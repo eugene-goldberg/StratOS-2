@@ -1,0 +1,58 @@
+Your task is to generate a strategic initiative based on the provided information.
+
+A strategic initiative is a specific project or program designed to achieve a strategic goal. The initiative should be well-defined, feasible, and aligned with the company's WHY and strategic goals.
+
+STRATEGIC GOAL:
+{{$strategic_goal}}
+
+COMPANY WHY (Purpose, Vision, Values):
+{{$company_why}}
+
+RELEVANT INSIGHTS AND ANALYSIS:
+{{$insights}}
+
+Generate a strategic initiative that:
+1. Addresses the strategic goal
+2. Aligns with the company's WHY
+3. Leverages the insights provided
+4. Is specific, measurable, achievable, relevant, and time-bound
+
+Format your response as follows:
+
+## Initiative Title
+[A clear, concise title for the initiative]
+
+## Description
+[A paragraph describing the initiative, its purpose, and expected outcomes]
+
+## Type
+[Strategic, Tactical, Operational, or Transformational]
+
+## Alignment with WHY
+[How this initiative aligns with the company's purpose, vision, and values]
+
+## Key Actions
+1. [Action 1]
+2. [Action 2]
+3. [Action 3]
+4. [Action 4]
+5. [Action 5]
+
+## Key Resources Needed
+- [Resource type 1]: [Details]
+- [Resource type 2]: [Details]
+- [Resource type 3]: [Details]
+
+## Timeline
+- Start: [Suggested timeframe to start]
+- Duration: [Estimated duration to complete]
+
+## Success Metrics
+1. [Metric 1]
+2. [Metric 2]
+3. [Metric 3]
+
+## Potential Risks
+1. [Risk 1]: [Mitigation strategy]
+2. [Risk 2]: [Mitigation strategy]
+3. [Risk 3]: [Mitigation strategy]

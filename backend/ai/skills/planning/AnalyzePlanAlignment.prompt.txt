@@ -1,0 +1,61 @@
+Your task is to analyze how well a strategic plan aligns with the company's WHY and strategic goals.
+
+A well-aligned strategic plan should clearly support the company's purpose, vision, values, and strategic goals. This analysis will help determine if the plan is strategically sound and consistent with the company's direction.
+
+COMPANY WHY (Purpose, Vision, Values):
+{{$company_why}}
+
+STRATEGIC GOALS:
+{{$strategic_goals}}
+
+STRATEGIC PLAN:
+{{$strategic_plan}}
+
+Analyze the alignment between the plan and the company's WHY and strategic goals. For each element below, provide a score from 1-10 (10 being perfectly aligned) and a brief explanation:
+
+1. Purpose Alignment: How well does the plan support and advance the company's purpose?
+2. Vision Alignment: How well does the plan move the company toward its vision?
+3. Values Alignment: How well does the plan reflect and reinforce the company's values?
+4. Strategic Goals Alignment: How well does the plan directly address the strategic goals?
+
+Then provide an overall assessment, including:
+- Overall alignment score (1-10)
+- Key strengths in alignment
+- Gaps or misalignments
+- Recommendations to improve alignment
+
+Format your response as follows:
+
+## Purpose Alignment
+Score: [1-10]
+[Brief explanation]
+
+## Vision Alignment
+Score: [1-10]
+[Brief explanation]
+
+## Values Alignment
+Score: [1-10]
+[Brief explanation]
+
+## Strategic Goals Alignment
+Score: [1-10]
+[Brief explanation]
+
+## Overall Assessment
+Overall Score: [1-10]
+
+### Strengths
+- [Strength 1]
+- [Strength 2]
+- [Strength 3]
+
+### Gaps
+- [Gap 1]
+- [Gap 2]
+- [Gap 3]
+
+### Recommendations
+1. [Recommendation 1]
+2. [Recommendation 2]
+3. [Recommendation 3]

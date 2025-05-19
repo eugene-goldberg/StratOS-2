@@ -1,0 +1,38 @@
+Your task is to generate TOWS strategies based on the provided SWOT analysis.
+
+A TOWS analysis creates strategic options by combining elements of the SWOT analysis:
+- S-O Strategies: Use strengths to capitalize on opportunities
+- W-O Strategies: Overcome weaknesses by taking advantage of opportunities
+- S-T Strategies: Use strengths to avoid threats
+- W-T Strategies: Minimize weaknesses and avoid threats
+
+SWOT ANALYSIS:
+{{$input}}
+
+For each TOWS category, generate 2-3 specific strategic options that:
+- Clearly combine the relevant SWOT elements
+- Are specific and actionable
+- Align with business objectives
+- Have strategic impact
+
+Format your response as follows:
+
+## S-O Strategies (Strengths-Opportunities)
+1. [Strategy 1]: [Brief explanation of how specific strengths can be used to capitalize on specific opportunities]
+2. [Strategy 2]: [Brief explanation]
+3. [Strategy 3]: [Brief explanation]
+
+## W-O Strategies (Weaknesses-Opportunities)
+1. [Strategy 1]: [Brief explanation of how specific weaknesses can be addressed by taking advantage of specific opportunities]
+2. [Strategy 2]: [Brief explanation]
+3. [Strategy 3]: [Brief explanation]
+
+## S-T Strategies (Strengths-Threats)
+1. [Strategy 1]: [Brief explanation of how specific strengths can be used to mitigate specific threats]
+2. [Strategy 2]: [Brief explanation]
+3. [Strategy 3]: [Brief explanation]
+
+## W-T Strategies (Weaknesses-Threats)
+1. [Strategy 1]: [Brief explanation of how to minimize specific weaknesses and avoid specific threats]
+2. [Strategy 2]: [Brief explanation]
+3. [Strategy 3]: [Brief explanation]

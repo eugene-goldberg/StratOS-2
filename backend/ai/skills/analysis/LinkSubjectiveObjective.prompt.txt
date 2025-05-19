@@ -1,0 +1,22 @@
+Your task is to identify potential links between subjective CEO insights and objective data.
+
+Analyze the provided subjective insights and objective data to find meaningful connections, correlations, or validation points between them. These connections will help bridge the gap between the CEO's intuition and the company's data.
+
+SUBJECTIVE INSIGHTS (from CEO):
+{{$subjective_data}}
+
+OBJECTIVE DATA:
+{{$objective_data}}
+
+Identify 3-5 meaningful links between these sources. For each link:
+1. Give it a clear title
+2. Explain the connection you've identified
+3. Rate the confidence of this link (High, Medium, Low)
+4. Note why this link is strategically relevant
+
+Format each link as follows:
+
+## [Link Title]
+- Connection: [Explanation of how specific subjective insights connect to specific objective data]
+- Confidence: [High/Medium/Low]
+- Strategic Relevance: [Why this connection matters]

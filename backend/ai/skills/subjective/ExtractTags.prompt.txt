@@ -1,0 +1,16 @@
+Your task is to extract relevant business and strategic themes or tags from the CEO's log entry.
+
+The CEO's subjective insights are critical for strategic planning. Identify the key themes, topics, or concepts that are relevant to business strategy.
+
+Extract 3-7 concise tags that capture the strategic essence of the entry. Each tag should be 1-3 words.
+
+Consider categories such as:
+- Business areas (marketing, finance, operations, etc.)
+- Strategic concepts (growth, innovation, risk, opportunity, etc.)
+- Market factors (competition, trends, customer behavior, etc.)
+- Organizational elements (culture, talent, leadership, etc.)
+
+The CEO's log entry:
+{{$input}}
+
+Tags (comma-separated):

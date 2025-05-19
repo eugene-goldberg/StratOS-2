@@ -1,0 +1,14 @@
+Your task is to summarize a CEO's log entry in a concise, strategic manner.
+
+The CEO has shared their subjective thoughts, observations, or reflections. Create a brief summary that captures the core message and strategic relevance.
+
+The summary should:
+- Be 1-3 sentences long
+- Capture the main point or concern
+- Highlight any strategic implications
+- Preserve the CEO's perspective and intent
+
+The CEO's log entry:
+{{$input}}
+
+Summary:
