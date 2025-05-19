@@ -10,6 +10,9 @@ import importlib
 # Import skills
 from .skills.log_management_skill import LogManagementSkill
 from .skills.voice_input_skill import VoiceInputSkill
+from .skills.analysis_skills.swot_analysis_skill import SWOTAnalysisSkill
+from .skills.analysis_skills.contextual_prompt_generation_skill import ContextualPromptGenerationSkill
+from .skills.analysis_skills.strategic_context_retriever_skill import StrategicContextRetrieverSkill
 
 # Load environment variables
 load_dotenv()
@@ -71,12 +74,21 @@ class KernelService:
             self.kernel.import_skill(LogManagementSkill(), "LogManagement")
             self.kernel.import_skill(VoiceInputSkill(), "VoiceInput")
             
+            # Register SWOT/TOWS analysis skills
+            self.kernel.import_skill(SWOTAnalysisSkill(), "SWOTAnalysis")
+            self.kernel.import_skill(ContextualPromptGenerationSkill(), "ContextualPrompt")
+            self.kernel.import_skill(StrategicContextRetrieverSkill(), "StrategicContext")
+            
             # Register semantic functions from prompts
             current_dir = os.path.dirname(os.path.abspath(__file__))
             
             # Register subjective log skills
             subjective_log_dir = os.path.join(current_dir, "skills", "subjective_log")
             self.kernel.import_semantic_skill_from_directory(subjective_log_dir, "SubjectiveLog")
+            
+            # Register analysis skills (semantic functions)
+            analysis_skills_dir = os.path.join(current_dir, "skills", "analysis_skills")
+            self.kernel.import_semantic_skill_from_directory(analysis_skills_dir, "Analysis")
             
             self.logger.info("Skills registered successfully")
         except Exception as e:
