@@ -20,6 +20,11 @@ class InsightSource(str, Enum):
     COMBINED = "combined"
     AI_GENERATED = "ai_generated"
 
+class LinkageType(str, Enum):
+    CORRELATION = "correlation"
+    CONTRADICTION = "contradiction"
+    EMERGING_THEME = "emerging_theme"
+
 class SWOTCategory(str, Enum):
     STRENGTH = "strength"
     WEAKNESS = "weakness"
@@ -57,6 +62,36 @@ class SWOTItemCreate(BaseModel):
 class SWOTAnalysisCreate(BaseModel):
     title: str
     description: Optional[str] = None
+
+class SOLinkage(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    user_id: UUID
+    topic_context: Optional[str] = None
+    subjective_item_id: Optional[str] = None # Could be LogEntry ID or reference to a snippet
+    subjective_snippet_text: str
+    objective_item_id: Optional[str] = None # Could be DataSet ID, DataPoint ID, or chunk ID
+    objective_snippet_text: str
+    objective_item_title: Optional[str] = None # e.g., title of the dataset
+    linkage_type: LinkageType # "correlation", "contradiction", "emerging_theme"
+    ai_summary_of_linkage: str
+    ai_prompt_for_ceo: str
+    created_at: datetime = Field(default_factory=datetime.now)
+    # Optional: user feedback on relevance, user-added notes
+
+class SOLinkageCreate(BaseModel): # For creating a new linkage record
+    user_id: UUID
+    topic_context: Optional[str] = None
+    subjective_item_id: Optional[str] = None
+    subjective_snippet_text: str
+    objective_item_id: Optional[str] = None
+    objective_snippet_text: str
+    objective_item_title: Optional[str] = None
+    linkage_type: LinkageType
+    ai_summary_of_linkage: str
+    ai_prompt_for_ceo: str
+
+class SOLinkageResponse(SOLinkage): # For API responses
+    pass
 
 class Insight(BaseModel):
     id: UUID = Field(default_factory=uuid4)

@@ -10,7 +10,10 @@ from ..models.analysis import (
     InsightCreate,
     InsightType,
     InsightSource,
-    SWOTCategory
+    SWOTCategory,
+    SOLinkage,
+    SOLinkageResponse,
+    LinkageType
 )
 from ..services.analysis_service import AnalysisService
 from ..ai.kernel_service import kernel_service
@@ -176,16 +179,70 @@ async def generate_insights_from_data(
     insights = await analysis_service.generate_insights_from_data(data_sources, insight_types, max_insights)
     return insights
 
-@router.post("/s-o-links", response_model=List[Dict[str, Any]])
-async def find_subjective_objective_links(
-    subjective_ids: List[UUID],
-    objective_ids: List[UUID],
-    min_confidence: Optional[float] = 0.7
+# S+O Linkage Endpoints
+
+@router.post("/so-linkage/discover", response_model=List[Dict[str, Any]])
+async def discover_so_linkages(
+    user_id: UUID,
+    topic_context: Optional[str] = None,
+    subjective_entry_ids: Optional[List[str]] = None,
+    objective_dataset_ids: Optional[List[str]] = None,
+    date_range_start: Optional[str] = None,
+    date_range_end: Optional[str] = None,
+    max_linkages_to_find: int = 5
 ):
     """
-    Find potential links between subjective inputs and objective data
+    Discover potential linkages between subjective insights and objective data
     """
-    links = await analysis_service.find_subjective_objective_links(
-        subjective_ids, objective_ids, min_confidence
+    linkages = await analysis_service.discover_so_linkages(
+        str(user_id),
+        topic_context,
+        subjective_entry_ids,
+        objective_dataset_ids,
+        date_range_start,
+        date_range_end,
+        max_linkages_to_find
     )
-    return links
+    return linkages
+
+@router.get("/so-linkage", response_model=List[SOLinkageResponse])
+async def list_so_linkages(
+    user_id: UUID,
+    topic_context_filter: Optional[str] = None,
+    date_range_start: Optional[str] = None,
+    date_range_end: Optional[str] = None,
+    limit: int = 20,
+    offset: int = 0
+):
+    """
+    List S+O linkages with optional filtering
+    """
+    linkages = await analysis_service.list_so_linkages(
+        user_id,
+        topic_context_filter,
+        date_range_start,
+        date_range_end,
+        limit,
+        offset
+    )
+    return linkages
+
+@router.get("/so-linkage/{linkage_id}", response_model=SOLinkageResponse)
+async def get_so_linkage(linkage_id: UUID):
+    """
+    Get an S+O linkage by ID
+    """
+    linkage = await analysis_service.get_so_linkage(linkage_id)
+    if not linkage:
+        raise HTTPException(status_code=404, detail="S+O linkage not found")
+    return linkage
+
+@router.delete("/so-linkage/{linkage_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_so_linkage(linkage_id: UUID):
+    """
+    Delete an S+O linkage
+    """
+    deleted = await analysis_service.delete_so_linkage(linkage_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="S+O linkage not found")
+    return {"status": "success"}

@@ -13,6 +13,7 @@ from .skills.voice_input_skill import VoiceInputSkill
 from .skills.analysis_skills.swot_analysis_skill import SWOTAnalysisSkill
 from .skills.analysis_skills.contextual_prompt_generation_skill import ContextualPromptGenerationSkill
 from .skills.analysis_skills.strategic_context_retriever_skill import StrategicContextRetrieverSkill
+from .skills.analysis_skills.subjective_objective_linkage_skill import SubjectiveObjectiveLinkageSkill
 
 # Load environment variables
 load_dotenv()
@@ -78,6 +79,9 @@ class KernelService:
             self.kernel.import_skill(SWOTAnalysisSkill(), "SWOTAnalysis")
             self.kernel.import_skill(ContextualPromptGenerationSkill(), "ContextualPrompt")
             self.kernel.import_skill(StrategicContextRetrieverSkill(), "StrategicContext")
+            
+            # Register S+O Linkage skills
+            self.kernel.import_skill(SubjectiveObjectiveLinkageSkill(), "SubjectiveObjectiveLinkage")
             
             # Register semantic functions from prompts
             current_dir = os.path.dirname(os.path.abspath(__file__))
