@@ -46,6 +46,8 @@ export interface DataSetCreate {
   category: string;
   source_type?: string;
   data_format?: string;
+  tags?: string[];
+  linked_goals?: string[];
 }
 
 export interface DataPoint {
@@ -119,13 +121,21 @@ export const objectiveDataService = {
     name: string,
     category: string,
     description?: string,
+    tags?: string[],
+    linkedGoals?: string[],
     onUploadProgress?: (progressEvent: ProgressEvent) => void
   ): Promise<DataSet> => {
     const formData = new FormData();
     formData.append('file', file);
 
     const res = await api.post('/api/objective/datasets/upload', formData, {
-      params: { name, description, category },
+      params: {
+        name,
+        description,
+        category,
+        tags: tags?.join(','),
+        linked_goals: linkedGoals?.join(',')
+      },
       onUploadProgress
     });
     return res.data;

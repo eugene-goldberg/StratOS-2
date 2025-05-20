@@ -44,6 +44,7 @@ import {
   Refresh as RefreshIcon
 } from '@mui/icons-material';
 import useObjectiveDataStore from '../store/objectiveDataStore';
+import useNorthStarStore from '../store/northStarStore';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -77,6 +78,11 @@ const ObjectiveData: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState<'kpi' | 'dataset'>('kpi');
   const [category, setCategory] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -96,10 +102,51 @@ const ObjectiveData: React.FC = () => {
     setDatasetName('');
     setDatasetDesc('');
     setDatasetFile(null);
+    setTags([]);
+    setTagInput('');
+    setSelectedGoals([]);
   };
 
   const handleCategoryChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value);
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const value = tagInput.trim();
+      if (value && !tags.includes(value)) {
+        setTags([...tags, value]);
+      }
+      setTagInput('');
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+  };
+
+  const handleGoalsChange = (event: SelectChangeEvent<string[]>) => {
+    const value = event.target.value as string[];
+    setSelectedGoals(value);
+  };
+
+  const handleViewDetails = async (id: string) => {
+    await getDataset(id);
+    setDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => setDetailOpen(false);
+
+  const handleConfirmDelete = (id: string) => {
+    setConfirmDeleteId(id);
+  };
+
+  const handleDelete = async () => {
+    if (confirmDeleteId) {
+      await deleteDataset(confirmDeleteId);
+      setConfirmDeleteId(null);
+    }
   };
 
   const handleSubmit = async () => {
@@ -112,7 +159,14 @@ const ObjectiveData: React.FC = () => {
         unit: kpiUnit || undefined
       });
     } else if (datasetFile) {
-      await uploadDataset(datasetFile, datasetName, category, datasetDesc);
+      await uploadDataset(
+        datasetFile,
+        datasetName,
+        category,
+        datasetDesc,
+        tags,
+        selectedGoals
+      );
     }
     handleCloseDialog();
   };
@@ -125,11 +179,13 @@ const ObjectiveData: React.FC = () => {
     createKPI,
     uploadDataset,
     deleteDataset,
+    getDataset,
     isLoading,
     uploading,
     uploadProgress,
     error
   } = useObjectiveDataStore();
+  const { strategicGoals, loadStrategicGoals } = useNorthStarStore();
 
   const [kpiName, setKpiName] = useState('');
   const [kpiCurrent, setKpiCurrent] = useState('');
@@ -143,7 +199,8 @@ const ObjectiveData: React.FC = () => {
   useEffect(() => {
     loadKPIs();
     loadDatasets();
-  }, [loadKPIs, loadDatasets]);
+    loadStrategicGoals();
+  }, [loadKPIs, loadDatasets, loadStrategicGoals]);
 
   return (
     <Box sx={{ height: 'calc(100vh - 140px)', display: 'flex', flexDirection: 'column' }}>
@@ -233,7 +290,7 @@ const ObjectiveData: React.FC = () => {
                       <IconButton size="small">
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton size="small" onClick={() => deleteDataset(dataset.id)}>
+                      <IconButton size="small" onClick={() => handleConfirmDelete(dataset.id)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
@@ -336,7 +393,11 @@ const ObjectiveData: React.FC = () => {
                 )}
                 {datasets.map((dataset) => (
                   <TableRow key={dataset.id}>
-                    <TableCell>{dataset.name}</TableCell>
+                    <TableCell>
+                      <Button size="small" onClick={() => handleViewDetails(dataset.id)}>
+                        {dataset.name}
+                      </Button>
+                    </TableCell>
                     <TableCell>
                       <Chip label={dataset.category} size="small" />
                     </TableCell>
@@ -350,7 +411,7 @@ const ObjectiveData: React.FC = () => {
                       <IconButton size="small">
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton size="small" onClick={() => deleteDataset(dataset.id)}>
+                      <IconButton size="small" onClick={() => handleConfirmDelete(dataset.id)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
@@ -466,6 +527,42 @@ const ObjectiveData: React.FC = () => {
                 onChange={(e) => setDatasetDesc(e.target.value)}
                 sx={{ mb: 2 }}
               />
+              <TextField
+                margin="dense"
+                label="Add Tag"
+                fullWidth
+                variant="outlined"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                sx={{ mb: 1 }}
+              />
+              <Box sx={{ mb: 2 }}>
+                {tags.map((t) => (
+                  <Chip key={t} label={t} onDelete={() => handleRemoveTag(t)} sx={{ mr: 0.5, mb: 0.5 }} />
+                ))}
+              </Box>
+              <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+                <InputLabel>Link Strategic Goals</InputLabel>
+                <Select
+                  multiple
+                  value={selectedGoals}
+                  onChange={handleGoalsChange}
+                  label="Link Strategic Goals"
+                  renderValue={(selected) =>
+                    strategicGoals
+                      .filter((g) => selected.includes(g.id))
+                      .map((g) => g.title)
+                      .join(', ')
+                  }
+                >
+                  {strategicGoals.map((goal) => (
+                    <MenuItem key={goal.id} value={goal.id}>
+                      {goal.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <Button
                 variant="outlined"
                 component="label"
@@ -488,6 +585,37 @@ const ObjectiveData: React.FC = () => {
           <Button onClick={handleSubmit} variant="contained">
             {dialogType === 'kpi' ? 'Add KPI' : 'Upload'}
           </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={detailOpen} onClose={handleCloseDetail} maxWidth="sm" fullWidth>
+        <DialogTitle>Dataset Details</DialogTitle>
+        <DialogContent>
+          {selectedDataset && (
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                {selectedDataset.name}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                {selectedDataset.description}
+              </Typography>
+              <Typography variant="body2">
+                Status: {selectedDataset.metadata?.processing_status}
+              </Typography>
+              <Typography variant="body2">
+                Uploaded: {selectedDataset.import_date ? new Date(selectedDataset.import_date).toLocaleString() : ''}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDetail}>Close</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={Boolean(confirmDeleteId)} onClose={() => setConfirmDeleteId(null)}>
+        <DialogTitle>Delete Dataset?</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setConfirmDeleteId(null)}>Cancel</Button>
+          <Button color="error" onClick={handleDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
       <Snackbar open={Boolean(error)} autoHideDuration={6000}>
