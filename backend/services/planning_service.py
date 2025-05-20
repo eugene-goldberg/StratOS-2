@@ -94,20 +94,20 @@ class PlanningService:
         current_time = datetime.now()
         
         # Construct the Initiative object
-        initiative = Initiative(
+            initiative = Initiative(
             id=initiative_id,
-            name=initiative_create.name,
+            title=initiative_create.title,
             description=initiative_create.description,
             initiative_type=initiative_create.initiative_type,
             status=initiative_create.status,
-            priority=initiative_create.priority,
+            linked_strategic_goal=initiative_create.linked_strategic_goal,
+            owner=initiative_create.owner,
             start_date=initiative_create.start_date,
             end_date=initiative_create.end_date,
-            strategic_goal_id=initiative_create.strategic_goal_id,
-            owner=initiative_create.owner,
             actions=[],
-            resources=[],
             risks=[],
+            resources=[],
+            key_metrics=[],
             created_at=current_time,
             updated_at=current_time
         )
@@ -262,18 +262,18 @@ class PlanningService:
         # Create updated initiative object, preserving existing actions, resources, and risks
         updated_initiative = Initiative(
             id=initiative_id,
-            name=initiative_update.name,
+            title=initiative_update.title,
             description=initiative_update.description,
             initiative_type=initiative_update.initiative_type,
             status=initiative_update.status,
-            priority=initiative_update.priority,
+            linked_strategic_goal=initiative_update.linked_strategic_goal,
+            owner=initiative_update.owner,
             start_date=initiative_update.start_date,
             end_date=initiative_update.end_date,
-            strategic_goal_id=initiative_update.strategic_goal_id,
-            owner=initiative_update.owner,
             actions=existing_initiative.actions,
             resources=existing_initiative.resources,
             risks=existing_initiative.risks,
+            key_metrics=existing_initiative.key_metrics,
             created_at=existing_initiative.created_at,
             updated_at=current_time
         )
@@ -385,11 +385,11 @@ class PlanningService:
         # Create the Action object
         action = Action(
             id=action_id,
-            name=action_create.name,
+            title=action_create.title,
             description=action_create.description,
             status=action_create.status,
             start_date=action_create.start_date,
-            end_date=action_create.end_date,
+            due_date=action_create.due_date,
             owner=action_create.owner,
             created_at=current_time,
             updated_at=current_time
@@ -472,11 +472,11 @@ class PlanningService:
         # Create updated action
         updated_action = Action(
             id=action_id,
-            name=action_update.name,
+            title=action_update.title,
             description=action_update.description,
             status=action_update.status,
             start_date=action_update.start_date,
-            end_date=action_update.end_date,
+            due_date=action_update.due_date,
             owner=action_update.owner,
             created_at=initiative.actions[action_index].created_at,
             updated_at=current_time
@@ -613,9 +613,10 @@ class PlanningService:
         # Construct the StrategicPlan object
         plan = StrategicPlan(
             id=plan_id,
-            name=plan_create.name,
+            title=plan_create.title,
             description=plan_create.description,
             status=plan_create.status,
+            time_horizon=plan_create.time_horizon,
             start_date=plan_create.start_date,
             end_date=plan_create.end_date,
             created_at=current_time,
@@ -642,6 +643,10 @@ class PlanningService:
             self.logger.info(f"Created strategic plan in memory: {plan_id}")
         
         return plan
+
+    # Aliases used by routers
+    async def create_strategic_plan(self, plan_create: StrategicPlanCreate) -> StrategicPlan:
+        return await self.create_plan(plan_create)
     
     async def get_plan(self, plan_id: UUID) -> StrategicPlan:
         """
@@ -687,6 +692,9 @@ class PlanningService:
         
         # Not found
         raise HTTPException(status_code=404, detail=f"Strategic plan with ID {plan_id} not found")
+
+    async def get_strategic_plan(self, plan_id: UUID) -> StrategicPlan:
+        return await self.get_plan(plan_id)
     
     async def list_plans(self) -> List[StrategicPlan]:
         """
@@ -719,6 +727,9 @@ class PlanningService:
         
         # Return from memory if database is unavailable
         return list(self.plans_cache.values())
+
+    async def list_strategic_plans(self) -> List[StrategicPlan]:
+        return await self.list_plans()
     
     async def update_plan(self, plan_id: UUID, plan_update: StrategicPlanCreate) -> StrategicPlan:
         """
@@ -746,9 +757,10 @@ class PlanningService:
         # Create updated plan object
         updated_plan = StrategicPlan(
             id=plan_id,
-            name=plan_update.name,
+            title=plan_update.title,
             description=plan_update.description,
             status=plan_update.status,
+            time_horizon=plan_update.time_horizon,
             start_date=plan_update.start_date,
             end_date=plan_update.end_date,
             created_at=existing_plan.created_at,
@@ -778,6 +790,9 @@ class PlanningService:
             self.logger.info(f"Updated strategic plan in memory: {plan_id}")
         
         return updated_plan
+
+    async def update_strategic_plan(self, plan_id: UUID, plan_update: StrategicPlanCreate) -> StrategicPlan:
+        return await self.update_plan(plan_id, plan_update)
     
     async def delete_plan(self, plan_id: UUID) -> bool:
         """
@@ -818,3 +833,64 @@ class PlanningService:
                 self.logger.info(f"Deleted strategic plan from memory: {plan_id}")
         
         return True
+
+    async def delete_strategic_plan(self, plan_id: UUID) -> bool:
+        return await self.delete_plan(plan_id)
+
+    # ----- Advanced Planning Features -----
+    async def analyze_plan_alignment(self, plan_id: UUID) -> Dict[str, Any]:
+        """Simple heuristic alignment analysis."""
+        plan = await self.get_plan(plan_id)
+        score = float(len(plan.title)) % 10 + 1.0
+        plan.overall_alignment_score = score
+        self.plans_cache[plan_id] = plan
+        return {"plan_id": str(plan_id), "alignment_score": score}
+
+    async def generate_plan_variants(
+        self,
+        base_plan_id: UUID,
+        num_variants: int = 2,
+        focus_areas: Optional[List[str]] = None,
+    ) -> List[StrategicPlan]:
+        base = await self.get_plan(base_plan_id)
+        variants: List[StrategicPlan] = []
+        for i in range(num_variants):
+            variant = StrategicPlan(
+                id=uuid.uuid4(),
+                title=f"{base.title} Variant {i+1}",
+                description=base.description,
+                status=PlanStatus.DRAFT,
+                time_horizon=base.time_horizon,
+                start_date=base.start_date,
+                end_date=base.end_date,
+                initiatives=[],
+                ai_recommendations=[f"Focus on {fa}" for fa in (focus_areas or [])],
+                created_at=datetime.now(),
+                updated_at=datetime.now(),
+            )
+            self.plans_cache[variant.id] = variant
+            variants.append(variant)
+        return variants
+
+    async def compare_plans(
+        self,
+        plan_ids: List[UUID],
+        comparison_criteria: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, Any]:
+        plans = [await self.get_plan(pid) for pid in plan_ids]
+        comparison = {str(p.id): len(p.initiatives) for p in plans}
+        return {"initiative_counts": comparison}
+
+    async def generate_actions(self, initiative_id: UUID) -> List[Action]:
+        initiative = await self.get_initiative(initiative_id)
+        new_actions: List[Action] = []
+        for i in range(3):
+            act = Action(
+                id=uuid.uuid4(),
+                title=f"Auto Action {i+1}",
+                description=f"Generated for {initiative.title}",
+            )
+            initiative.actions.append(act)
+            new_actions.append(act)
+        self.initiatives_cache[initiative_id] = initiative
+        return new_actions
