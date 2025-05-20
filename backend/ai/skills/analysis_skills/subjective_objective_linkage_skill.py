@@ -51,9 +51,30 @@ JSON Array of Linkages:
         Returns:
             JSON array string of potential linkages
         """
-        # In a production implementation using SemanticKernel, the prompt execution 
-        # would be handled by the kernel. This is a placeholder for the functionality.
-        pass
+        try:
+            from ..kernel_service import kernel_service
+
+            # Extract required context variables
+            topic_context = context["topic_context"]
+            subjective_snippets_json = context["subjective_snippets_json"]
+            objective_snippets_json = context["objective_snippets_json"]
+
+            # Format the prompt with the provided context
+            prompt = self.PROMPT_TEMPLATE
+            prompt = prompt.replace("{{$topic_context}}", str(topic_context))
+            prompt = prompt.replace("{{$subjective_snippets_json}}", str(subjective_snippets_json))
+            prompt = prompt.replace("{{$objective_snippets_json}}", str(objective_snippets_json))
+
+            # Invoke the LLM to generate potential linkages
+            llm_response = await kernel_service.generate_completion(prompt, max_tokens=800)
+
+            # Process and validate the LLM response
+            linkages = await self.process_llm_response(llm_response)
+
+            return json.dumps(linkages)
+        except Exception as e:
+            # Return errors in JSON format for the caller
+            return json.dumps({"error": str(e)})
 
     async def process_llm_response(self, llm_response: str) -> List[Dict[str, Any]]:
         """
