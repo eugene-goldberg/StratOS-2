@@ -139,4 +139,4 @@ Please refer to the CONTRIBUTING.md file for details on our code of conduct and 
 
 ## License
 
-This project is proprietary software.# StratOS
+This project is proprietary software.
