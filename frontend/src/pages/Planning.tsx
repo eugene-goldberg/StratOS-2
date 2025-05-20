@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -32,7 +32,6 @@ import {
   FormControl,
   InputLabel,
   Select,
-  SelectChangeEvent,
   Slider,
   Tooltip
 } from '@mui/material';
@@ -55,6 +54,9 @@ import {
   Analytics as AnalyticsIcon,
   ViewList as ViewListIcon
 } from '@mui/icons-material';
+import usePlanningStore from '../store/planningStore';
+import useNorthStarStore from '../store/northStarStore';
+import { Action, Initiative } from '../services/planningService';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -101,15 +103,54 @@ const Planning: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
-  const [initiativeType, setInitiativeType] = useState('');
   const [compareMode, setCompareMode] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+
+  const {
+    plans,
+    initiatives,
+    loadPlans,
+    createInitiative,
+    updateInitiative,
+    deleteInitiative,
+    addAction,
+    updateAction,
+    deleteAction
+  } = usePlanningStore();
+
+  const { strategicGoals, loadStrategicGoals } = useNorthStarStore();
+
+  const [initiativeData, setInitiativeData] = useState({
+    title: '',
+    description: '',
+    owner: '',
+    startDate: '',
+    endDate: '',
+    linkedGoal: '',
+    initiativeType: ''
+  });
+  const [editingInitiative, setEditingInitiative] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadPlans();
+    loadStrategicGoals();
+  }, [loadPlans, loadStrategicGoals]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
   const handleOpenDialog = () => {
+    setInitiativeData({
+      title: '',
+      description: '',
+      owner: '',
+      startDate: '',
+      endDate: '',
+      linkedGoal: '',
+      initiativeType: ''
+    });
+    setEditingInitiative(null);
     setOpenDialog(true);
   };
 
@@ -126,9 +167,6 @@ const Planning: React.FC = () => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
-  const handleInitiativeTypeChange = (event: SelectChangeEvent) => {
-    setInitiativeType(event.target.value);
-  };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setMenuAnchorEl(event.currentTarget);
@@ -143,74 +181,62 @@ const Planning: React.FC = () => {
     handleMenuClose();
   };
 
-  const mockPlans = [
-    {
-      id: 1,
-      title: "Growth Strategy 2025-2027",
-      status: "active",
-      initiatives: 5,
-      progress: 35,
-      alignmentScore: 8.2
-    },
-    {
-      id: 2,
-      title: "Digital Transformation Initiative",
-      status: "draft",
-      initiatives: 3,
-      progress: 0,
-      alignmentScore: 7.5
-    },
-    {
-      id: 3,
-      title: "Market Expansion Plan",
-      status: "active",
-      initiatives: 4,
-      progress: 60,
-      alignmentScore: 8.8
-    }
-  ];
+  const handleSaveInitiative = async () => {
+    const planId = plans[0]?.id;
+    if (!planId) return;
+    const payload = {
+      title: initiativeData.title,
+      description: initiativeData.description,
+      initiative_type: initiativeData.initiativeType,
+      linked_strategic_goal: initiativeData.linkedGoal || undefined,
+      owner: initiativeData.owner,
+      start_date: initiativeData.startDate,
+      end_date: initiativeData.endDate
+    };
 
-  const mockInitiatives = [
-    {
-      id: 1,
-      title: "Asia-Pacific Market Expansion",
-      type: "Strategic",
-      owner: "Sarah Chen",
-      startDate: "Jun 2025",
-      endDate: "Dec 2026",
-      status: "active",
-      progress: 40,
-      actions: 8,
-      risks: 3,
-      alignmentScore: 9.2
-    },
-    {
-      id: 2,
-      title: "AI Product Integration",
-      type: "Transformational",
-      owner: "David Wilson",
-      startDate: "Jul 2025",
-      endDate: "Mar 2026",
-      status: "active",
-      progress: 25,
-      actions: 12,
-      risks: 5,
-      alignmentScore: 8.5
-    },
-    {
-      id: 3,
-      title: "Customer Success Program",
-      type: "Tactical",
-      owner: "Michael Rodriguez",
-      startDate: "Aug 2025",
-      endDate: "Aug 2026",
-      status: "draft",
-      progress: 0,
-      actions: 6,
-      risks: 2,
-      alignmentScore: 7.8
+    if (editingInitiative) {
+      await updateInitiative(editingInitiative, payload);
+    } else {
+      await createInitiative(planId, payload);
     }
-  ];
+    setEditingInitiative(null);
+    handleCloseDialog();
+  };
+
+  const handleEditInitiative = (initiative: Initiative) => {
+    setEditingInitiative(initiative.id);
+    setInitiativeData({
+      title: initiative.title,
+      description: initiative.description || '',
+      owner: initiative.owner || '',
+      startDate: initiative.start_date || '',
+      endDate: initiative.end_date || '',
+      linkedGoal: initiative.linked_strategic_goal || '',
+      initiativeType: initiative.initiative_type || ''
+    });
+    setOpenDialog(true);
+  };
+
+  const handleAddAction = async (initiativeId: string) => {
+    const title = window.prompt('Action title');
+    if (title) {
+      await addAction(initiativeId, { title });
+    }
+  };
+
+  const handleEditAction = async (initiativeId: string, action: Action) => {
+    const title = window.prompt('Action title', action.title);
+    if (title !== null) {
+      await updateAction(initiativeId, action.id, { title });
+    }
+  };
+
+  const handleDeleteAction = async (initiativeId: string, actionId: string) => {
+    if (window.confirm('Delete action?')) {
+      await deleteAction(initiativeId, actionId);
+    }
+  };
+
 
   return (
     <Box sx={{ height: 'calc(100vh - 140px)', display: 'flex', flexDirection: 'column' }}>
@@ -287,7 +313,7 @@ const Planning: React.FC = () => {
         <TabPanel value={tabValue} index={0}>
           {!compareMode ? (
             <Grid container spacing={3}>
-              {mockPlans.map((plan) => (
+              {plans.map((plan) => (
                 <Grid item xs={12} key={plan.id}>
                   <Card variant="outlined">
                     <CardContent>
@@ -579,12 +605,12 @@ const Planning: React.FC = () => {
           </Box>
           
           <Grid container spacing={3}>
-            {mockInitiatives.map((initiative) => (
+            {initiatives.map((initiative) => (
               <Grid item xs={12} md={6} lg={4} key={initiative.id}>
                 <Card variant="outlined">
                   <CardHeader
                     title={initiative.title}
-                    subheader={`${initiative.type} Initiative`}
+                    subheader={`${initiative.initiative_type} Initiative`}
                     action={
                       <StatusChip status={initiative.status} />
                     }
@@ -595,28 +621,33 @@ const Planning: React.FC = () => {
                         <ListItemIcon>
                           <PersonIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText primary={`Owner: ${initiative.owner}`} />
+                        <ListItemText primary={`Owner: ${initiative.owner || ''}`} />
                       </ListItem>
                       <ListItem>
                         <ListItemIcon>
                           <DateRangeIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText primary={`Timeline: ${initiative.startDate} - ${initiative.endDate}`} />
+                        <ListItemText primary={`Timeline: ${initiative.start_date || ''} - ${initiative.end_date || ''}`} />
                       </ListItem>
                       <ListItem>
                         <ListItemIcon>
                           <FlagIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText 
-                          primary={`${initiative.actions} Actions (${initiative.progress}% Complete)`} 
+                        <ListItemText
+                          primary={`${initiative.actions.length} Actions`}
                         />
                       </ListItem>
-                      <ListItem>
-                        <ListItemIcon>
-                          <WarningIcon fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText primary={`${initiative.risks} Identified Risks`} />
-                      </ListItem>
+                      {initiative.actions.map((action) => (
+                        <ListItem key={action.id} sx={{ pl: 4 }}>
+                          <ListItemText primary={action.title} />
+                          <IconButton size="small" onClick={() => handleEditAction(initiative.id, action)}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => handleDeleteAction(initiative.id, action.id)}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </ListItem>
+                      ))}
                     </List>
                     <Divider sx={{ my: 1 }} />
                     <Box sx={{ mt: 2 }}>
@@ -633,19 +664,14 @@ const Planning: React.FC = () => {
                     {initiative.status === 'active' && (
                       <Box sx={{ mt: 2 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Progress: {initiative.progress}%
+                          Active Initiative
                         </Typography>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={initiative.progress} 
-                          sx={{ height: 8, borderRadius: 5 }}
-                        />
                       </Box>
                     )}
                   </CardContent>
                   <CardActions>
-                    <Button size="small">View Details</Button>
-                    <Button size="small">Edit</Button>
+                    <Button size="small" onClick={() => handleAddAction(initiative.id)}>Add Action</Button>
+                    <Button size="small" onClick={() => handleEditInitiative(initiative)}>Edit</Button>
                   </CardActions>
                 </Card>
               </Grid>
@@ -686,14 +712,16 @@ const Planning: React.FC = () => {
                 label="Initiative Title"
                 fullWidth
                 variant="outlined"
+                value={initiativeData.title}
+                onChange={(e) => setInitiativeData({ ...initiativeData, title: e.target.value })}
                 sx={{ mb: 2 }}
               />
               
               <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
                 <InputLabel>Initiative Type</InputLabel>
                 <Select
-                  value={initiativeType}
-                  onChange={handleInitiativeTypeChange}
+                  value={initiativeData.initiativeType}
+                  onChange={(e) => setInitiativeData({ ...initiativeData, initiativeType: e.target.value })}
                   label="Initiative Type"
                 >
                   <MenuItem value="strategic">Strategic</MenuItem>
@@ -710,6 +738,8 @@ const Planning: React.FC = () => {
                 multiline
                 rows={3}
                 variant="outlined"
+                value={initiativeData.description}
+                onChange={(e) => setInitiativeData({ ...initiativeData, description: e.target.value })}
                 sx={{ mb: 2 }}
               />
               
@@ -719,6 +749,8 @@ const Planning: React.FC = () => {
                     label="Owner"
                     fullWidth
                     variant="outlined"
+                    value={initiativeData.owner}
+                    onChange={(e) => setInitiativeData({ ...initiativeData, owner: e.target.value })}
                   />
                 </Grid>
                 <Grid item xs={6} sm={3}>
@@ -728,6 +760,8 @@ const Planning: React.FC = () => {
                     fullWidth
                     variant="outlined"
                     InputLabelProps={{ shrink: true }}
+                    value={initiativeData.startDate}
+                    onChange={(e) => setInitiativeData({ ...initiativeData, startDate: e.target.value })}
                   />
                 </Grid>
                 <Grid item xs={6} sm={3}>
@@ -737,6 +771,8 @@ const Planning: React.FC = () => {
                     fullWidth
                     variant="outlined"
                     InputLabelProps={{ shrink: true }}
+                    value={initiativeData.endDate}
+                    onChange={(e) => setInitiativeData({ ...initiativeData, endDate: e.target.value })}
                   />
                 </Grid>
               </Grid>
@@ -756,11 +792,12 @@ const Planning: React.FC = () => {
                 <InputLabel>Linked Strategic Goal</InputLabel>
                 <Select
                   label="Linked Strategic Goal"
-                  value=""
+                  value={initiativeData.linkedGoal}
+                  onChange={(e) => setInitiativeData({ ...initiativeData, linkedGoal: e.target.value })}
                 >
-                  <MenuItem value="goal1">Achieve 25% market share by Q4 2025</MenuItem>
-                  <MenuItem value="goal2">Launch 3 innovative product lines within 18 months</MenuItem>
-                  <MenuItem value="goal3">Increase customer retention to 85%</MenuItem>
+                  {strategicGoals.map(goal => (
+                    <MenuItem key={goal.id} value={goal.id}>{goal.title}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               
@@ -941,8 +978,8 @@ const Planning: React.FC = () => {
               Next
             </Button>
           ) : (
-            <Button onClick={handleCloseDialog} variant="contained">
-              Create Initiative
+            <Button onClick={handleSaveInitiative} variant="contained">
+              {editingInitiative ? 'Update Initiative' : 'Create Initiative'}
             </Button>
           )}
         </DialogActions>
