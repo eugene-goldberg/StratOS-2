@@ -74,6 +74,14 @@ After setup you can launch the development servers with:
 
 If you prefer to configure each part separately, run `./setup_backend.sh` and `./setup_frontend.sh` instead of the combined script.
 
+For a lightweight dependency setup without the virtual environment helpers you
+can use the convenience scripts:
+
+```bash
+./pip_install.sh   # install Python packages
+./npm_install.sh   # install frontend packages
+```
+
 ## Deployment
 
 StratOS is designed to be deployed on Azure using:
