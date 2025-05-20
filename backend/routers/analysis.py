@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional, Dict, Any
 from uuid import UUID
+
+from ..models.user import UserResponse
+from ..dependencies import get_current_active_user
 from ..models.analysis import (
     SWOTAnalysis,
     SWOTAnalysisCreate,
@@ -18,7 +21,7 @@ from ..models.analysis import (
 from ..services.analysis_service import AnalysisService
 from ..ai.kernel_service import kernel_service
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_active_user)])
 analysis_service = AnalysisService()
 
 # SWOT Analysis Endpoints
