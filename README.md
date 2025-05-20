@@ -58,47 +58,21 @@ stratos/
 
 ## Development Setup
 
-### Backend
+Run the setup script from the project root to prepare both the backend and frontend:
 
-1. Navigate to the backend directory:
-   ```
-   cd backend
-   ```
+```bash
+./setup_dev.sh
+```
 
-2. Create a virtual environment and activate it:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+The script verifies that `python3` and `npm` are available, creates `backend/venv` if needed, installs Python dependencies and frontend packages, and reminds you to create `.env` files based on the provided examples.
 
-3. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+After setup you can launch the development servers with:
 
-4. Set up environment variables (create a .env file with required Azure service credentials)
+```bash
+./run_dev.sh
+```
 
-5. Run the development server:
-   ```
-   uvicorn main:app --reload
-   ```
-
-### Frontend
-
-1. Navigate to the frontend directory:
-   ```
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```
-   npm install
-   ```
-
-3. Run the development server:
-   ```
-   npm start
-   ```
+If you prefer to configure each part separately, run `./setup_backend.sh` and `./setup_frontend.sh` instead of the combined script.
 
 ## Deployment
 
