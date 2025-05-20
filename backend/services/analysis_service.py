@@ -30,6 +30,7 @@ class AnalysisService:
         # In-memory storage (used as cache and fallback)
         self.active_sessions = {}  # In-memory cache for active analysis sessions
         self.analyses_cache = {}   # In-memory cache for persisted analyses
+        self.insights_cache = {}   # In-memory cache for insights
         self.so_linkages_cache = {}  # In-memory cache for S+O linkages
         
         # Initialize database connection flags
@@ -38,6 +39,7 @@ class AnalysisService:
         self.analyses_container = None
         self.sessions_container = None
         self.so_linkages_container = None
+        self.insights_container = None
         
         # Try to initialize Cosmos DB connection
         try:
@@ -56,11 +58,12 @@ class AnalysisService:
             # Get or create database
             self.database = self.cosmos_client.get_database_client(cosmos_database_name)
             
-            # Get or create containers for analyses, sessions, and SO linkages
+            # Get or create containers for analyses, sessions, insights, and SO linkages
             try:
                 self.analyses_container = self.database.get_container_client("analyses")
                 self.sessions_container = self.database.get_container_client("analysis_sessions")
                 self.so_linkages_container = self.database.get_container_client("so_linkages")
+                self.insights_container = self.database.get_container_client("insights")
                 self.logger.info("Connected to existing Cosmos DB containers")
             except exceptions.CosmosResourceNotFoundError:
                 # Create containers if they don't exist
@@ -79,7 +82,12 @@ class AnalysisService:
                     partition_key=PartitionKey(path="/user_id"),
                     offer_throughput=400
                 )
-                self.logger.info("Created Cosmos DB containers for analyses, sessions, and S+O linkages")
+                self.insights_container = self.database.create_container_if_not_exists(
+                    id="insights",
+                    partition_key=PartitionKey(path="/user_id"),
+                    offer_throughput=400
+                )
+                self.logger.info("Created Cosmos DB containers for analyses, sessions, insights, and S+O linkages")
             
             self.cosmos_db_available = True
             self.logger.info("Cosmos DB connection established successfully")
@@ -129,7 +137,228 @@ class AnalysisService:
             self.logger.error(f"Error creating SWOT analysis: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to create SWOT analysis: {str(e)}")
     
-    # ... [existing methods, not modifying] ...
+
+    async def get_swot_analysis(self, analysis_id: UUID) -> Optional[SWOTAnalysis]:
+        """Retrieve a SWOT analysis by ID."""
+        if str(analysis_id) in self.analyses_cache:
+            return SWOTAnalysis(**self.analyses_cache[str(analysis_id)])
+
+        if self.cosmos_db_available and self.analyses_container:
+            try:
+                item = self.analyses_container.read_item(item=str(analysis_id), partition_key=str(analysis_id))
+                self.analyses_cache[str(analysis_id)] = item
+                return SWOTAnalysis(**item)
+            except Exception:
+                return None
+
+        return None
+
+    async def list_swot_analyses(self, limit: int = 10, offset: int = 0) -> List[SWOTAnalysis]:
+        """List SWOT analyses with simple pagination."""
+        analyses = []
+        if self.cosmos_db_available and self.analyses_container:
+            query = f"SELECT * FROM c OFFSET {offset} LIMIT {limit}"
+            async for item in self.analyses_container.query_items(query=query, enable_cross_partition_query=True):
+                analyses.append(SWOTAnalysis(**item))
+                self.analyses_cache[str(item["id"])] = item
+            return analyses
+
+        for item in list(self.analyses_cache.values())[offset:offset+limit]:
+            analyses.append(SWOTAnalysis(**item))
+        return analyses
+
+    async def add_swot_item(self, analysis_id: UUID, item_data: SWOTItemCreate) -> Optional[SWOTItem]:
+        analysis = await self.get_swot_analysis(analysis_id)
+        if not analysis:
+            return None
+
+        item = SWOTItem(
+            category=item_data.category,
+            content=item_data.content,
+            source=item_data.source,
+            source_references=item_data.source_references,
+            impact_score=item_data.impact_score,
+            certainty_score=item_data.certainty_score,
+        )
+        analysis.items.append(item)
+        analysis.updated_at = datetime.now()
+
+        self.analyses_cache[str(analysis_id)] = analysis.dict()
+        if self.cosmos_db_available and self.analyses_container:
+            try:
+                self.analyses_container.replace_item(item=str(analysis_id), body=analysis.dict())
+            except Exception:
+                pass
+        return item
+
+    async def update_swot_item(self, analysis_id: UUID, item_id: UUID, item_data: Dict[str, Any]) -> Optional[SWOTItem]:
+        analysis = await self.get_swot_analysis(analysis_id)
+        if not analysis:
+            return None
+        for idx, itm in enumerate(analysis.items):
+            if itm.id == item_id:
+                updated_fields = itm.dict()
+                updated_fields.update(item_data)
+                analysis.items[idx] = SWOTItem(**updated_fields)
+                analysis.updated_at = datetime.now()
+                self.analyses_cache[str(analysis_id)] = analysis.dict()
+                if self.cosmos_db_available and self.analyses_container:
+                    try:
+                        self.analyses_container.replace_item(item=str(analysis_id), body=analysis.dict())
+                    except Exception:
+                        pass
+                return analysis.items[idx]
+        return None
+
+    async def delete_swot_item(self, analysis_id: UUID, item_id: UUID) -> bool:
+        analysis = await self.get_swot_analysis(analysis_id)
+        if not analysis:
+            return False
+        original_len = len(analysis.items)
+        analysis.items = [it for it in analysis.items if it.id != item_id]
+        if len(analysis.items) == original_len:
+            return False
+        analysis.updated_at = datetime.now()
+        self.analyses_cache[str(analysis_id)] = analysis.dict()
+        if self.cosmos_db_available and self.analyses_container:
+            try:
+                self.analyses_container.replace_item(item=str(analysis_id), body=analysis.dict())
+            except Exception:
+                pass
+        return True
+
+    async def create_insight(self, insight_data: InsightCreate) -> Insight:
+        insight = Insight(
+            title=insight_data.title,
+            description=insight_data.description,
+            insight_type=insight_data.insight_type,
+            source=insight_data.source,
+            source_references=insight_data.source_references,
+            confidence_score=insight_data.confidence_score,
+            impact_score=insight_data.impact_score,
+            linked_strategic_goals=[UUID(g) for g in insight_data.linked_strategic_goals],
+            supporting_data=insight_data.supporting_data,
+            visualization_data=insight_data.visualization_data,
+        )
+        self.insights_cache[str(insight.id)] = insight.dict()
+        if self.cosmos_db_available and self.insights_container:
+            try:
+                self.insights_container.create_item(body=insight.dict())
+            except Exception:
+                pass
+        return insight
+
+    async def get_insight(self, insight_id: UUID) -> Optional[Insight]:
+        if str(insight_id) in self.insights_cache:
+            return Insight(**self.insights_cache[str(insight_id)])
+
+        if self.cosmos_db_available and self.insights_container:
+            try:
+                item = self.insights_container.read_item(item=str(insight_id), partition_key=str(insight_id))
+                self.insights_cache[str(insight_id)] = item
+                return Insight(**item)
+            except Exception:
+                return None
+        return None
+
+    async def list_insights(self, limit: int = 20, offset: int = 0) -> List[Insight]:
+        insights = []
+        if self.cosmos_db_available and self.insights_container:
+            query = f"SELECT * FROM c OFFSET {offset} LIMIT {limit}"
+            async for item in self.insights_container.query_items(query=query, enable_cross_partition_query=True):
+                insights.append(Insight(**item))
+                self.insights_cache[str(item["id"])] = item
+            return insights
+
+        for item in list(self.insights_cache.values())[offset:offset+limit]:
+            insights.append(Insight(**item))
+        return insights
+
+    async def update_insight(self, insight_id: UUID, insight_data: Dict[str, Any]) -> Optional[Insight]:
+        insight = await self.get_insight(insight_id)
+        if not insight:
+            return None
+        updated_fields = insight.dict()
+        updated_fields.update(insight_data)
+        insight = Insight(**updated_fields)
+        self.insights_cache[str(insight_id)] = insight.dict()
+        if self.cosmos_db_available and self.insights_container:
+            try:
+                self.insights_container.replace_item(item=str(insight_id), body=insight.dict())
+            except Exception:
+                pass
+        return insight
+
+    async def delete_insight(self, insight_id: UUID) -> bool:
+        if str(insight_id) in self.insights_cache:
+            del self.insights_cache[str(insight_id)]
+
+        if self.cosmos_db_available and self.insights_container:
+            try:
+                self.insights_container.delete_item(item=str(insight_id), partition_key=str(insight_id))
+            except Exception:
+                pass
+
+        return True
+
+    async def generate_tows_strategies(self, analysis_id: UUID) -> List[Dict[str, Any]]:
+        """Generate simple TOWS strategies from a SWOT analysis."""
+        analysis = await self.get_swot_analysis(analysis_id)
+        if not analysis:
+            return []
+
+        strategies = []
+        strengths = [i.content for i in analysis.items if i.category == SWOTCategory.STRENGTH]
+        opportunities = [i.content for i in analysis.items if i.category == SWOTCategory.OPPORTUNITY]
+        for s in strengths:
+            for o in opportunities:
+                strategies.append({"strategy": f"Use {s} to leverage {o}"})
+
+        analysis.tows_strategies = strategies
+        analysis.updated_at = datetime.now()
+        self.analyses_cache[str(analysis_id)] = analysis.dict()
+        if self.cosmos_db_available and self.analyses_container:
+            try:
+                self.analyses_container.replace_item(item=str(analysis_id), body=analysis.dict())
+            except Exception:
+                pass
+        return strategies
+
+    async def generate_ai_guided_swot_items(self, analysis_id: UUID) -> None:
+        """Placeholder AI-guided SWOT item generation."""
+        example_items = [
+            SWOTItem(category=SWOTCategory.STRENGTH, content="Strong brand", source=InsightSource.AI_GENERATED),
+            SWOTItem(category=SWOTCategory.WEAKNESS, content="Limited distribution", source=InsightSource.AI_GENERATED),
+            SWOTItem(category=SWOTCategory.OPPORTUNITY, content="Emerging markets", source=InsightSource.AI_GENERATED),
+            SWOTItem(category=SWOTCategory.THREAT, content="New competitors", source=InsightSource.AI_GENERATED),
+        ]
+        analysis = await self.get_swot_analysis(analysis_id)
+        if not analysis:
+            return
+        analysis.items.extend(example_items)
+        analysis.updated_at = datetime.now()
+        self.analyses_cache[str(analysis_id)] = analysis.dict()
+        if self.cosmos_db_available and self.analyses_container:
+            try:
+                self.analyses_container.replace_item(item=str(analysis_id), body=analysis.dict())
+            except Exception:
+                pass
+
+    async def generate_insight_explanation(self, insight_id: UUID) -> str:
+        """Return a basic textual explanation for an insight."""
+        insight = await self.get_insight(insight_id)
+        if not insight:
+            raise HTTPException(status_code=404, detail="Insight not found")
+        return f"The insight '{insight.title}' indicates potential impact on strategy."
+
+    async def generate_insights_from_data(
+        self,
+        data_sources: Dict[str, List[UUID]],
+        insight_types: Optional[List[InsightType]] = None,
+        max_insights: Optional[int] = 5,
+    ) -> List[Insight]:
+        """Simple placeholder that returns no insights."""
+        return []
     
     # ----------- S+O Linkage Methods -----------
     

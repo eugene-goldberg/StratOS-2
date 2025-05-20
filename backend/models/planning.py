@@ -90,6 +90,8 @@ class StrategicPlan(BaseModel):
     description: Optional[str] = None
     status: PlanStatus = PlanStatus.DRAFT
     time_horizon: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     initiatives: List[Initiative] = []
     overall_alignment_score: Optional[float] = None
     overall_feasibility_score: Optional[float] = None
@@ -132,4 +134,7 @@ class InitiativeCreate(BaseModel):
 class StrategicPlanCreate(BaseModel):
     title: str
     description: Optional[str] = None
+    status: PlanStatus = PlanStatus.DRAFT
     time_horizon: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
