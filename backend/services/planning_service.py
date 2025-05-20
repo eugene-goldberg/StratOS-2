@@ -841,12 +841,27 @@ class PlanningService:
     async def analyze_plan_alignment(self, plan_id: UUID) -> Dict[str, Any]:
         """Analyze how well initiatives align with strategic goals."""
         plan = await self.get_plan(plan_id)
-
         if not plan.initiatives:
             score = 0.0
         else:
             linked = sum(1 for i in plan.initiatives if i.linked_strategic_goal)
-            score = round((linked / len(plan.initiatives)) * 10, 2)
+            coverage = linked / len(plan.initiatives)
+            score = round(coverage * 10, 2)
+
+            # Ask the LLM for a qualitative adjustment
+            summary = "\n".join(
+                f"- {i.title}: {i.description or ''}" for i in plan.initiatives
+            )
+            prompt = (
+                "Rate from 0 to 10 how well these initiatives support the strategic goals:"\
+                f"\n{summary}"
+            )
+            try:
+                llm_resp = await kernel_service.generate_completion(prompt, max_tokens=10)
+                llm_val = float("".join(filter(str.isdigit, llm_resp)) or 0)
+                score = round((score + llm_val) / 2, 2)
+            except Exception:
+                pass
 
         plan.overall_alignment_score = score
         self.plans_cache[plan_id] = plan
@@ -901,12 +916,26 @@ class PlanningService:
     async def generate_actions(self, initiative_id: UUID) -> List[Action]:
         initiative = await self.get_initiative(initiative_id)
         new_actions: List[Action] = []
-        for i in range(3):
-            act = Action(
-                id=uuid.uuid4(),
-                title=f"Auto Action {i+1}",
-                description=f"Generated for {initiative.title}",
-            )
+
+        prompt = (
+            "Suggest three concrete actions for the following initiative:"\
+            f"\nTitle: {initiative.title}\nDescription: {initiative.description}"
+        )
+        try:
+            response = await kernel_service.generate_completion(prompt, max_tokens=60)
+            lines = [l.strip('- ').strip() for l in response.splitlines() if l.strip()]
+        except Exception:
+            lines = []
+
+        if not lines:
+            lines = [
+                f"Start planning for {initiative.title}",
+                f"Assign a team to {initiative.title}",
+                f"Monitor progress of {initiative.title}"
+            ]
+
+        for text in lines[:3]:
+            act = Action(id=uuid.uuid4(), title=text, description=text)
             initiative.actions.append(act)
             new_actions.append(act)
         self.initiatives_cache[initiative_id] = initiative
