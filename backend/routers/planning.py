@@ -158,7 +158,8 @@ async def create_risk(initiative_id: UUID, risk_data: RiskCreate):
 
 # AI-Powered Planning Endpoints
 
-@router.post("/plans/analyze-alignment", response_model=Dict[str, Any])
+# Analyze strategic plan alignment with company goals
+@router.post("/plans/{plan_id}/analyze-alignment", response_model=Dict[str, Any])
 async def analyze_plan_alignment(plan_id: UUID):
     """
     Analyze a strategic plan's alignment with the company's WHY and strategic goals
