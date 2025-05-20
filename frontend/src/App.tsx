@@ -14,12 +14,24 @@ import ObjectiveData from './pages/ObjectiveData';
 import Analysis from './pages/Analysis';
 import Planning from './pages/Planning';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Dashboard />} />
           <Route path="north-star" element={<NorthStar />} />
           <Route path="ceo-log" element={<CEOLog />} />

@@ -41,6 +41,7 @@ import LogEntryCard from '../components/subjective/LogEntryCard';
 import VoiceInputButton from '../components/subjective/VoiceInputButton';
 import { useLogStore } from '../store/logStore';
 import { LogEntryType } from '../services/logService';
+import { useAuthStore } from '../store/authStore';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -70,8 +71,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const CEOLog: React.FC = () => {
-  // Mock user ID - in a real app this would come from authentication
-  const userId = "00000000-0000-0000-0000-000000000000";
+  const user = useAuthStore((state) => state.user);
+  const userId = user?.id || '';
 
   // State
   const [tabValue, setTabValue] = useState(0);
