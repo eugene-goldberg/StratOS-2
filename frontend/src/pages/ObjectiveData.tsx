@@ -29,7 +29,10 @@ import {
   Select,
   FormControl,
   InputLabel,
-  SelectChangeEvent
+  SelectChangeEvent,
+  LinearProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -120,7 +123,12 @@ const ObjectiveData: React.FC = () => {
     loadKPIs,
     loadDatasets,
     createKPI,
-    uploadDataset
+    uploadDataset,
+    deleteDataset,
+    isLoading,
+    uploading,
+    uploadProgress,
+    error
   } = useObjectiveDataStore();
 
   const [kpiName, setKpiName] = useState('');
@@ -225,7 +233,7 @@ const ObjectiveData: React.FC = () => {
                       <IconButton size="small">
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={() => deleteDataset(dataset.id)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
@@ -321,6 +329,11 @@ const ObjectiveData: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
+                {isLoading && (
+                  <TableRow>
+                    <TableCell colSpan={7}>Loading...</TableCell>
+                  </TableRow>
+                )}
                 {datasets.map((dataset) => (
                   <TableRow key={dataset.id}>
                     <TableCell>{dataset.name}</TableCell>
@@ -337,7 +350,7 @@ const ObjectiveData: React.FC = () => {
                       <IconButton size="small">
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={() => deleteDataset(dataset.id)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
@@ -462,6 +475,11 @@ const ObjectiveData: React.FC = () => {
                 Choose File
                 <input type="file" hidden onChange={(e) => setDatasetFile(e.target.files ? e.target.files[0] : null)} />
               </Button>
+              {uploading && (
+                <Box sx={{ mt: 2 }}>
+                  <LinearProgress variant="determinate" value={uploadProgress} />
+                </Box>
+              )}
             </>
           )}
         </DialogContent>
@@ -472,5 +490,9 @@ const ObjectiveData: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar open={Boolean(error)} autoHideDuration={6000}>
+        <Alert severity="error" sx={{ width: "100%" }}>{error}</Alert>
+      </Snackbar>
     </Box>
   );
+export default ObjectiveData;
