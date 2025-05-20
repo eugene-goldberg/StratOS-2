@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -18,27 +18,125 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import { Edit as EditIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { useNorthStarStore } from '../store/northStarStore';
+import { Value, StrategicGoal } from '../services/strategicFoundationService';
+import { v4 as uuidv4 } from 'uuid';
 
 const NorthStar: React.FC = () => {
   const [editMode, setEditMode] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState<'value' | 'goal'>('value');
+  const [dialogData, setDialogData] = useState({
+    name: '',
+    description: '',
+    timeFrame: '',
+    metrics: ''
+  });
 
-  const handleEditToggle = () => {
+  const {
+    data,
+    isLoading,
+    error,
+    loadNorthStar,
+    updateNorthStar
+  } = useNorthStarStore();
+
+  const [purpose, setPurpose] = useState('');
+  const [vision, setVision] = useState('');
+  const [values, setValues] = useState<Value[]>([]);
+  const [goals, setGoals] = useState<StrategicGoal[]>([]);
+
+  useEffect(() => {
+    loadNorthStar();
+  }, [loadNorthStar]);
+
+  useEffect(() => {
+    if (data) {
+      setPurpose(data.purpose.statement);
+      setVision(data.vision.statement);
+      setValues(data.values);
+      setGoals(data.strategic_goals);
+    }
+  }, [data]);
+
+  const handleEditToggle = async () => {
+    if (editMode) {
+      await updateNorthStar({
+        purpose,
+        vision,
+        values,
+        strategic_goals: goals
+      });
+    }
     setEditMode(!editMode);
   };
 
   const handleAddItem = (type: 'value' | 'goal') => {
     setDialogType(type);
+    setDialogData({ name: '', description: '', timeFrame: '', metrics: '' });
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
+
+  const handleDialogSave = () => {
+    if (dialogType === 'value') {
+      setValues([...values, { id: uuidv4(), name: dialogData.name, description: dialogData.description }]);
+    } else {
+      setGoals([
+        ...goals,
+        {
+          id: uuidv4(),
+          title: dialogData.name,
+          description: dialogData.description,
+          time_frame: dialogData.timeFrame,
+          metrics: dialogData.metrics
+            ? dialogData.metrics.split(',').map((m) => m.trim()).filter((m) => m)
+            : []
+        }
+      ]);
+    }
+    setOpenDialog(false);
+  };
+
+  const handleValueChange = (index: number, field: 'name' | 'description', value: string) => {
+    setValues((vals) => vals.map((v, i) => (i === index ? { ...v, [field]: value } : v)));
+  };
+
+  const handleGoalChange = (
+    index: number,
+    field: 'title' | 'description' | 'time_frame' | 'metrics',
+    value: string
+  ) => {
+    setGoals((gs) =>
+      gs.map((g, i) =>
+        i === index
+          ? {
+              ...g,
+              [field]:
+                field === 'metrics'
+                  ? value.split(',').map((m) => m.trim()).filter((m) => m)
+                  : value
+            }
+          : g
+      )
+    );
+  };
+
+  if (isLoading && !data) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -55,6 +153,11 @@ const NorthStar: React.FC = () => {
           {editMode ? "Save Changes" : "Edit"}
         </Button>
       </Box>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <Grid container spacing={4}>
         {/* Purpose & Vision Section */}
@@ -68,12 +171,13 @@ const NorthStar: React.FC = () => {
                 fullWidth
                 multiline
                 variant="outlined"
-                defaultValue="To empower businesses with strategic clarity and data-driven insights for sustainable growth and meaningful impact."
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
                 sx={{ mb: 2 }}
               />
             ) : (
               <Typography variant="h6" paragraph>
-                To empower businesses with strategic clarity and data-driven insights for sustainable growth and meaningful impact.
+                {purpose}
               </Typography>
             )}
 
@@ -85,12 +189,13 @@ const NorthStar: React.FC = () => {
                 fullWidth
                 multiline
                 variant="outlined"
-                defaultValue="By 2030, to be the indispensable AI-powered strategic partner for 10,000 leadership teams worldwide, helping them navigate complexity and achieve their boldest ambitions."
+                value={vision}
+                onChange={(e) => setVision(e.target.value)}
                 sx={{ mb: 2 }}
               />
             ) : (
               <Typography variant="h6" paragraph>
-                By 2030, to be the indispensable AI-powered strategic partner for 10,000 leadership teams worldwide, helping them navigate complexity and achieve their boldest ambitions.
+                {vision}
               </Typography>
             )}
           </Paper>
@@ -111,13 +216,24 @@ const NorthStar: React.FC = () => {
             </Box>
             <Divider sx={{ mb: 2 }} />
 
-            {['Integrity', 'Innovation', 'Excellence', 'Collaboration', 'Customer Focus'].map((value, index) => (
-              <Card key={index} variant="outlined" sx={{ mb: 2 }}>
+            {values.map((valueItem, index) => (
+              <Card key={valueItem.id} variant="outlined" sx={{ mb: 2 }}>
                 <CardHeader
-                  title={value}
+                  title={
+                    editMode ? (
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        value={valueItem.name}
+                        onChange={(e) => handleValueChange(index, 'name', e.target.value)}
+                      />
+                    ) : (
+                      valueItem.name
+                    )
+                  }
                   action={
                     editMode && (
-                      <IconButton aria-label="delete" size="small">
+                      <IconButton aria-label="delete" size="small" onClick={() => setValues(values.filter((_, i) => i !== index))}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     )
@@ -131,10 +247,11 @@ const NorthStar: React.FC = () => {
                         multiline
                         variant="outlined"
                         size="small"
-                        defaultValue="This is a description of the value and what it means to our organization."
+                        value={valueItem.description}
+                        onChange={(e) => handleValueChange(index, 'description', e.target.value)}
                       />
                     ) : (
-                      "This is a description of the value and what it means to our organization."
+                      valueItem.description
                     )}
                   </Typography>
                 </CardContent>
@@ -158,14 +275,25 @@ const NorthStar: React.FC = () => {
             </Box>
             <Divider sx={{ mb: 2 }} />
 
-            {['Achieve 25% market share by Q4 2025', 'Launch 3 innovative product lines within 18 months', 'Increase customer retention to 85%'].map((goal, index) => (
-              <Card key={index} variant="outlined" sx={{ mb: 2 }}>
+            {goals.map((goal, index) => (
+              <Card key={goal.id} variant="outlined" sx={{ mb: 2 }}>
                 <CardHeader
-                  title={goal}
-                  subheader="2023-2025"
+                  title={
+                    editMode ? (
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        value={goal.title}
+                        onChange={(e) => handleGoalChange(index, 'title', e.target.value)}
+                      />
+                    ) : (
+                      goal.title
+                    )
+                  }
+                  subheader={goal.time_frame}
                   action={
                     editMode && (
-                      <IconButton aria-label="delete" size="small">
+                      <IconButton aria-label="delete" size="small" onClick={() => setGoals(goals.filter((_, i) => i !== index))}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     )
@@ -180,10 +308,11 @@ const NorthStar: React.FC = () => {
                           multiline
                           variant="outlined"
                           size="small"
-                          defaultValue="This strategic goal will help us strengthen our market position and drive sustainable growth."
+                          value={goal.description}
+                          onChange={(e) => handleGoalChange(index, 'description', e.target.value)}
                         />
                       ) : (
-                        "This strategic goal will help us strengthen our market position and drive sustainable growth."
+                        goal.description
                       )}
                     </Typography>
                   </Box>
@@ -191,11 +320,21 @@ const NorthStar: React.FC = () => {
                     <Typography variant="body2" gutterBottom>
                       Key Metrics:
                     </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      <Chip label="Revenue Growth" size="small" />
-                      <Chip label="Market Share" size="small" />
-                      <Chip label="Customer Acquisition" size="small" />
-                    </Box>
+                    {editMode ? (
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        value={goal.metrics ? goal.metrics.join(', ') : ''}
+                        onChange={(e) => handleGoalChange(index, 'metrics', e.target.value)}
+                      />
+                    ) : (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {goal.metrics && goal.metrics.map((m) => (
+                          <Chip key={m} label={m} size="small" />
+                        ))}
+                      </Box>
+                    )}
                   </Box>
                 </CardContent>
               </Card>
@@ -216,6 +355,8 @@ const NorthStar: React.FC = () => {
             label={dialogType === 'value' ? 'Value Name' : 'Goal Title'}
             fullWidth
             variant="outlined"
+            value={dialogData.name}
+            onChange={(e) => setDialogData({ ...dialogData, name: e.target.value })}
             sx={{ mb: 2, mt: 1 }}
           />
           <TextField
@@ -225,6 +366,8 @@ const NorthStar: React.FC = () => {
             multiline
             rows={3}
             variant="outlined"
+            value={dialogData.description}
+            onChange={(e) => setDialogData({ ...dialogData, description: e.target.value })}
             sx={{ mb: 2 }}
           />
           {dialogType === 'goal' && (
@@ -235,6 +378,8 @@ const NorthStar: React.FC = () => {
                 fullWidth
                 variant="outlined"
                 placeholder="e.g., 2023-2025"
+                value={dialogData.timeFrame}
+                onChange={(e) => setDialogData({ ...dialogData, timeFrame: e.target.value })}
                 sx={{ mb: 2 }}
               />
               <TextField
@@ -243,19 +388,17 @@ const NorthStar: React.FC = () => {
                 fullWidth
                 variant="outlined"
                 placeholder="e.g., Revenue Growth, Market Share"
+                value={dialogData.metrics}
+                onChange={(e) => setDialogData({ ...dialogData, metrics: e.target.value })}
               />
             </>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleCloseDialog} variant="contained">
+          <Button onClick={handleDialogSave} variant="contained">
             Add
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
-  );
-};
-
 export default NorthStar;
