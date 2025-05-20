@@ -2,6 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File,
 from fastapi.responses import JSONResponse
 from typing import List, Optional, Dict, Any
 from uuid import UUID
+
+from ..models.user import UserResponse
+from ..dependencies import get_current_active_user
 import json
 import base64
 from ..models.subjective_input import (
@@ -16,7 +19,7 @@ from ..models.subjective_input import (
 from ..services.subjective_input_service import SubjectiveInputService
 from ..ai.kernel_service import kernel_service
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_active_user)])
 input_service = SubjectiveInputService()
 
 # CEO's Log Endpoints

@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional, Dict, Any
 from uuid import UUID
+
+from ..models.user import UserResponse
+from ..dependencies import get_current_active_user
 from ..models.planning import (
     StrategicPlan,
     StrategicPlanCreate,
@@ -17,7 +20,7 @@ from ..models.planning import (
 )
 from ..services.planning_service import PlanningService
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_active_user)])
 planning_service = PlanningService()
 
 # Strategic Plan Endpoints

@@ -302,17 +302,49 @@ class AnalysisService:
         return True
 
     async def generate_tows_strategies(self, analysis_id: UUID) -> List[Dict[str, Any]]:
-        """Generate simple TOWS strategies from a SWOT analysis."""
+        """Generate TOWS strategies from a SWOT analysis using the LLM."""
         analysis = await self.get_swot_analysis(analysis_id)
         if not analysis:
             return []
 
-        strategies = []
+        # Build SWOT text for the prompt
         strengths = [i.content for i in analysis.items if i.category == SWOTCategory.STRENGTH]
+        weaknesses = [i.content for i in analysis.items if i.category == SWOTCategory.WEAKNESS]
         opportunities = [i.content for i in analysis.items if i.category == SWOTCategory.OPPORTUNITY]
-        for s in strengths:
-            for o in opportunities:
-                strategies.append({"strategy": f"Use {s} to leverage {o}"})
+        threats = [i.content for i in analysis.items if i.category == SWOTCategory.THREAT]
+
+        swot_text = "Strengths:\n" + "\n".join(strengths) + "\n\n" + \
+                    "Weaknesses:\n" + "\n".join(weaknesses) + "\n\n" + \
+                    "Opportunities:\n" + "\n".join(opportunities) + "\n\n" + \
+                    "Threats:\n" + "\n".join(threats)
+
+        # Invoke semantic function to generate TOWS strategies
+        try:
+            response = await kernel_service.invoke_semantic_function(
+                "Analysis", "GenerateTOWS", swot_text
+            )
+        except Exception as e:
+            self.logger.error(f"Error generating TOWS strategies: {e}")
+            return []
+
+        strategies: List[Dict[str, Any]] = []
+        current_type = None
+        for line in response.splitlines():
+            line = line.strip()
+            if line.startswith("##"):
+                if "S-O" in line:
+                    current_type = "SO"
+                elif "W-O" in line:
+                    current_type = "WO"
+                elif "S-T" in line:
+                    current_type = "ST"
+                elif "W-T" in line:
+                    current_type = "WT"
+            elif line and line[0].isdigit():
+                # Remove list numbering and optional description
+                parts = line.split(" ", 1)
+                strategy_text = parts[1] if len(parts) > 1 else line
+                strategies.append({"type": current_type, "strategy": strategy_text})
 
         analysis.tows_strategies = strategies
         analysis.updated_at = datetime.now()
@@ -325,17 +357,42 @@ class AnalysisService:
         return strategies
 
     async def generate_ai_guided_swot_items(self, analysis_id: UUID) -> None:
-        """Placeholder AI-guided SWOT item generation."""
-        example_items = [
-            SWOTItem(category=SWOTCategory.STRENGTH, content="Strong brand", source=InsightSource.AI_GENERATED),
-            SWOTItem(category=SWOTCategory.WEAKNESS, content="Limited distribution", source=InsightSource.AI_GENERATED),
-            SWOTItem(category=SWOTCategory.OPPORTUNITY, content="Emerging markets", source=InsightSource.AI_GENERATED),
-            SWOTItem(category=SWOTCategory.THREAT, content="New competitors", source=InsightSource.AI_GENERATED),
-        ]
+        """Use the LLM to suggest SWOT items for the analysis."""
         analysis = await self.get_swot_analysis(analysis_id)
         if not analysis:
             return
-        analysis.items.extend(example_items)
+
+        prompt_input = f"Title: {analysis.title}\n\nDescription: {analysis.description or ''}"
+        try:
+            response = await kernel_service.invoke_semantic_function(
+                "Analysis", "GenerateSWOT", prompt_input
+            )
+        except Exception as e:
+            self.logger.error(f"Error generating SWOT items: {e}")
+            return
+
+        category = None
+        for line in response.splitlines():
+            line = line.strip()
+            if line.startswith("##"):
+                if "Strengths" in line:
+                    category = SWOTCategory.STRENGTH
+                elif "Weaknesses" in line:
+                    category = SWOTCategory.WEAKNESS
+                elif "Opportunities" in line:
+                    category = SWOTCategory.OPPORTUNITY
+                elif "Threats" in line:
+                    category = SWOTCategory.THREAT
+            elif line.startswith("-") and category is not None:
+                content = line.lstrip("- ").strip()
+                analysis.items.append(
+                    SWOTItem(
+                        category=category,
+                        content=content,
+                        source=InsightSource.AI_GENERATED,
+                    )
+                )
+
         analysis.updated_at = datetime.now()
         self.analyses_cache[str(analysis_id)] = analysis.dict()
         if self.cosmos_db_available and self.analyses_container:
@@ -357,8 +414,35 @@ class AnalysisService:
         insight_types: Optional[List[InsightType]] = None,
         max_insights: Optional[int] = 5,
     ) -> List[Insight]:
-        """Simple placeholder that returns no insights."""
-        return []
+        """Generate simple insights from provided subjective and objective data."""
+        insights: List[Insight] = []
+
+        subjective_ids = data_sources.get("subjective", [])
+        objective_ids = data_sources.get("objective", [])
+
+        for sid in subjective_ids[:max_insights]:
+            insights.append(
+                Insight(
+                    title=f"Subjective insight {sid}",
+                    description="Observation from CEO log entry",
+                    insight_type=InsightType.OPPORTUNITY,
+                    source=InsightSource.SUBJECTIVE,
+                    source_references=[{"id": str(sid)}],
+                )
+            )
+
+        for oid in objective_ids[:max_insights - len(insights)]:
+            insights.append(
+                Insight(
+                    title=f"Objective data trend {oid}",
+                    description="Notable pattern detected in dataset",
+                    insight_type=InsightType.TREND,
+                    source=InsightSource.OBJECTIVE,
+                    source_references=[{"id": str(oid)}],
+                )
+            )
+
+        return insights[:max_insights]
     
     # ----------- S+O Linkage Methods -----------
     
