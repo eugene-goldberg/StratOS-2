@@ -120,3 +120,4 @@ class InsightCreate(BaseModel):
     impact_score: Optional[int] = None
     linked_strategic_goals: List[str] = []
     supporting_data: Optional[Dict[str, Any]] = None
+    visualization_data: Optional[Dict[str, Any]] = None
