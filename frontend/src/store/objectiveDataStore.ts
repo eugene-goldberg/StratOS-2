@@ -19,7 +19,14 @@ interface ObjectiveDataState {
   loadDatasets: () => Promise<void>;
   getDataset: (id: string) => Promise<void>;
   createKPI: (data: KPICreate) => Promise<void>;
-  uploadDataset: (file: File, name: string, category: string, description?: string) => Promise<void>;
+  uploadDataset: (
+    file: File,
+    name: string,
+    category: string,
+    description?: string,
+    tags?: string[],
+    linkedGoals?: string[]
+  ) => Promise<void>;
   deleteDataset: (id: string) => Promise<void>;
 }
 
@@ -72,7 +79,14 @@ export const useObjectiveDataStore = create<ObjectiveDataState>((set) => ({
     }
   },
 
-  uploadDataset: async (file: File, name: string, category: string, description?: string) => {
+  uploadDataset: async (
+    file: File,
+    name: string,
+    category: string,
+    description?: string,
+    tags?: string[],
+    linkedGoals?: string[]
+  ) => {
     try {
       set({ uploading: true, uploadProgress: 0, error: null });
       const dataset = await objectiveDataService.uploadDataset(
@@ -80,6 +94,8 @@ export const useObjectiveDataStore = create<ObjectiveDataState>((set) => ({
         name,
         category,
         description,
+        tags,
+        linkedGoals,
         (e) => {
           const total = e.total ?? 0;
           const loaded = e.loaded ?? 0;
