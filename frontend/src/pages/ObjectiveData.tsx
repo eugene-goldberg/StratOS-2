@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -40,6 +40,7 @@ import {
   Delete as DeleteIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
+import useObjectiveDataStore from '../store/objectiveDataStore';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -85,27 +86,56 @@ const ObjectiveData: React.FC = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+    setKpiName('');
+    setKpiCurrent('');
+    setKpiTarget('');
+    setKpiUnit('');
+    setDatasetName('');
+    setDatasetDesc('');
+    setDatasetFile(null);
   };
 
   const handleCategoryChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value);
   };
 
-  const mockKPIs = [
-    { id: 1, name: 'Revenue Growth', category: 'Financial', current: '12.5%', target: '15%', trend: 'up' },
-    { id: 2, name: 'Customer Satisfaction', category: 'Customer', current: '4.2/5', target: '4.5/5', trend: 'stable' },
-    { id: 3, name: 'Market Share', category: 'Market', current: '18%', target: '22%', trend: 'up' },
-    { id: 4, name: 'Employee Retention', category: 'HR', current: '85%', target: '90%', trend: 'down' },
-    { id: 5, name: 'Profit Margin', category: 'Financial', current: '22%', target: '25%', trend: 'stable' }
-  ];
+  const handleSubmit = async () => {
+    if (dialogType === 'kpi') {
+      await createKPI({
+        name: kpiName,
+        category,
+        current_value: parseFloat(kpiCurrent),
+        target_value: kpiTarget ? parseFloat(kpiTarget) : undefined,
+        unit: kpiUnit || undefined
+      });
+    } else if (datasetFile) {
+      await uploadDataset(datasetFile, datasetName, category, datasetDesc);
+    }
+    handleCloseDialog();
+  };
 
-  const mockDatasets = [
-    { id: 1, name: 'Q1 Financial Results', category: 'Financial', type: 'Excel', date: 'May 1, 2025', size: '1.2 MB' },
-    { id: 2, name: 'Customer Survey Results', category: 'Customer', type: 'CSV', date: 'Apr 22, 2025', size: '3.4 MB' },
-    { id: 3, name: 'Market Analysis Report', category: 'Market', type: 'PDF', date: 'Apr 15, 2025', size: '4.7 MB' },
-    { id: 4, name: 'Competitor Pricing Data', category: 'Competitor', type: 'Excel', date: 'Apr 10, 2025', size: '2.1 MB' },
-    { id: 5, name: 'Website Analytics', category: 'Marketing', type: 'JSON', date: 'Apr 5, 2025', size: '5.6 MB' }
-  ];
+  const {
+    kpis,
+    datasets,
+    loadKPIs,
+    loadDatasets,
+    createKPI,
+    uploadDataset
+  } = useObjectiveDataStore();
+
+  const [kpiName, setKpiName] = useState('');
+  const [kpiCurrent, setKpiCurrent] = useState('');
+  const [kpiTarget, setKpiTarget] = useState('');
+  const [kpiUnit, setKpiUnit] = useState('');
+
+  const [datasetName, setDatasetName] = useState('');
+  const [datasetDesc, setDatasetDesc] = useState('');
+  const [datasetFile, setDatasetFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    loadKPIs();
+    loadDatasets();
+  }, [loadKPIs, loadDatasets]);
 
   return (
     <Box sx={{ height: 'calc(100vh - 140px)', display: 'flex', flexDirection: 'column' }}>
@@ -178,14 +208,14 @@ const ObjectiveData: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {mockKPIs.map((kpi) => (
+                {kpis.map((kpi) => (
                   <TableRow key={kpi.id}>
                     <TableCell>{kpi.name}</TableCell>
                     <TableCell>
                       <Chip label={kpi.category} size="small" />
                     </TableCell>
-                    <TableCell>{kpi.current}</TableCell>
-                    <TableCell>{kpi.target}</TableCell>
+                    <TableCell>{kpi.current_value}</TableCell>
+                    <TableCell>{kpi.target_value}</TableCell>
                     <TableCell>
                       {kpi.trend === 'up' && <Chip label="↑" size="small" color="success" />}
                       {kpi.trend === 'down' && <Chip label="↓" size="small" color="error" />}
@@ -286,19 +316,23 @@ const ObjectiveData: React.FC = () => {
                   <TableCell>Type</TableCell>
                   <TableCell>Upload Date</TableCell>
                   <TableCell>Size</TableCell>
+                  <TableCell>Status</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {mockDatasets.map((dataset) => (
+                {datasets.map((dataset) => (
                   <TableRow key={dataset.id}>
                     <TableCell>{dataset.name}</TableCell>
                     <TableCell>
                       <Chip label={dataset.category} size="small" />
                     </TableCell>
-                    <TableCell>{dataset.type}</TableCell>
-                    <TableCell>{dataset.date}</TableCell>
-                    <TableCell>{dataset.size}</TableCell>
+                    <TableCell>{dataset.data_format}</TableCell>
+                    <TableCell>{dataset.import_date ? new Date(dataset.import_date).toLocaleDateString() : ''}</TableCell>
+                    <TableCell>
+                      {dataset.metadata?.size_bytes ? `${(dataset.metadata.size_bytes/1024).toFixed(1)} KB` : ''}
+                    </TableCell>
+                    <TableCell>{dataset.metadata?.processing_status || ''}</TableCell>
                     <TableCell>
                       <IconButton size="small">
                         <EditIcon fontSize="small" />
@@ -337,6 +371,8 @@ const ObjectiveData: React.FC = () => {
                 label="KPI Name"
                 fullWidth
                 variant="outlined"
+                value={kpiName}
+                onChange={(e) => setKpiName(e.target.value)}
                 sx={{ mb: 2, mt: 1 }}
               />
               <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
@@ -358,6 +394,8 @@ const ObjectiveData: React.FC = () => {
                 label="Current Value"
                 fullWidth
                 variant="outlined"
+                value={kpiCurrent}
+                onChange={(e) => setKpiCurrent(e.target.value)}
                 sx={{ mb: 2 }}
               />
               <TextField
@@ -365,6 +403,8 @@ const ObjectiveData: React.FC = () => {
                 label="Target Value"
                 fullWidth
                 variant="outlined"
+                value={kpiTarget}
+                onChange={(e) => setKpiTarget(e.target.value)}
                 sx={{ mb: 2 }}
               />
               <TextField
@@ -372,6 +412,8 @@ const ObjectiveData: React.FC = () => {
                 label="Unit (e.g., %, $)"
                 fullWidth
                 variant="outlined"
+                value={kpiUnit}
+                onChange={(e) => setKpiUnit(e.target.value)}
               />
             </>
           ) : (
@@ -382,6 +424,8 @@ const ObjectiveData: React.FC = () => {
                 label="Dataset Name"
                 fullWidth
                 variant="outlined"
+                value={datasetName}
+                onChange={(e) => setDatasetName(e.target.value)}
                 sx={{ mb: 2, mt: 1 }}
               />
               <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
@@ -405,6 +449,8 @@ const ObjectiveData: React.FC = () => {
                 multiline
                 rows={2}
                 variant="outlined"
+                value={datasetDesc}
+                onChange={(e) => setDatasetDesc(e.target.value)}
                 sx={{ mb: 2 }}
               />
               <Button
@@ -414,20 +460,17 @@ const ObjectiveData: React.FC = () => {
                 fullWidth
               >
                 Choose File
-                <input type="file" hidden />
+                <input type="file" hidden onChange={(e) => setDatasetFile(e.target.files ? e.target.files[0] : null)} />
               </Button>
             </>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleCloseDialog} variant="contained">
+          <Button onClick={handleSubmit} variant="contained">
             {dialogType === 'kpi' ? 'Add KPI' : 'Upload'}
           </Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
-};
-
-export default ObjectiveData;
