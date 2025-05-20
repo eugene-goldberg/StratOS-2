@@ -47,7 +47,7 @@ async def get_north_star(
     """
     Get a North Star by ID (for admin or sharing purposes)
     """
-    # For MVp, users can only access their own North Star
+    # For MVP, users can only access their own North Star
     # In future, could implement sharing or admin access
     if north_star_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied to this North Star")
