@@ -239,16 +239,12 @@ Implemented all main page components with placeholder UI:
 ## Next Steps for MVP Completion
 
 1. **Backend Development**:
-   - Implement service layer for remaining modules (CEO's Log service layer is complete)
-   - Set up database connections for remaining modules (CEO's Log DB integration is complete)
-   - Complete the AI skill prompt engineering for remaining features (CEO's Log AI skills are complete)
-   - Implement authentication and authorization
+   - Refine AI logic for analysis and planning services
+   - Improve error handling and logging throughout the API
 
 2. **Frontend Development**:
-   - Connect remaining modules to backend APIs (CEO's Log API integration is complete)
-   - Implement state management with Zustand for remaining modules (CEO's Log state management is complete)
-   - Develop actual Strategic Canvas with React Flow
-   - Complete voice interaction functionality for remaining modules (CEO's Log voice features are complete)
+   - Develop the full Strategic Canvas using React Flow
+   - Polish voice interaction capabilities across modules
 
 3. **Infrastructure**:
    - Set up Azure services
@@ -256,8 +252,7 @@ Implemented all main page components with placeholder UI:
    - Implement deployment scripts
 
 4. **Testing**:
-   - Create unit tests for backend
-   - Create integration tests
+   - Expand unit and integration tests across all routers and services
    - Implement frontend testing
 
 5. **Documentation**:
@@ -266,6 +261,11 @@ Implemented all main page components with placeholder UI:
    - Create user guide
 
 ## MVP Feature Status
+
+### F0.0: Authentication & Authorization
+- ✅ User registration and login endpoints
+- ✅ JWT-based auth with `get_current_user_id` dependency
+- ✅ All API routers secured and user context derived from the token
 
 ### F1.1: "Our North Star" Module
 - ✅ Backend models defined
@@ -315,14 +315,14 @@ The CEO's Log feature now provides a complete implementation of the "S" (Subject
 - ✅ API endpoints created
 - ✅ Frontend UI implemented
 - ✅ Basic prompt templates created
-- Partial service implementation (AI-generated SWOT items and insights use placeholder logic)
+- ✅ Service implementation completed with Semantic Kernel-powered SWOT generation and TOWS strategies
 
 ### F4.1: Basic Initiative Planner
 - ✅ Backend models defined
 - ✅ API endpoints created
 - ✅ Frontend UI implemented
 - ✅ Service implementation completed
-- ⚠️ Initial integration with Analysis started (alignment scoring placeholder)
+- ✅ Alignment scoring and AI recommendations fully integrated
 
 ## Conclusion
 
