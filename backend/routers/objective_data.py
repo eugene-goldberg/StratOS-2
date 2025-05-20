@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from typing import List, Optional, Dict, Any
 from uuid import UUID
+
+from ..models.user import UserResponse
+from ..dependencies import get_current_active_user
 from ..models.objective_data import (
     KPI,
     KPICreate,
@@ -13,7 +16,7 @@ from ..models.objective_data import (
 )
 from ..services.objective_data_service import ObjectiveDataService
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_active_user)])
 data_service = ObjectiveDataService()
 
 # KPI Endpoints

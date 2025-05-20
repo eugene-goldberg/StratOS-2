@@ -839,11 +839,28 @@ class PlanningService:
 
     # ----- Advanced Planning Features -----
     async def analyze_plan_alignment(self, plan_id: UUID) -> Dict[str, Any]:
-        """Simple heuristic alignment analysis."""
+        """Analyze how well initiatives align with strategic goals."""
         plan = await self.get_plan(plan_id)
-        score = float(len(plan.title)) % 10 + 1.0
+
+        if not plan.initiatives:
+            score = 0.0
+        else:
+            linked = sum(1 for i in plan.initiatives if i.linked_strategic_goal)
+            score = round((linked / len(plan.initiatives)) * 10, 2)
+
         plan.overall_alignment_score = score
         self.plans_cache[plan_id] = plan
+        if self.cosmos_db_available and self.plans_container:
+            try:
+                plan_dict = plan.dict()
+                plan_dict["id"] = str(plan_dict["id"])
+                for initiative in plan_dict.get("initiatives", []):
+                    initiative["id"] = str(initiative["id"])
+                    if initiative.get("linked_strategic_goal"):
+                        initiative["linked_strategic_goal"] = str(initiative["linked_strategic_goal"])
+                await self.plans_container.replace_item(item=str(plan_id), body=plan_dict)
+            except Exception:
+                pass
         return {"plan_id": str(plan_id), "alignment_score": score}
 
     async def generate_plan_variants(
