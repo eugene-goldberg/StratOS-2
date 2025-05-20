@@ -186,19 +186,19 @@ async def generate_insights_from_data(
 
 @router.post("/so-linkage/discover", response_model=List[Dict[str, Any]])
 async def discover_so_linkages(
-    user_id: UUID,
     topic_context: Optional[str] = None,
     subjective_entry_ids: Optional[List[str]] = None,
     objective_dataset_ids: Optional[List[str]] = None,
     date_range_start: Optional[str] = None,
     date_range_end: Optional[str] = None,
-    max_linkages_to_find: int = 5
+    max_linkages_to_find: int = 5,
+    current_user_id: UUID = Depends(get_current_user_id)
 ):
     """
     Discover potential linkages between subjective insights and objective data
     """
     linkages = await analysis_service.discover_so_linkages(
-        str(user_id),
+        str(current_user_id),
         topic_context,
         subjective_entry_ids,
         objective_dataset_ids,
@@ -210,18 +210,18 @@ async def discover_so_linkages(
 
 @router.get("/so-linkage", response_model=List[SOLinkageResponse])
 async def list_so_linkages(
-    user_id: UUID,
     topic_context_filter: Optional[str] = None,
     date_range_start: Optional[str] = None,
     date_range_end: Optional[str] = None,
     limit: int = 20,
-    offset: int = 0
+    offset: int = 0,
+    current_user_id: UUID = Depends(get_current_user_id)
 ):
     """
     List S+O linkages with optional filtering
     """
     linkages = await analysis_service.list_so_linkages(
-        user_id,
+        current_user_id,
         topic_context_filter,
         date_range_start,
         date_range_end,

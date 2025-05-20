@@ -402,11 +402,21 @@ class AnalysisService:
                 pass
 
     async def generate_insight_explanation(self, insight_id: UUID) -> str:
-        """Return a basic textual explanation for an insight."""
+        """Generate an AI-based explanation for the given insight."""
         insight = await self.get_insight(insight_id)
         if not insight:
             raise HTTPException(status_code=404, detail="Insight not found")
-        return f"The insight '{insight.title}' indicates potential impact on strategy."
+
+        prompt = (
+            "Explain why the following insight is strategically important.\n"
+            f"Title: {insight.title}\n"
+            f"Description: {insight.description or ''}"
+        )
+        try:
+            explanation = await kernel_service.generate_completion(prompt, max_tokens=100)
+            return explanation.strip()
+        except Exception:
+            return f"{insight.title} may impact strategic decisions."
 
     async def generate_insights_from_data(
         self,
@@ -414,33 +424,47 @@ class AnalysisService:
         insight_types: Optional[List[InsightType]] = None,
         max_insights: Optional[int] = 5,
     ) -> List[Insight]:
-        """Generate simple insights from provided subjective and objective data."""
+        """Generate insights from provided subjective and objective data."""
         insights: List[Insight] = []
 
         subjective_ids = data_sources.get("subjective", [])
         objective_ids = data_sources.get("objective", [])
 
-        for sid in subjective_ids[:max_insights]:
+        for sid in subjective_ids:
+            prompt = f"Provide a short strategic insight based on subjective note {sid}."
+            try:
+                desc = await kernel_service.generate_completion(prompt, max_tokens=60)
+            except Exception:
+                desc = "Observation from CEO log entry"
             insights.append(
                 Insight(
-                    title=f"Subjective insight {sid}",
-                    description="Observation from CEO log entry",
+                    title=f"Insight from {sid}",
+                    description=desc.strip(),
                     insight_type=InsightType.OPPORTUNITY,
                     source=InsightSource.SUBJECTIVE,
                     source_references=[{"id": str(sid)}],
                 )
             )
+            if len(insights) >= max_insights:
+                return insights
 
-        for oid in objective_ids[:max_insights - len(insights)]:
+        for oid in objective_ids:
+            prompt = f"Summarize a key trend from dataset {oid}."
+            try:
+                desc = await kernel_service.generate_completion(prompt, max_tokens=60)
+            except Exception:
+                desc = "Notable pattern detected in dataset"
             insights.append(
                 Insight(
-                    title=f"Objective data trend {oid}",
-                    description="Notable pattern detected in dataset",
+                    title=f"Trend from {oid}",
+                    description=desc.strip(),
                     insight_type=InsightType.TREND,
                     source=InsightSource.OBJECTIVE,
                     source_references=[{"id": str(oid)}],
                 )
             )
+            if len(insights) >= max_insights:
+                break
 
         return insights[:max_insights]
     

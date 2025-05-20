@@ -31,3 +31,4 @@ def test_analyze_alignment_valid(monkeypatch):
 def test_analyze_alignment_invalid_uuid():
     response = client.post("/api/planning/plans/not-a-uuid/analyze-alignment")
     assert response.status_code == 422
+

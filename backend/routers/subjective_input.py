@@ -25,12 +25,15 @@ input_service = SubjectiveInputService()
 # CEO's Log Endpoints
 
 @router.post("/log", response_model=LogEntry, status_code=status.HTTP_201_CREATED)
-async def create_log_entry(entry_data: LogEntryCreate, user_id: UUID):
+async def create_log_entry(
+    entry_data: LogEntryCreate,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
     """
     Create a new CEO Log entry with text/voice input
     """
     # Create the log entry
-    entry = await input_service.create_log_entry(entry_data, user_id)
+    entry = await input_service.create_log_entry(entry_data, current_user_id)
     
     # Process with AI for tagging and insights
     await process_log_entry_with_ai(entry.id)
@@ -49,16 +52,16 @@ async def get_log_entry(entry_id: UUID):
 
 @router.get("/log", response_model=List[LogEntry])
 async def list_log_entries(
-    user_id: UUID,
     limit: int = 20,
     offset: int = 0,
     entry_type: Optional[str] = None,
-    tag: Optional[str] = None
+    tag: Optional[str] = None,
+    current_user_id: UUID = Depends(get_current_user_id)
 ):
     """
     List CEO Log entries with optional filtering
     """
-    return await input_service.list_log_entries(user_id, limit, offset, entry_type, tag)
+    return await input_service.list_log_entries(current_user_id, limit, offset, entry_type, tag)
 
 @router.put("/log/{entry_id}", response_model=LogEntry)
 async def update_log_entry(entry_id: UUID, entry_data: LogEntryUpdate):
@@ -85,7 +88,10 @@ async def delete_log_entry(entry_id: UUID):
     return {"status": "success"}
 
 @router.post("/log/voice", response_model=LogEntry, status_code=status.HTTP_201_CREATED)
-async def create_voice_log_entry(audio_file: UploadFile = File(...), user_id: UUID = None):
+async def create_voice_log_entry(
+    audio_file: UploadFile = File(...),
+    current_user_id: UUID = Depends(get_current_user_id)
+):
     """
     Create a new CEO Log entry from voice input (file upload)
     """
@@ -94,7 +100,7 @@ async def create_voice_log_entry(audio_file: UploadFile = File(...), user_id: UU
     
     # Create entry
     entry_data = LogEntryCreate(content=text_content)
-    entry = await input_service.create_log_entry(entry_data, user_id)
+    entry = await input_service.create_log_entry(entry_data, current_user_id)
     
     # Process with AI
     await process_log_entry_with_ai(entry.id)
@@ -102,7 +108,10 @@ async def create_voice_log_entry(audio_file: UploadFile = File(...), user_id: UU
     return entry
 
 @router.post("/voice-note/stream/start")
-async def start_voice_streaming(request: Request, user_id: UUID):
+async def start_voice_streaming(
+    request: Request,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
     """
     Start a voice streaming session for real-time transcription
     
@@ -138,7 +147,10 @@ async def start_voice_streaming(request: Request, user_id: UUID):
         )
 
 @router.post("/voice-note/stream/chunk")
-async def process_voice_chunk(request: Request):
+async def process_voice_chunk(
+    request: Request,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
     """
     Process a chunk of audio data in an active streaming session
     """
@@ -179,13 +191,9 @@ async def process_voice_chunk(request: Request):
                 entry_type=LogEntryType.OTHER
             )
             
-            # Get user_id from the query parameters (this would come from auth in production)
-            user_id = request.query_params.get("userId")
-            if user_id:
-                user_id = UUID(user_id)
-                
-                # Create the log entry
-                entry = await input_service.create_log_entry(entry_data, user_id)
+            # Use authenticated user id
+            if current_user_id:
+                entry = await input_service.create_log_entry(entry_data, current_user_id)
                 
                 # Process with AI
                 await process_log_entry_with_ai(entry.id)
@@ -412,11 +420,14 @@ async def voice_websocket(websocket: WebSocket):
 # Strategic Canvas Endpoints
 
 @router.post("/canvas", response_model=StrategicCanvas, status_code=status.HTTP_201_CREATED)
-async def create_canvas(canvas_data: StrategicCanvasCreate, user_id: UUID):
+async def create_canvas(
+    canvas_data: StrategicCanvasCreate,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
     """
     Create a new Strategic Canvas
     """
-    return await input_service.create_canvas(canvas_data, user_id)
+    return await input_service.create_canvas(canvas_data, current_user_id)
 
 @router.get("/canvas/{canvas_id}", response_model=StrategicCanvas)
 async def get_canvas(canvas_id: UUID):
@@ -429,11 +440,15 @@ async def get_canvas(canvas_id: UUID):
     return canvas
 
 @router.get("/canvas", response_model=List[StrategicCanvas])
-async def list_canvases(user_id: UUID, limit: int = 10, offset: int = 0):
+async def list_canvases(
+    limit: int = 10,
+    offset: int = 0,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
     """
     List Strategic Canvases
     """
-    return await input_service.list_canvases(user_id, limit, offset)
+    return await input_service.list_canvases(current_user_id, limit, offset)
 
 @router.post("/canvas/{canvas_id}/elements", status_code=status.HTTP_201_CREATED)
 async def add_canvas_element(canvas_id: UUID, element_data: CanvasElementCreate):
