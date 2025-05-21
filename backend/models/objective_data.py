@@ -56,6 +56,8 @@ class DataSet(BaseModel):
     source_details: Optional[Dict[str, Any]] = None
     file_path: Optional[str] = None
     data_format: Optional[str] = None  # "csv", "json", "xlsx", etc.
+    tags: List[str] = Field(default_factory=list) # Added tags
+    linked_strategic_elements: List[Dict[str, str]] = Field(default_factory=list) # Added links: e.g. [{"type": "goal", "id": "uuid_str"}]
     import_date: datetime = Field(default_factory=datetime.now)
     last_refreshed: Optional[datetime] = None
     metadata: Optional[Dict[str, Any]] = None
@@ -70,6 +72,8 @@ class DataSetCreate(BaseModel):
     source_type: DataSourceType
     source_details: Optional[Dict[str, Any]] = None
     data_format: Optional[str] = None
+    tags: List[str] = Field(default_factory=list) # Added tags
+    linked_strategic_elements: List[Dict[str, str]] = Field(default_factory=list) # Added links
 
 class DataPoint(BaseModel):
     id: UUID = Field(default_factory=uuid4)

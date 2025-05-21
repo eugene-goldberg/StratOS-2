@@ -715,6 +715,9 @@ class ObjectiveDataService:
                     metadata["dataset_id"] = dataset_id
                     metadata["dataset_name"] = dataset_name
                     metadata["category"] = dataset_metadata.get("category")
+                    # Add new fields to AI Search metadata
+                    metadata["tags"] = dataset_metadata.get("tags", [])
+                    metadata["linked_strategic_elements"] = dataset_metadata.get("linked_strategic_elements", [])
                     metadata["index_timestamp"] = datetime.now().isoformat()
                     metadata["chunk_id"] = chunk_id
                     
@@ -882,24 +885,38 @@ class ObjectiveDataService:
                 )
             
             # Create dataset record
-            dataset_dict = dataset_data.dict()
+            # dataset_data is DataSetCreate, which now includes tags and linked_strategic_elements
             current_time = datetime.now()
             
-            dataset_dict.update({
-                "id": UUID(dataset_id),
-                "file_path": blob_url,
-                "import_date": current_time,
-                "created_at": current_time,
-                "updated_at": current_time,
-                "metadata": {
+            dataset = DataSet(
+                id=UUID(dataset_id),
+                name=dataset_data.name,
+                description=dataset_data.description,
+                category=dataset_data.category,
+                source_type=dataset_data.source_type,
+                source_details=dataset_data.source_details,
+                data_format=dataset_data.data_format,
+                tags=dataset_data.tags, # Pass through tags
+                linked_strategic_elements=dataset_data.linked_strategic_elements, # Pass through links
+                file_path=blob_url,
+                import_date=current_time,
+                created_at=current_time,
+                updated_at=current_time,
+                metadata={ # Initial metadata
                     "original_filename": file.filename,
                     "ai_indexed": False,
-                    "size_bytes": file.size,
+                    "size_bytes": file.size if file else 0, # Handle if file is None (though not in this method)
                     "processing_status": "pending"
                 }
-            })
+            )
             
-            dataset = DataSet(**dataset_dict)
+            # Convert to dict for DB, ensuring UUIDs are strings if model stores them as UUID
+            dataset_db_dict = dataset.dict()
+            dataset_db_dict["id"] = str(dataset.id) # id is already UUID from default_factory
+            # tags and linked_strategic_elements are already in correct format from model
+            
+            # Save to Cosmos DB
+            await self.datasets_container.create_item(body=dataset_db_dict)
             
             # Save to Cosmos DB
             await self.datasets_container.create_item(body=dataset.dict())
@@ -989,9 +1006,11 @@ class ObjectiveDataService:
             indexing_results = await self._trigger_ai_indexing(
                 str(dataset.id), 
                 content_chunks,
-                {
-                    "name": dataset_name,
-                    "category": dataset.category.value if dataset.category else None
+                { # Pass dataset metadata for indexing context
+                    "name": dataset.name,
+                    "category": dataset.category.value if dataset.category else None,
+                    "tags": dataset.tags,
+                    "linked_strategic_elements": dataset.linked_strategic_elements
                 }
             )
             
@@ -1042,19 +1061,29 @@ class ObjectiveDataService:
             )
             
         dataset_id = uuid.uuid4()
-        dataset_dict = dataset_data.dict()
         current_time = datetime.now()
         
-        dataset_dict.update({
-            "id": dataset_id,
-            "created_at": current_time,
-            "updated_at": current_time
-        })
+        # DataSetCreate now includes tags and linked_strategic_elements
+        dataset = DataSet(
+            id=dataset_id,
+            name=dataset_data.name,
+            description=dataset_data.description,
+            category=dataset_data.category,
+            source_type=dataset_data.source_type,
+            source_details=dataset_data.source_details,
+            data_format=dataset_data.data_format,
+            tags=dataset_data.tags,
+            linked_strategic_elements=dataset_data.linked_strategic_elements,
+            created_at=current_time,
+            updated_at=current_time
+            # file_path and import_date would typically be None or set if applicable
+        )
         
-        dataset = DataSet(**dataset_dict)
-        
+        dataset_db_dict = dataset.dict()
+        dataset_db_dict["id"] = str(dataset.id)
+
         # Save to Cosmos DB
-        await self.datasets_container.create_item(body=dataset.dict())
+        await self.datasets_container.create_item(body=dataset_db_dict)
         
         return dataset
     

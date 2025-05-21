@@ -17,10 +17,15 @@ from ..models.subjective_input import (
     CanvasElementCreate
 )
 from ..services.subjective_input_service import SubjectiveInputService
+from ..services.strategic_foundation_service import StrategicFoundationService # Import StrategicFoundationService
+from ..dependencies import get_current_user_id # Ensure this is imported
 from ..ai.kernel_service import kernel_service
+import logging # For logging errors
 
 router = APIRouter(dependencies=[Depends(get_current_active_user)])
 input_service = SubjectiveInputService()
+# Instantiate StrategicFoundationService for use in this router
+foundation_service = StrategicFoundationService() 
 
 # CEO's Log Endpoints
 
@@ -36,7 +41,7 @@ async def create_log_entry(
     entry = await input_service.create_log_entry(entry_data, current_user_id)
     
     # Process with AI for tagging and insights
-    await process_log_entry_with_ai(entry.id)
+    await process_log_entry_with_ai(entry.id, current_user_id) # Pass user_id
     
     return entry
 
@@ -103,7 +108,7 @@ async def create_voice_log_entry(
     entry = await input_service.create_log_entry(entry_data, current_user_id)
     
     # Process with AI
-    await process_log_entry_with_ai(entry.id)
+    await process_log_entry_with_ai(entry.id, current_user_id) # Pass user_id
     
     return entry
 
@@ -343,7 +348,7 @@ async def voice_websocket(websocket: WebSocket):
                         entry = await input_service.create_log_entry(entry_data, user_id)
                         
                         # Process with AI
-                        await process_log_entry_with_ai(entry.id)
+                        await process_log_entry_with_ai(entry.id, user_id) # Pass user_id
                         
                         # Add entry ID to result
                         final_result["entryId"] = str(entry.id)
@@ -500,29 +505,44 @@ async def process_log_entry_with_ai(entry_id: UUID, user_id: UUID): # Added user
         return False
     
     try:
-        # Fetch strategic elements (e.g., from NorthStar service for the user_id)
-        # This part needs actual implementation to fetch user-specific strategic context.
-        # Placeholder:
-        user_strategic_context = f"User {user_id}'s strategic context (purpose, vision, goals) would be fetched here."
+        # Fetch user's North Star data for context
+        north_star = await foundation_service.get_north_star(user_id)
+        user_strategic_context = "No specific strategic context available."
+        if north_star:
+            purpose_str = f"Purpose: {north_star.purpose.statement}" if north_star.purpose else ""
+            vision_str = f"Vision: {north_star.vision.statement}" if north_star.vision else ""
+            values_str = f"Values: {', '.join([v.name for v in north_star.values])}" if north_star.values else ""
+            goals_str = f"Strategic Goals: {'; '.join([g.title for g in north_star.strategic_goals])}" if north_star.strategic_goals else ""
+            user_strategic_context = "\n".join(filter(None, [purpose_str, vision_str, values_str, goals_str]))
+            if not user_strategic_context.strip(): # Handle case where all components are empty
+                 user_strategic_context = "User has a North Star defined but specific elements (purpose, vision, values, goals) are not detailed."
         
         # Generate tags
         tags_response = await kernel_service.invoke_semantic_function(
             skill_name="SubjectiveLog", function_name="GenerateTags",
             input_text=entry.content, variables={"user_context": user_strategic_context}
         )
-        ai_tags = json.loads(str(tags_response)) if str(tags_response) else []
+        
+        ai_tags_str = str(tags_response.result if hasattr(tags_response, 'result') else tags_response)
+        try:
+            ai_tags = json.loads(ai_tags_str) if ai_tags_str else []
+            if not isinstance(ai_tags, list): # Ensure it's a list
+                ai_tags = [str(tag).strip() for tag in ai_tags_str.split(',') if str(tag).strip()] if ai_tags_str else []
+        except json.JSONDecodeError:
+            ai_tags = [str(tag).strip() for tag in ai_tags_str.split(',') if str(tag).strip()] if ai_tags_str else []
+
 
         # Generate summary
         summary_response = await kernel_service.invoke_semantic_function(
             skill_name="SubjectiveLog", function_name="GenerateSummary", input_text=entry.content
         )
-        ai_summary = str(summary_response).strip()
+        ai_summary = str(summary_response.result if hasattr(summary_response, 'result') else summary_response).strip()
 
         # Generate insights
         insights_response = await kernel_service.invoke_semantic_function(
             skill_name="SubjectiveLog", function_name="GenerateInsights", input_text=entry.content
         )
-        ai_insights = [i.strip() for i in str(insights_response).split('\n') if i.strip()]
+        ai_insights = [i.strip() for i in str(insights_response.result if hasattr(insights_response, 'result') else insights_response).split('\n') if i.strip()]
         
         # Update the entry with AI results using the service (passing user_id)
         await input_service.update_log_entry_ai_results(

@@ -65,6 +65,8 @@ class Action(BaseModel):
 
 class Initiative(BaseModel):
     id: UUID = Field(default_factory=uuid4)
+    plan_id: UUID # Link to the parent StrategicPlan
+    user_id: UUID # Owner of the initiative/plan
     title: str
     description: str
     initiative_type: InitiativeType
@@ -86,6 +88,7 @@ class Initiative(BaseModel):
 
 class StrategicPlan(BaseModel):
     id: UUID = Field(default_factory=uuid4)
+    user_id: UUID # Owner of the plan
     title: str
     description: Optional[str] = None
     status: PlanStatus = PlanStatus.DRAFT
@@ -126,7 +129,8 @@ class InitiativeCreate(BaseModel):
     title: str
     description: str
     initiative_type: InitiativeType
-    linked_strategic_goal: Optional[str] = None
+    # linked_strategic_goal should be UUID if it's an ID
+    linked_strategic_goal: Optional[UUID] = None 
     owner: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
