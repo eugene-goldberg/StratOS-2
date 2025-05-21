@@ -44,6 +44,7 @@ class SWOTItem(BaseModel):
 
 class SWOTAnalysis(BaseModel):
     id: UUID = Field(default_factory=uuid4)
+    user_id: UUID  # Added user_id for ownership and partitioning
     title: str
     description: Optional[str] = None
     items: List[SWOTItem] = []
@@ -95,6 +96,7 @@ class SOLinkageResponse(SOLinkage): # For API responses
 
 class Insight(BaseModel):
     id: UUID = Field(default_factory=uuid4)
+    user_id: UUID  # Added user_id for ownership and partitioning
     title: str
     description: str
     insight_type: InsightType
