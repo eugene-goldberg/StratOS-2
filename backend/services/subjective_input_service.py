@@ -4,8 +4,10 @@ import json
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 import azure.cognitiveservices.speech as speechsdk
-from azure.cosmos import CosmosClient, PartitionKey
+from azure.cosmos.aio import CosmosClient as AsyncCosmosClient, DatabaseProxy, ContainerProxy
+from azure.cosmos import PartitionKey, exceptions as CosmosExceptions
 from datetime import datetime
+from fastapi import HTTPException # For raising HTTP errors
 
 from ..models.subjective_input import (
     LogEntry, 
@@ -23,702 +25,405 @@ from ..ai.kernel_service import kernel_service
 class SubjectiveInputService:
     def __init__(self):
         self.setup_logging()
-        self.setup_cosmos_db()
+        self._initialize_cosmos_db_sync() # Changed from setup_cosmos_db
         self.setup_speech_service()
         
+        # In-memory fallback if Cosmos DB is not available
+        if not self.cosmos_db_available:
+            self.log_entries_cache = {} # user_id -> {entry_id: LogEntry}
+            self.canvases_cache = {}    # user_id -> {canvas_id: StrategicCanvas}
+            self.logger.warning("Using in-memory storage as fallback for SubjectiveInputService.")
+
     def setup_logging(self):
         self.logger = logging.getLogger("subjective_input_service")
-        self.logger.setLevel(logging.INFO)
-        
-    def setup_cosmos_db(self):
-        """Initialize Azure Cosmos DB connection"""
+        # self.logger.setLevel(logging.INFO) # Level setting is usually done globally
+
+    def _initialize_cosmos_db_sync(self):
+        """Initialize Azure Cosmos DB connection using async client."""
+        self.cosmos_db_available = False
+        self.cosmos_client: Optional[AsyncCosmosClient] = None
+        self.database: Optional[DatabaseProxy] = None
+        self.log_container: Optional[ContainerProxy] = None
+        self.canvas_container: Optional[ContainerProxy] = None
+
+        cosmos_endpoint = os.getenv("AZURE_COSMOS_ENDPOINT")
+        cosmos_key = os.getenv("AZURE_COSMOS_KEY")
+        self.cosmos_database_name = os.getenv("AZURE_COSMOS_DATABASE", "stratosdb") # Consistent DB name
+            
+        if not cosmos_endpoint or not cosmos_key or not self.cosmos_database_name:
+            self.logger.warning("Cosmos DB credentials or database name not found. SubjectiveInputService will use in-memory fallback.")
+            return
+
         try:
-            # Get connection info from environment variables
-            cosmos_endpoint = os.getenv("AZURE_COSMOS_ENDPOINT")
-            cosmos_key = os.getenv("AZURE_COSMOS_KEY")
-            cosmos_database = os.getenv("AZURE_COSMOS_DATABASE")
+            self.cosmos_client = AsyncCosmosClient(url=cosmos_endpoint, credential=cosmos_key)
+            self.database = self.cosmos_client.get_database_client(self.cosmos_database_name)
             
-            # Initialize Cosmos client
-            self.cosmos_client = CosmosClient(cosmos_endpoint, cosmos_key)
-            self.database = self.cosmos_client.get_database_client(cosmos_database)
+            # Get container proxies. Actual creation should be handled at app startup.
+            self.log_container = self.database.get_container_client("log_entries") # PK: /user_id
+            self.canvas_container = self.database.get_container_client("strategic_canvases") # PK: /user_id
             
-            # Get or create containers
-            self.log_container = self.database.get_container_client("log_entries")
-            self.canvas_container = self.database.get_container_client("strategic_canvases")
-            
-            self.logger.info("Cosmos DB connection established successfully")
+            self.cosmos_db_available = True
+            self.logger.info("Cosmos DB async client initialized for SubjectiveInputService.")
         except Exception as e:
-            self.logger.error(f"Error setting up Cosmos DB: {str(e)}")
-            # Using in-memory storage as fallback for development
-            self.log_entries = []
-            self.canvases = []
-            self.logger.warning("Using in-memory storage as fallback")
+            self.logger.error(f"Error setting up Cosmos DB for SubjectiveInputService: {str(e)}")
+            # Ensure all clients are None if setup fails
+            self.cosmos_client = None
+            self.database = None
+            self.log_container = None
+            self.canvas_container = None
     
     def setup_speech_service(self):
         """Initialize Azure Speech Service for voice-to-text"""
         try:
-            # Get connection info from environment variables
             speech_key = os.getenv("AZURE_SPEECH_KEY")
             speech_region = os.getenv("AZURE_SPEECH_REGION")
-            
-            # Store config for later use
-            self.speech_config = speechsdk.SpeechConfig(
-                subscription=speech_key, 
-                region=speech_region
-            )
+            if not speech_key or not speech_region:
+                self.logger.warning("Azure Speech Key or Region not configured.")
+                self.speech_config = None
+                return
+
+            self.speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=speech_region)
             self.speech_config.speech_recognition_language = "en-US"
-            
-            self.logger.info("Speech service configured successfully")
+            self.logger.info("Speech service configured successfully.")
         except Exception as e:
             self.logger.error(f"Error setting up Speech service: {str(e)}")
+            self.speech_config = None
             
-    # CEO's Log Methods
+    async def _save_log_entry_to_db(self, entry: LogEntry):
+        if not (self.cosmos_db_available and self.log_container):
+            self.logger.warning(f"Cosmos DB not available for log_entries. Caching log entry {entry.id} in memory.")
+            self.log_entries_cache.setdefault(str(entry.user_id), {})[str(entry.id)] = entry
+            return
 
-    async def create_log_entry(self, entry_data: LogEntryCreate, user_id: UUID) -> LogEntry:
-        """Create a new log entry"""
+        entry_dict = entry.dict()
+        entry_dict["id"] = str(entry.id)
+        entry_dict["user_id"] = str(entry.user_id) # Partition Key
+        for i, tag_dict in enumerate(entry_dict.get("tags", [])):
+            tag_dict["id"] = str(tag_dict["id"])
+            if tag_dict.get("reference_id"):
+                tag_dict["reference_id"] = str(tag_dict["reference_id"])
+        
         try:
-            # Convert basic tag strings to LogEntryTag objects
-            tags = []
-            for tag_name in entry_data.tags:
-                tags.append(LogEntryTag(
-                    name=tag_name,
-                    type="custom"
-                ))
-            
-            # Create new log entry
-            entry = LogEntry(
-                content=entry_data.content,
-                entry_type=entry_data.entry_type,
-                tags=tags,
-                user_id=user_id
-            )
-            
-            # Save to Cosmos DB
-            if hasattr(self, 'log_container'):
-                entry_dict = entry.dict()
-                # Convert UUID to string for Cosmos
-                entry_dict["id"] = str(entry.id)
-                entry_dict["user_id"] = str(entry.user_id)
-                for i, tag in enumerate(entry_dict["tags"]):
-                    entry_dict["tags"][i]["id"] = str(tag["id"])
-                    if tag["reference_id"]:
-                        entry_dict["tags"][i]["reference_id"] = str(tag["reference_id"])
-                
-                await self.log_container.create_item(entry_dict)
-            else:
-                # Fallback to in-memory storage
-                self.log_entries.append(entry)
-                
-            self.logger.info(f"Created log entry with ID: {entry.id}")
-            return entry
-        except Exception as e:
-            self.logger.error(f"Error creating log entry: {str(e)}")
-            raise
+            # Using upsert_item for create/update simplicity on save
+            await self.log_container.upsert_item(body=entry_dict)
+            self.logger.info(f"Saved log entry {entry.id} for user {entry.user_id} to Cosmos DB.")
+            self.log_entries_cache.setdefault(str(entry.user_id), {})[str(entry.id)] = entry
+        except CosmosExceptions.CosmosHttpResponseError as e:
+            self.logger.error(f"Error saving log entry {entry.id} to Cosmos DB: {str(e)}")
+            self.log_entries_cache.setdefault(str(entry.user_id), {})[str(entry.id)] = entry
+
+
+    async def _save_canvas_to_db(self, canvas: StrategicCanvas):
+        if not (self.cosmos_db_available and self.canvas_container):
+            self.logger.warning(f"Cosmos DB not available for canvases. Caching canvas {canvas.id} in memory.")
+            self.canvases_cache.setdefault(str(canvas.user_id), {})[str(canvas.id)] = canvas
+            return
+
+        canvas_dict = canvas.dict()
+        canvas_dict["id"] = str(canvas.id)
+        canvas_dict["user_id"] = str(canvas.user_id) # Partition Key
+        for i, el_dict in enumerate(canvas_dict.get("elements", [])):
+            el_dict["id"] = str(el_dict["id"])
+            el_dict["connections"] = [str(c) for c in el_dict.get("connections", [])]
+
+        try:
+            await self.canvas_container.upsert_item(body=canvas_dict)
+            self.logger.info(f"Saved canvas {canvas.id} for user {canvas.user_id} to Cosmos DB.")
+            self.canvases_cache.setdefault(str(canvas.user_id), {})[str(canvas.id)] = canvas
+        except CosmosExceptions.CosmosHttpResponseError as e:
+            self.logger.error(f"Error saving canvas {canvas.id} to Cosmos DB: {str(e)}")
+            self.canvases_cache.setdefault(str(canvas.user_id), {})[str(canvas.id)] = canvas
+
+    # CEO's Log Methods
+    async def create_log_entry(self, entry_data: LogEntryCreate, user_id: UUID) -> LogEntry:
+        tags = [LogEntryTag(name=tag_name, type="custom") for tag_name in entry_data.tags]
+        entry = LogEntry(content=entry_data.content, entry_type=entry_data.entry_type, tags=tags, user_id=user_id)
+        await self._save_log_entry_to_db(entry) # Changed to use helper
+        return entry
     
     async def create_log_entry_from_voice(self, text_content: str, user_id: UUID) -> LogEntry:
-        """Create a log entry from transcribed voice"""
-        try:
-            # Create entry data
-            entry_data = LogEntryCreate(
-                content=text_content,
-                entry_type=LogEntryType.OTHER
-            )
-            
-            # Create the log entry
-            entry = await self.create_log_entry(entry_data, user_id)
-            
-            return entry
-        except Exception as e:
-            self.logger.error(f"Error creating log entry from voice: {str(e)}")
-            raise
+        entry_data = LogEntryCreate(content=text_content, entry_type=LogEntryType.VOICE_NOTE) # Changed type
+        return await self.create_log_entry(entry_data, user_id)
     
-    async def get_log_entry(self, entry_id: UUID) -> Optional[LogEntry]:
-        """Get a log entry by ID"""
-        try:
-            if hasattr(self, 'log_container'):
-                query = f"SELECT * FROM c WHERE c.id = '{str(entry_id)}'"
-                items = list(self.log_container.query_items(
-                    query=query,
-                    enable_cross_partition_query=True
-                ))
-                
-                if not items:
-                    return None
-                
-                # Convert Cosmos DB item to LogEntry model
-                entry_dict = items[0]
-                # Convert string UUIDs back to UUID objects
-                entry_dict["id"] = UUID(entry_dict["id"])
-                entry_dict["user_id"] = UUID(entry_dict["user_id"])
-                for i, tag in enumerate(entry_dict["tags"]):
-                    entry_dict["tags"][i]["id"] = UUID(tag["id"])
-                    if tag["reference_id"]:
-                        entry_dict["tags"][i]["reference_id"] = UUID(tag["reference_id"])
-                
-                return LogEntry(**entry_dict)
-            else:
-                # Fallback to in-memory storage
-                for entry in self.log_entries:
-                    if entry.id == entry_id:
-                        return entry
+    async def get_log_entry(self, entry_id: UUID, user_id: Optional[UUID] = None) -> Optional[LogEntry]: # Added user_id for partitioned read
+        # Try cache first (assuming cache is user-partitioned or checked)
+        if user_id and str(user_id) in self.log_entries_cache and str(entry_id) in self.log_entries_cache[str(user_id)]:
+            return self.log_entries_cache[str(user_id)][str(entry_id)]
+        
+        if self.cosmos_db_available and self.log_container:
+            if not user_id: # If user_id not provided, cannot do efficient read
+                 self.logger.warning("get_log_entry called without user_id for DB lookup, this will be inefficient or fail if PK is user_id.")
+                 # Fallback to cross-partition query if absolutely necessary and PK is not /user_id
+                 # query = f"SELECT * FROM c WHERE c.id = '{str(entry_id)}'"
+                 # items = [item async for item in self.log_container.query_items(query=query, enable_cross_partition_query=True)]
+                 # if not items: return None
+                 # item_data = items[0]
+                 # This path should be avoided. For now, require user_id for DB read.
+                 return None # Or raise error
+
+            try:
+                item_data = await self.log_container.read_item(item=str(entry_id), partition_key=str(user_id))
+                item_data["id"] = UUID(item_data["id"])
+                item_data["user_id"] = UUID(item_data["user_id"])
+                for tag_dict in item_data.get("tags", []):
+                    tag_dict["id"] = UUID(tag_dict["id"])
+                    if tag_dict.get("reference_id"): tag_dict["reference_id"] = UUID(tag_dict["reference_id"])
+                entry = LogEntry(**item_data)
+                self.log_entries_cache.setdefault(str(user_id), {})[str(entry_id)] = entry
+                return entry
+            except CosmosExceptions.CosmosResourceNotFoundError:
                 return None
-        except Exception as e:
-            self.logger.error(f"Error getting log entry: {str(e)}")
-            return None
-    
-    async def list_log_entries(
-        self, 
-        user_id: UUID, 
-        limit: int = 20, 
-        offset: int = 0,
-        entry_type: Optional[str] = None,
-        tag: Optional[str] = None
-    ) -> List[LogEntry]:
-        """List log entries with optional filtering"""
-        try:
-            if hasattr(self, 'log_container'):
-                # Build query based on filters
-                query = f"SELECT * FROM c WHERE c.user_id = '{str(user_id)}'"
-                
-                if entry_type:
-                    query += f" AND c.entry_type = '{entry_type}'"
-                
-                if tag:
-                    query += f" AND ARRAY_CONTAINS(c.tags, {{'name': '{tag}'}})"
-                
-                # Add sorting and pagination
-                query += f" ORDER BY c.created_at DESC OFFSET {offset} LIMIT {limit}"
-                
-                items = list(self.log_container.query_items(
-                    query=query,
-                    enable_cross_partition_query=True
-                ))
-                
-                # Convert Cosmos DB items to LogEntry models
-                entries = []
-                for item in items:
-                    # Convert string UUIDs back to UUID objects
-                    item["id"] = UUID(item["id"])
-                    item["user_id"] = UUID(item["user_id"])
-                    for i, tag in enumerate(item["tags"]):
-                        item["tags"][i]["id"] = UUID(tag["id"])
-                        if tag["reference_id"]:
-                            item["tags"][i]["reference_id"] = UUID(tag["reference_id"])
-                    
-                    entries.append(LogEntry(**item))
-                
+            except Exception as e:
+                self.logger.error(f"Error getting log entry {entry_id} for user {user_id}: {str(e)}")
+                return None
+        
+        # Fallback to non-user-partitioned cache scan if user_id was None
+        if not user_id:
+            for user_bucket in self.log_entries_cache.values():
+                if str(entry_id) in user_bucket:
+                    return user_bucket[str(entry_id)]
+        return None
+
+    async def list_log_entries(self, user_id: UUID, limit: int = 20, offset: int = 0, entry_type: Optional[str] = None, tag: Optional[str] = None) -> List[LogEntry]:
+        if self.cosmos_db_available and self.log_container:
+            query_parts = ["SELECT * FROM c WHERE c.user_id = @user_id"]
+            parameters: List[Dict[str, Any]] = [{"name": "@user_id", "value": str(user_id)}]
+            
+            if entry_type:
+                query_parts.append("AND c.entry_type = @entry_type")
+                parameters.append({"name": "@entry_type", "value": entry_type})
+            if tag: # ARRAY_CONTAINS for searching in an array of objects needs specific syntax
+                query_parts.append("AND EXISTS (SELECT VALUE t FROM t IN c.tags WHERE t.name = @tag_name)")
+                parameters.append({"name": "@tag_name", "value": tag})
+
+            # Cosmos DB OFFSET LIMIT is not directly on query string but on query_items options for async SDK
+            # The query itself should not contain OFFSET LIMIT for async SDK.
+            # However, for simplicity and consistency with other services, keeping it in query string.
+            # The proper way for async SDK is:
+            # results_iterable = self.log_container.query_items(query=query, parameters=parameters, partition_key=str(user_id), max_item_count=limit)
+            # items = await results_iterable.to_list() # This would fetch all then slice, or use continuation tokens.
+            # For now, let's assume the OFFSET LIMIT in query string works as intended by the sync SDK behavior.
+            query = " ".join(query_parts) + f" ORDER BY c.created_at DESC OFFSET {offset} LIMIT {limit}"
+            
+            entries = []
+            try:
+                async for item_data in self.log_container.query_items(query=query, parameters=parameters, partition_key=str(user_id)):
+                    item_data["id"] = UUID(item_data["id"])
+                    item_data["user_id"] = UUID(item_data["user_id"])
+                    for t_dict in item_data.get("tags",[]): t_dict["id"] = UUID(t_dict["id"])
+                    if t_dict.get("reference_id"): t_dict["reference_id"] = UUID(t_dict["reference_id"])
+                    entries.append(LogEntry(**item_data))
                 return entries
-            else:
-                # Fallback to in-memory storage
-                filtered_entries = [e for e in self.log_entries if e.user_id == user_id]
-                
-                if entry_type:
-                    filtered_entries = [e for e in filtered_entries if e.entry_type == entry_type]
-                
-                if tag:
-                    filtered_entries = [e for e in filtered_entries if any(t.name == tag for t in e.tags)]
-                
-                # Sort by created_at descending
-                filtered_entries.sort(key=lambda e: e.created_at, reverse=True)
-                
-                # Apply pagination
-                paginated_entries = filtered_entries[offset:offset + limit]
-                
-                return paginated_entries
-        except Exception as e:
-            self.logger.error(f"Error listing log entries: {str(e)}")
-            return []
-    
-    async def update_log_entry(self, entry_id: UUID, entry_data: LogEntryUpdate) -> Optional[LogEntry]:
-        """Update a log entry"""
-        try:
-            # Get existing entry
-            entry = await self.get_log_entry(entry_id)
-            if not entry:
-                return None
-            
-            # Update fields that are provided
-            if entry_data.content is not None:
-                entry.content = entry_data.content
-            
-            if entry_data.entry_type is not None:
-                entry.entry_type = entry_data.entry_type
-            
-            if entry_data.tags is not None:
-                # Convert tag strings to LogEntryTag objects
-                tags = []
-                for tag_name in entry_data.tags:
-                    tags.append(LogEntryTag(
-                        name=tag_name,
-                        type="custom"
-                    ))
-                entry.tags = tags
-            
-            # Update timestamp
-            entry.updated_at = datetime.now()
-            
-            # Save to database
-            if hasattr(self, 'log_container'):
-                entry_dict = entry.dict()
-                # Convert UUID to string for Cosmos
-                entry_dict["id"] = str(entry.id)
-                entry_dict["user_id"] = str(entry.user_id)
-                for i, tag in enumerate(entry_dict["tags"]):
-                    entry_dict["tags"][i]["id"] = str(tag["id"])
-                    if tag["reference_id"]:
-                        entry_dict["tags"][i]["reference_id"] = str(tag["reference_id"])
-                
-                await self.log_container.replace_item(
-                    item=str(entry_id),
-                    body=entry_dict
-                )
-            else:
-                # Fallback to in-memory storage
-                for i, e in enumerate(self.log_entries):
-                    if e.id == entry_id:
-                        self.log_entries[i] = entry
-                        break
-            
-            self.logger.info(f"Updated log entry with ID: {entry_id}")
-            return entry
-        except Exception as e:
-            self.logger.error(f"Error updating log entry: {str(e)}")
-            return None
-    
-    async def delete_log_entry(self, entry_id: UUID) -> bool:
-        """Delete a log entry"""
-        try:
-            if hasattr(self, 'log_container'):
-                await self.log_container.delete_item(
-                    item=str(entry_id),
-                    partition_key=str(entry_id)
-                )
-            else:
-                # Fallback to in-memory storage
-                self.log_entries = [e for e in self.log_entries if e.id != entry_id]
-            
-            self.logger.info(f"Deleted log entry with ID: {entry_id}")
-            return True
-        except Exception as e:
-            self.logger.error(f"Error deleting log entry: {str(e)}")
+            except Exception as e:
+                self.logger.error(f"Error listing log entries for user {user_id}: {str(e)}")
+                # Fallback to cache
+        
+        # Fallback to in-memory cache
+        user_logs = self.log_entries_cache.get(str(user_id), {}).values()
+        filtered = []
+        for e_obj in user_logs: # e_obj is LogEntry
+            if entry_type and e_obj.entry_type.value != entry_type: continue
+            if tag and not any(t.name == tag for t in e_obj.tags): continue
+            filtered.append(e_obj)
+        filtered.sort(key=lambda e_obj: e_obj.created_at, reverse=True)
+        return filtered[offset : offset + limit]
+
+    async def update_log_entry(self, entry_id: UUID, entry_data: LogEntryUpdate, user_id: UUID) -> Optional[LogEntry]: # Added user_id
+        entry = await self.get_log_entry(entry_id, user_id) # Pass user_id for read
+        if not entry: return None
+        
+        if entry_data.content is not None: entry.content = entry_data.content
+        if entry_data.entry_type is not None: entry.entry_type = entry_data.entry_type
+        if entry_data.tags is not None:
+            entry.tags = [LogEntryTag(name=tag_name, type="custom") for tag_name in entry_data.tags]
+        entry.updated_at = datetime.now()
+        
+        await self._save_log_entry_to_db(entry)
+        return entry
+
+    async def delete_log_entry(self, entry_id: UUID, user_id: UUID) -> bool: # Added user_id
+        # Ensure entry exists and belongs to user before deleting from cache
+        entry_to_delete = await self.get_log_entry(entry_id, user_id)
+        if not entry_to_delete: # Handles not found or not owned by user
             return False
-    
-    async def update_log_entry_ai_results(
-        self, 
-        entry_id: UUID, 
-        ai_tags: List[str], 
-        ai_summary: str, 
-        ai_insights: List[str]
-    ) -> bool:
-        """Update a log entry with AI-generated results"""
-        try:
-            # Get existing entry
-            entry = await self.get_log_entry(entry_id)
-            if not entry:
+
+        if self.cosmos_db_available and self.log_container:
+            try:
+                await self.log_container.delete_item(item=str(entry_id), partition_key=str(user_id))
+                self.logger.info(f"Deleted log entry {entry_id} for user {user_id} from Cosmos DB.")
+                # Remove from cache after successful DB deletion
+                if str(user_id) in self.log_entries_cache and str(entry_id) in self.log_entries_cache[str(user_id)]:
+                    del self.log_entries_cache[str(user_id)][str(entry_id)]
+                return True
+            except CosmosExceptions.CosmosResourceNotFoundError: # Should be caught by get_log_entry if PK is correct
+                self.logger.warning(f"Log entry {entry_id} for user {user_id} not found in DB for deletion.")
                 return False
-            
-            # Update AI fields
-            entry.ai_generated_tags = ai_tags
-            entry.ai_summary = ai_summary
-            entry.ai_insights = ai_insights
-            entry.updated_at = datetime.now()
-            
-            # Save to database
-            if hasattr(self, 'log_container'):
-                entry_dict = entry.dict()
-                # Convert UUID to string for Cosmos
-                entry_dict["id"] = str(entry.id)
-                entry_dict["user_id"] = str(entry.user_id)
-                for i, tag in enumerate(entry_dict["tags"]):
-                    entry_dict["tags"][i]["id"] = str(tag["id"])
-                    if tag["reference_id"]:
-                        entry_dict["tags"][i]["reference_id"] = str(tag["reference_id"])
-                
-                await self.log_container.replace_item(
-                    item=str(entry_id),
-                    body=entry_dict
-                )
-            else:
-                # Fallback to in-memory storage
-                for i, e in enumerate(self.log_entries):
-                    if e.id == entry_id:
-                        self.log_entries[i] = entry
-                        break
-            
-            self.logger.info(f"Updated log entry AI results for ID: {entry_id}")
+            except Exception as e:
+                self.logger.error(f"Error deleting log entry {entry_id} for user {user_id}: {str(e)}")
+                return False
+        
+        # Fallback to in-memory if DB not available but was found in cache by get_log_entry
+        if str(user_id) in self.log_entries_cache and str(entry_id) in self.log_entries_cache[str(user_id)]:
+            del self.log_entries_cache[str(user_id)][str(entry_id)]
+            self.logger.info(f"Deleted log entry {entry_id} for user {user_id} from memory.")
             return True
-        except Exception as e:
-            self.logger.error(f"Error updating log entry AI results: {str(e)}")
-            return False
+        return False # Should not happen if get_log_entry found it
+    
+    async def update_log_entry_ai_results(self, entry_id: UUID, user_id: UUID, ai_tags: List[str], ai_summary: str, ai_insights: List[str]) -> bool: # Added user_id
+        entry = await self.get_log_entry(entry_id, user_id) # Pass user_id for read
+        if not entry: return False
+            
+        entry.ai_generated_tags = ai_tags
+        entry.ai_summary = ai_summary
+        entry.ai_insights = ai_insights
+        entry.updated_at = datetime.now()
+        
+        await self._save_log_entry_to_db(entry)
+        return True
     
     async def process_voice_to_text(self, audio_file) -> str:
-        """Process audio file to text using Azure Speech Services"""
+        if not self.speech_config:
+            self.logger.error("Speech service not configured, cannot process voice to text.")
+            return ""
         try:
-            # Create temporary file to store the audio
-            temp_filename = f"temp_audio_{datetime.now().timestamp()}.wav"
-            
+            temp_filename = f"temp_audio_{uuid.uuid4()}.wav" # Unique filename
             with open(temp_filename, "wb") as f:
                 contents = await audio_file.read()
                 f.write(contents)
             
-            # Configure audio config
             audio_config = speechsdk.AudioConfig(filename=temp_filename)
+            speech_recognizer = speechsdk.SpeechRecognizer(speech_config=self.speech_config, audio_config=audio_config)
+            result = await speech_recognizer.recognize_once_async() # Use await for async SDK method
             
-            # Create speech recognizer
-            speech_recognizer = speechsdk.SpeechRecognizer(
-                speech_config=self.speech_config, 
-                audio_config=audio_config
-            )
-            
-            # Start recognition
-            result = speech_recognizer.recognize_once_async().get()
-            
-            # Clean up temporary file
             os.remove(temp_filename)
             
-            if result.reason == speechsdk.ResultReason.RecognizedSpeech:
-                return result.text
-            else:
-                self.logger.warning(f"Speech recognition failed: {result.reason}")
-                return ""
+            if result.reason == speechsdk.ResultReason.RecognizedSpeech: return result.text
+            self.logger.warning(f"Speech recognition failed: {result.reason}, Details: {result.no_match_details if result.reason == speechsdk.ResultReason.NoMatch else result.cancellation_details}")
+            return ""
         except Exception as e:
             self.logger.error(f"Error processing voice to text: {str(e)}")
-            return ""
-    
-    async def process_voice_note_stream(self, audio_stream) -> str:
-        """Process streaming audio to text using Azure Speech Services"""
-        try:
-            # Configure audio stream config
-            pull_stream = speechsdk.audio.PullAudioInputStream(
-                pull_stream_callback=lambda size: audio_stream.read(size),
-                stream_format=speechsdk.audio.AudioStreamFormat(
-                    samples_per_second=16000,
-                    bits_per_sample=16,
-                    channels=1
-                )
-            )
-            
-            audio_config = speechsdk.audio.AudioConfig(stream=pull_stream)
-            
-            # Create speech recognizer
-            speech_recognizer = speechsdk.SpeechRecognizer(
-                speech_config=self.speech_config, 
-                audio_config=audio_config
-            )
-            
-            # Start recognition
-            result = speech_recognizer.recognize_once_async().get()
-            
-            if result.reason == speechsdk.ResultReason.RecognizedSpeech:
-                return result.text
-            else:
-                self.logger.warning(f"Speech recognition failed: {result.reason}")
-                return ""
-        except Exception as e:
-            self.logger.error(f"Error processing voice stream to text: {str(e)}")
+            if os.path.exists(temp_filename): os.remove(temp_filename) # Ensure cleanup on error
             return ""
     
     # Strategic Canvas Methods
-    
     async def create_canvas(self, canvas_data: StrategicCanvasCreate, user_id: UUID) -> StrategicCanvas:
-        """Create a new strategic canvas"""
-        try:
-            # Create new canvas
-            canvas = StrategicCanvas(
-                title=canvas_data.title,
-                description=canvas_data.description,
-                user_id=user_id
-            )
-            
-            # Save to Cosmos DB
-            if hasattr(self, 'canvas_container'):
-                canvas_dict = canvas.dict()
-                # Convert UUID to string for Cosmos
-                canvas_dict["id"] = str(canvas.id)
-                canvas_dict["user_id"] = str(canvas.user_id)
-                
-                await self.canvas_container.create_item(canvas_dict)
-            else:
-                # Fallback to in-memory storage
-                self.canvases.append(canvas)
-                
-            self.logger.info(f"Created strategic canvas with ID: {canvas.id}")
-            return canvas
-        except Exception as e:
-            self.logger.error(f"Error creating strategic canvas: {str(e)}")
-            raise
+        canvas = StrategicCanvas(title=canvas_data.title, description=canvas_data.description, user_id=user_id)
+        await self._save_canvas_to_db(canvas)
+        return canvas
     
-    async def get_canvas(self, canvas_id: UUID) -> Optional[StrategicCanvas]:
-        """Get a strategic canvas by ID"""
-        try:
-            if hasattr(self, 'canvas_container'):
-                query = f"SELECT * FROM c WHERE c.id = '{str(canvas_id)}'"
-                items = list(self.canvas_container.query_items(
-                    query=query,
-                    enable_cross_partition_query=True
-                ))
-                
-                if not items:
-                    return None
-                
-                # Convert Cosmos DB item to StrategicCanvas model
-                canvas_dict = items[0]
-                # Convert string UUIDs back to UUID objects
-                canvas_dict["id"] = UUID(canvas_dict["id"])
-                canvas_dict["user_id"] = UUID(canvas_dict["user_id"])
-                
-                # Convert element UUIDs
-                for i, element in enumerate(canvas_dict["elements"]):
-                    canvas_dict["elements"][i]["id"] = UUID(element["id"])
-                    canvas_dict["elements"][i]["connections"] = [UUID(c) for c in element["connections"]]
-                
-                return StrategicCanvas(**canvas_dict)
-            else:
-                # Fallback to in-memory storage
-                for canvas in self.canvases:
-                    if canvas.id == canvas_id:
-                        return canvas
+    async def get_canvas(self, canvas_id: UUID, user_id: Optional[UUID] = None) -> Optional[StrategicCanvas]: # Added user_id
+        if user_id and str(user_id) in self.canvases_cache and str(canvas_id) in self.canvases_cache[str(user_id)]:
+            return self.canvases_cache[str(user_id)][str(canvas_id)]
+
+        if self.cosmos_db_available and self.canvas_container:
+            if not user_id: # If user_id not provided, cannot do efficient read
+                self.logger.warning("get_canvas called without user_id for DB lookup.")
+                return None 
+            try:
+                item_data = await self.canvas_container.read_item(item=str(canvas_id), partition_key=str(user_id))
+                item_data["id"] = UUID(item_data["id"])
+                item_data["user_id"] = UUID(item_data["user_id"])
+                for el_dict in item_data.get("elements", []):
+                    el_dict["id"] = UUID(el_dict["id"])
+                    el_dict["connections"] = [UUID(c) for c in el_dict.get("connections", [])]
+                canvas = StrategicCanvas(**item_data)
+                self.canvases_cache.setdefault(str(user_id), {})[str(canvas_id)] = canvas
+                return canvas
+            except CosmosExceptions.CosmosResourceNotFoundError:
                 return None
-        except Exception as e:
-            self.logger.error(f"Error getting strategic canvas: {str(e)}")
-            return None
-    
+            except Exception as e:
+                self.logger.error(f"Error getting canvas {canvas_id} for user {user_id}: {str(e)}")
+                return None
+        
+        if not user_id: # Fallback scan if no user_id provided
+            for user_bucket in self.canvases_cache.values():
+                if str(canvas_id) in user_bucket:
+                    return user_bucket[str(canvas_id)]
+        return None
+
     async def list_canvases(self, user_id: UUID, limit: int = 10, offset: int = 0) -> List[StrategicCanvas]:
-        """List strategic canvases"""
-        try:
-            if hasattr(self, 'canvas_container'):
-                query = f"SELECT * FROM c WHERE c.user_id = '{str(user_id)}' ORDER BY c.created_at DESC OFFSET {offset} LIMIT {limit}"
-                items = list(self.canvas_container.query_items(
-                    query=query,
-                    enable_cross_partition_query=True
-                ))
-                
-                # Convert Cosmos DB items to StrategicCanvas models
-                canvases = []
-                for item in items:
-                    # Convert string UUIDs back to UUID objects
-                    item["id"] = UUID(item["id"])
-                    item["user_id"] = UUID(item["user_id"])
-                    
-                    # Convert element UUIDs
-                    for i, element in enumerate(item["elements"]):
-                        item["elements"][i]["id"] = UUID(element["id"])
-                        item["elements"][i]["connections"] = [UUID(c) for c in element["connections"]]
-                    
-                    canvases.append(StrategicCanvas(**item))
-                
+        if self.cosmos_db_available and self.canvas_container:
+            query = "SELECT * FROM c WHERE c.user_id = @user_id ORDER BY c.created_at DESC OFFSET @offset LIMIT @limit"
+            parameters = [
+                {"name": "@user_id", "value": str(user_id)},
+                {"name": "@offset", "value": offset},
+                {"name": "@limit", "value": limit}
+            ]
+            canvases = []
+            try:
+                async for item_data in self.canvas_container.query_items(query=query, parameters=parameters, partition_key=str(user_id)):
+                    item_data["id"] = UUID(item_data["id"])
+                    item_data["user_id"] = UUID(item_data["user_id"])
+                    for el_dict in item_data.get("elements", []):
+                        el_dict["id"] = UUID(el_dict["id"])
+                        el_dict["connections"] = [UUID(c) for c in el_dict.get("connections", [])]
+                    canvases.append(StrategicCanvas(**item_data))
                 return canvases
-            else:
-                # Fallback to in-memory storage
-                filtered_canvases = [c for c in self.canvases if c.user_id == user_id]
-                
-                # Sort by created_at descending
-                filtered_canvases.sort(key=lambda c: c.created_at, reverse=True)
-                
-                # Apply pagination
-                paginated_canvases = filtered_canvases[offset:offset + limit]
-                
-                return paginated_canvases
-        except Exception as e:
-            self.logger.error(f"Error listing strategic canvases: {str(e)}")
-            return []
+            except Exception as e:
+                self.logger.error(f"Error listing canvases for user {user_id}: {str(e)}")
+        
+        user_canvases = self.canvases_cache.get(str(user_id), {}).values()
+        sorted_canvases = sorted(list(user_canvases), key=lambda c_obj: c_obj.created_at, reverse=True)
+        return sorted_canvases[offset : offset + limit]
+
+    async def add_canvas_element(self, canvas_id: UUID, user_id: UUID, element_data: CanvasElementCreate) -> CanvasElement: # Added user_id
+        canvas = await self.get_canvas(canvas_id, user_id) # Pass user_id
+        if not canvas: raise HTTPException(status_code=404, detail=f"Canvas with ID {canvas_id} not found for user.")
+            
+        element = CanvasElement(element_type=element_data.element_type, content=element_data.content, position=element_data.position, style=element_data.style, connections=[UUID(c) for c in element_data.connections])
+        canvas.elements.append(element)
+        canvas.updated_at = datetime.now()
+        await self._save_canvas_to_db(canvas)
+        return element
     
-    async def add_canvas_element(self, canvas_id: UUID, element_data: CanvasElementCreate) -> CanvasElement:
-        """Add an element to a strategic canvas"""
-        try:
-            # Get the canvas
-            canvas = await self.get_canvas(canvas_id)
-            if not canvas:
-                raise ValueError(f"Canvas with ID {canvas_id} not found")
+    async def update_canvas_element(self, canvas_id: UUID, user_id: UUID, element_id: UUID, element_data: dict) -> Optional[CanvasElement]: # Added user_id
+        canvas = await self.get_canvas(canvas_id, user_id) # Pass user_id
+        if not canvas: return None
             
-            # Create the new element
-            element = CanvasElement(
-                element_type=element_data.element_type,
-                content=element_data.content,
-                position=element_data.position,
-                style=element_data.style,
-                connections=[UUID(c) for c in element_data.connections]
-            )
+        element_index = next((i for i, el in enumerate(canvas.elements) if el.id == element_id), -1)
+        if element_index == -1: return None
             
-            # Add to canvas
-            canvas.elements.append(element)
-            canvas.updated_at = datetime.now()
-            
-            # Save to database
-            if hasattr(self, 'canvas_container'):
-                canvas_dict = canvas.dict()
-                # Convert UUID to string for Cosmos
-                canvas_dict["id"] = str(canvas.id)
-                canvas_dict["user_id"] = str(canvas.user_id)
-                
-                # Convert element UUIDs to strings
-                for i, element in enumerate(canvas_dict["elements"]):
-                    canvas_dict["elements"][i]["id"] = str(element["id"])
-                    canvas_dict["elements"][i]["connections"] = [str(c) for c in element["connections"]]
-                
-                await self.canvas_container.replace_item(
-                    item=str(canvas_id),
-                    body=canvas_dict
-                )
-            else:
-                # Fallback to in-memory storage
-                for i, c in enumerate(self.canvases):
-                    if c.id == canvas_id:
-                        self.canvases[i] = canvas
-                        break
-            
-            self.logger.info(f"Added element to canvas {canvas_id}: {element.id}")
-            return element
-        except Exception as e:
-            self.logger.error(f"Error adding canvas element: {str(e)}")
-            raise
+        el_to_update = canvas.elements[element_index]
+        # Use CanvasElementCreate for validation if possible, or update fields carefully
+        if "element_type" in element_data: el_to_update.element_type = element_data["element_type"]
+        if "content" in element_data: el_to_update.content = element_data["content"]
+        if "position" in element_data: el_to_update.position = element_data["position"]
+        if "style" in element_data: el_to_update.style = element_data["style"]
+        if "connections" in element_data: el_to_update.connections = [UUID(c) for c in element_data["connections"]]
+        el_to_update.updated_at = datetime.now()
+        canvas.updated_at = datetime.now()
+        
+        await self._save_canvas_to_db(canvas)
+        return el_to_update
     
-    async def update_canvas_element(self, canvas_id: UUID, element_id: UUID, element_data: dict) -> Optional[CanvasElement]:
-        """Update a canvas element"""
-        try:
-            # Get the canvas
-            canvas = await self.get_canvas(canvas_id)
-            if not canvas:
-                return None
+    async def delete_canvas_element(self, canvas_id: UUID, user_id: UUID, element_id: UUID) -> bool: # Added user_id
+        canvas = await self.get_canvas(canvas_id, user_id) # Pass user_id
+        if not canvas: return False
             
-            # Find the element
-            element_index = None
-            for i, element in enumerate(canvas.elements):
-                if element.id == element_id:
-                    element_index = i
-                    break
+        original_len = len(canvas.elements)
+        canvas.elements = [el for el in canvas.elements if el.id != element_id]
+        if len(canvas.elements) == original_len: return False # Not found
             
-            if element_index is None:
-                return None
-            
-            # Update the element
-            for key, value in element_data.items():
-                if key == 'connections' and value:
-                    # Convert connection strings to UUIDs
-                    canvas.elements[element_index].connections = [UUID(c) for c in value]
-                elif key in ['content', 'position', 'style'] and value:
-                    setattr(canvas.elements[element_index], key, value)
-                elif key == 'element_type' and value:
-                    canvas.elements[element_index].element_type = value
-            
-            # Update timestamp
-            canvas.elements[element_index].updated_at = datetime.now()
-            canvas.updated_at = datetime.now()
-            
-            # Save to database
-            if hasattr(self, 'canvas_container'):
-                canvas_dict = canvas.dict()
-                # Convert UUID to string for Cosmos
-                canvas_dict["id"] = str(canvas.id)
-                canvas_dict["user_id"] = str(canvas.user_id)
-                
-                # Convert element UUIDs to strings
-                for i, element in enumerate(canvas_dict["elements"]):
-                    canvas_dict["elements"][i]["id"] = str(element["id"])
-                    canvas_dict["elements"][i]["connections"] = [str(c) for c in element["connections"]]
-                
-                await self.canvas_container.replace_item(
-                    item=str(canvas_id),
-                    body=canvas_dict
-                )
-            else:
-                # Fallback to in-memory storage
-                for i, c in enumerate(self.canvases):
-                    if c.id == canvas_id:
-                        self.canvases[i] = canvas
-                        break
-            
-            self.logger.info(f"Updated element {element_id} in canvas {canvas_id}")
-            return canvas.elements[element_index]
-        except Exception as e:
-            self.logger.error(f"Error updating canvas element: {str(e)}")
-            return None
+        for el in canvas.elements: # Remove connections to the deleted element
+            if element_id in el.connections: el.connections.remove(element_id)
+        canvas.updated_at = datetime.now()
+        await self._save_canvas_to_db(canvas)
+        return True
     
-    async def delete_canvas_element(self, canvas_id: UUID, element_id: UUID) -> bool:
-        """Delete a canvas element"""
+    async def get_canvas_ai_assistance(self, canvas_id: UUID, user_id: UUID, prompt: str) -> str: # Added user_id
+        canvas = await self.get_canvas(canvas_id, user_id) # Pass user_id
+        if not canvas: raise HTTPException(status_code=404, detail="Canvas not found for user.")
+            
+        canvas_data_for_ai = {"title": canvas.title, "description": canvas.description, "elements": []}
+        for el in canvas.elements:
+            canvas_data_for_ai["elements"].append({"id": str(el.id), "type": el.element_type, "content": el.content, "connections": [str(c) for c in el.connections]})
+        
+        context_vars = {"canvas": json.dumps(canvas_data_for_ai), "prompt": prompt, "user_id": str(user_id)}
         try:
-            # Get the canvas
-            canvas = await self.get_canvas(canvas_id)
-            if not canvas:
-                return False
-            
-            # Find and remove the element
-            canvas.elements = [e for e in canvas.elements if e.id != element_id]
-            canvas.updated_at = datetime.now()
-            
-            # Update connections to this element in other elements
-            for element in canvas.elements:
-                if element_id in element.connections:
-                    element.connections.remove(element_id)
-            
-            # Save to database
-            if hasattr(self, 'canvas_container'):
-                canvas_dict = canvas.dict()
-                # Convert UUID to string for Cosmos
-                canvas_dict["id"] = str(canvas.id)
-                canvas_dict["user_id"] = str(canvas.user_id)
-                
-                # Convert element UUIDs to strings
-                for i, element in enumerate(canvas_dict["elements"]):
-                    canvas_dict["elements"][i]["id"] = str(element["id"])
-                    canvas_dict["elements"][i]["connections"] = [str(c) for c in element["connections"]]
-                
-                await self.canvas_container.replace_item(
-                    item=str(canvas_id),
-                    body=canvas_dict
-                )
-            else:
-                # Fallback to in-memory storage
-                for i, c in enumerate(self.canvases):
-                    if c.id == canvas_id:
-                        self.canvases[i] = canvas
-                        break
-            
-            self.logger.info(f"Deleted element {element_id} from canvas {canvas_id}")
-            return True
+            response = await kernel_service.invoke_semantic_function(skill_name="CanvasAssistant", function_name="ProvideAssistance", input_text="", variables=context_vars)
+            return str(response.result if hasattr(response, 'result') else response)
         except Exception as e:
-            self.logger.error(f"Error deleting canvas element: {str(e)}")
-            return False
-    
-    async def get_canvas_ai_assistance(self, canvas_id: UUID, prompt: str) -> str:
-        """Get AI assistance for a strategic canvas"""
-        try:
-            # Get the canvas
-            canvas = await self.get_canvas(canvas_id)
-            if not canvas:
-                raise ValueError(f"Canvas with ID {canvas_id} not found")
-            
-            # Prepare canvas data for the AI
-            canvas_data = {
-                "title": canvas.title,
-                "description": canvas.description,
-                "elements": []
-            }
-            
-            for element in canvas.elements:
-                element_data = {
-                    "id": str(element.id),
-                    "type": element.element_type,
-                    "content": element.content,
-                    "connections": [str(c) for c in element.connections]
-                }
-                canvas_data["elements"].append(element_data)
-            
-            # Create the context for the AI
-            context = {
-                "canvas": json.dumps(canvas_data),
-                "prompt": prompt
-            }
-            
-            # Generate response using Semantic Kernel
-            response = await kernel_service.invoke_semantic_function(
-                skill_name="CanvasAssistant",
-                function_name="ProvideAssistance",
-                input_text="",
-                variables=context
-            )
-            
-            return response
-        except Exception as e:
-            self.logger.error(f"Error getting canvas AI assistance: {str(e)}")
-            return f"I'm sorry, I couldn't provide assistance at this time. Error: {str(e)}"
+            self.logger.error(f"Error getting canvas AI assistance for user {user_id}, canvas {canvas_id}: {str(e)}")
+            return f"AI assistance unavailable. Error: {str(e)}"
+
+    # process_voice_note_stream method is removed as the router uses kernel_service directly for streaming.

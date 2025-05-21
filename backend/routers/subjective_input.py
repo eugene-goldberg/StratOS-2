@@ -41,11 +41,11 @@ async def create_log_entry(
     return entry
 
 @router.get("/log/{entry_id}", response_model=LogEntry)
-async def get_log_entry(entry_id: UUID):
+async def get_log_entry(entry_id: UUID, current_user_id: UUID = Depends(get_current_user_id)):
     """
     Get a CEO Log entry by ID
     """
-    entry = await input_service.get_log_entry(entry_id)
+    entry = await input_service.get_log_entry(entry_id, current_user_id) # Pass user_id
     if not entry:
         raise HTTPException(status_code=404, detail="Log entry not found")
     return entry
@@ -64,25 +64,25 @@ async def list_log_entries(
     return await input_service.list_log_entries(current_user_id, limit, offset, entry_type, tag)
 
 @router.put("/log/{entry_id}", response_model=LogEntry)
-async def update_log_entry(entry_id: UUID, entry_data: LogEntryUpdate):
+async def update_log_entry(entry_id: UUID, entry_data: LogEntryUpdate, current_user_id: UUID = Depends(get_current_user_id)):
     """
     Update a CEO Log entry
     """
-    updated = await input_service.update_log_entry(entry_id, entry_data)
+    updated = await input_service.update_log_entry(entry_id, entry_data, current_user_id) # Pass user_id
     if not updated:
         raise HTTPException(status_code=404, detail="Log entry not found")
     
     # Re-process with AI
-    await process_log_entry_with_ai(entry_id)
+    await process_log_entry_with_ai(entry_id, current_user_id) # Pass user_id
     
     return updated
 
 @router.delete("/log/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_log_entry(entry_id: UUID):
+async def delete_log_entry(entry_id: UUID, current_user_id: UUID = Depends(get_current_user_id)):
     """
     Delete a CEO Log entry
     """
-    deleted = await input_service.delete_log_entry(entry_id)
+    deleted = await input_service.delete_log_entry(entry_id, current_user_id) # Pass user_id
     if not deleted:
         raise HTTPException(status_code=404, detail="Log entry not found")
     return {"status": "success"}
@@ -430,11 +430,11 @@ async def create_canvas(
     return await input_service.create_canvas(canvas_data, current_user_id)
 
 @router.get("/canvas/{canvas_id}", response_model=StrategicCanvas)
-async def get_canvas(canvas_id: UUID):
+async def get_canvas(canvas_id: UUID, current_user_id: UUID = Depends(get_current_user_id)):
     """
     Get a Strategic Canvas by ID
     """
-    canvas = await input_service.get_canvas(canvas_id)
+    canvas = await input_service.get_canvas(canvas_id, current_user_id) # Pass user_id
     if not canvas:
         raise HTTPException(status_code=404, detail="Canvas not found")
     return canvas
@@ -451,143 +451,95 @@ async def list_canvases(
     return await input_service.list_canvases(current_user_id, limit, offset)
 
 @router.post("/canvas/{canvas_id}/elements", status_code=status.HTTP_201_CREATED)
-async def add_canvas_element(canvas_id: UUID, element_data: CanvasElementCreate):
+async def add_canvas_element(canvas_id: UUID, element_data: CanvasElementCreate, current_user_id: UUID = Depends(get_current_user_id)):
     """
     Add an element to a Strategic Canvas
     """
-    canvas = await input_service.get_canvas(canvas_id)
-    if not canvas:
-        raise HTTPException(status_code=404, detail="Canvas not found")
-    
-    return await input_service.add_canvas_element(canvas_id, element_data)
+    # Service's get_canvas now expects user_id, but add_canvas_element also needs it.
+    # The get_canvas call here is just for validation, can be removed if add_canvas_element handles not found.
+    # For now, let's assume add_canvas_element will call get_canvas internally with user_id.
+    return await input_service.add_canvas_element(canvas_id, current_user_id, element_data)
 
 @router.put("/canvas/{canvas_id}/elements/{element_id}")
-async def update_canvas_element(canvas_id: UUID, element_id: UUID, element_data: dict):
+async def update_canvas_element(canvas_id: UUID, element_id: UUID, element_data: dict, current_user_id: UUID = Depends(get_current_user_id)):
     """
     Update a canvas element
     """
-    updated = await input_service.update_canvas_element(canvas_id, element_id, element_data)
+    updated = await input_service.update_canvas_element(canvas_id, current_user_id, element_id, element_data)
     if not updated:
         raise HTTPException(status_code=404, detail="Canvas element not found")
     return updated
 
 @router.delete("/canvas/{canvas_id}/elements/{element_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_canvas_element(canvas_id: UUID, element_id: UUID):
+async def delete_canvas_element(canvas_id: UUID, element_id: UUID, current_user_id: UUID = Depends(get_current_user_id)):
     """
     Delete a canvas element
     """
-    deleted = await input_service.delete_canvas_element(canvas_id, element_id)
+    deleted = await input_service.delete_canvas_element(canvas_id, current_user_id, element_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Canvas element not found")
     return {"status": "success"}
 
 @router.post("/canvas/{canvas_id}/ai-assist")
-async def get_canvas_ai_assistance(canvas_id: UUID, prompt: str):
+async def get_canvas_ai_assistance(canvas_id: UUID, prompt: str, current_user_id: UUID = Depends(get_current_user_id)):
     """
     Get AI assistance for the Strategic Canvas
     """
-    canvas = await input_service.get_canvas(canvas_id)
-    if not canvas:
-        raise HTTPException(status_code=404, detail="Canvas not found")
-    
-    # Process with Semantic Kernel
-    response = await input_service.get_canvas_ai_assistance(canvas_id, prompt)
+    # Service method now takes user_id
+    response = await input_service.get_canvas_ai_assistance(canvas_id, current_user_id, prompt)
     return {"response": response}
 
 # Helper functions
 
-async def process_log_entry_with_ai(entry_id: UUID):
+async def process_log_entry_with_ai(entry_id: UUID, user_id: UUID): # Added user_id
     """
     Process a log entry with AI for tagging, summarization, and insights
     """
-    entry = await input_service.get_log_entry(entry_id)
+    entry = await input_service.get_log_entry(entry_id, user_id) # Pass user_id
     if not entry:
         return False
     
     try:
-        # Fetch strategic elements to use for tag suggestions
-        # In a real implementation, we would fetch WHY/WHAT elements from the database
-        # For now, we'll use placeholder data
-        strategic_elements = {
-            "purpose": "To empower businesses with strategic clarity and data-driven insights for sustainable growth and meaningful impact.",
-            "vision": "By 2030, to be the indispensable AI-powered strategic partner for 10,000 leadership teams worldwide.",
-            "values": ["Integrity", "Innovation", "Excellence", "Collaboration", "Customer Focus"],
-            "strategic_goals": [
-                "Achieve 25% market share by Q4 2025",
-                "Launch 3 innovative product lines within 18 months",
-                "Increase customer retention to 85%"
-            ]
-        }
+        # Fetch strategic elements (e.g., from NorthStar service for the user_id)
+        # This part needs actual implementation to fetch user-specific strategic context.
+        # Placeholder:
+        user_strategic_context = f"User {user_id}'s strategic context (purpose, vision, goals) would be fetched here."
         
-        # Format strategic elements for the AI
-        predefined_elements_list = (
-            f"PURPOSE: {strategic_elements['purpose']}\n"
-            f"VISION: {strategic_elements['vision']}\n"
-            f"VALUES: {', '.join(strategic_elements['values'])}\n"
-            f"STRATEGIC GOALS: {'; '.join(strategic_elements['strategic_goals'])}"
+        # Generate tags
+        tags_response = await kernel_service.invoke_semantic_function(
+            skill_name="SubjectiveLog", function_name="GenerateTags",
+            input_text=entry.content, variables={"user_context": user_strategic_context}
         )
-        
-        # Generate tags using the TaggingSkill
-        tags_result = await kernel_service.invoke_semantic_function(
-            skill_name="SubjectiveLog",
-            function_name="GenerateTags",
-            input_text=entry.content,
-            variables={"predefined_elements_list": predefined_elements_list}
-        )
-        
-        # Parse tags - should be a JSON array of strings
-        try:
-            ai_tags = json.loads(tags_result)
-            if not isinstance(ai_tags, list):
-                ai_tags = [str(tags_result).strip()]
-        except json.JSONDecodeError:
-            # Fallback in case the JSON parsing fails
-            ai_tags = [tag.strip() for tag in tags_result.split(',')]
-        
+        ai_tags = json.loads(str(tags_response)) if str(tags_response) else []
+
         # Generate summary
-        ai_summary = await kernel_service.invoke_semantic_function(
-            skill_name="SubjectiveLog",
-            function_name="GenerateSummary",
-            input_text=entry.content
+        summary_response = await kernel_service.invoke_semantic_function(
+            skill_name="SubjectiveLog", function_name="GenerateSummary", input_text=entry.content
         )
-        
+        ai_summary = str(summary_response).strip()
+
         # Generate insights
-        insights_result = await kernel_service.invoke_semantic_function(
-            skill_name="SubjectiveLog",
-            function_name="GenerateInsights",
-            input_text=entry.content
+        insights_response = await kernel_service.invoke_semantic_function(
+            skill_name="SubjectiveLog", function_name="GenerateInsights", input_text=entry.content
         )
+        ai_insights = [i.strip() for i in str(insights_response).split('\n') if i.strip()]
         
-        # Split insights into a list, filtering empty lines
-        ai_insights = [insight.strip() for insight in insights_result.split('\n') if insight.strip()]
-        
-        # Update the entry with AI results using the service
+        # Update the entry with AI results using the service (passing user_id)
         await input_service.update_log_entry_ai_results(
-            entry_id, ai_tags, ai_summary, ai_insights
+            entry_id, user_id, ai_tags, ai_summary, ai_insights
         )
         
-        # Also update using the Semantic Kernel skill for database consistency
-        await kernel_service.invoke_semantic_function(
-            skill_name="LogManagement",
-            function_name="update_log_entry_ai_results",
-            input_text=str(entry_id),
-            variables={
-                "ai_tags": json.dumps(ai_tags),
-                "ai_summary": ai_summary,
-                "ai_insights": json.dumps(ai_insights)
-            }
-        )
+        # The redundant call to LogManagement skill is removed.
+        # The service method update_log_entry_ai_results should handle persistence.
         
-        # Store in Semantic Memory for future context and retrieval
+        # Store in Semantic Memory
         await kernel_service.remember(
-            "ceo_log_entries",
-            str(entry_id),
-            entry.content,
-            ai_summary
+            collection_name=f"ceo_log_entries_user_{user_id}", # User-specific collection
+            key=str(entry_id),
+            text=entry.content,
+            description=ai_summary # Or more detailed metadata
         )
-        
         return True
     except Exception as e:
-        # Log the error but don't fail the request
-        print(f"Error processing log entry with AI: {str(e)}")
+        logging.error(f"Error processing log entry {entry_id} with AI for user {user_id}: {str(e)}")
         return False
