@@ -1,5 +1,6 @@
 import pytest
 import pytest_asyncio
+import json
 from uuid import uuid4, UUID
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -154,27 +155,16 @@ async def test_discover_so_linkages_basic(mock_ks: AsyncMock, analysis_service: 
     # Mock responses from kernel_service skills
     async def mock_run_async_replacement(*args, **kwargs):
         # args[0] is the sk_function object
-        # kwargs might contain input_vars or input_text
+        # The mock setup is:
+        # mock_ks.get_skill = MagicMock(return_value=MagicMock(get_function=lambda name: name))
+        # So sk_function_invoked will be the string name of the function
         sk_function_invoked = args[0]
         
-        # We need to identify which function is being called.
-        # The sk_function_invoked object might have a .name or similar attribute.
-        # Or we can check its __name__ if it's a direct method reference from a skill instance.
-        # For this test, the functions are obtained via kernel_service.get_skill(...).get_function(...)
-        # Let's assume sk_function_invoked.name gives us the function name.
+        # Identify which function is being called based on the function name
+        func_name_being_called = sk_function_invoked
         
-        # To make this robust, we'd ideally check the skill name too,
-        # but the mock setup for get_skill().get_function() is simplified.
-        # Let's assume the function names are unique enough for this test.
-        
-        func_name_being_called = sk_function_invoked # This is the function object itself
-                                                    # We need its name.
-                                                    # The mock setup is:
-                                                    # mock_ks.get_skill = MagicMock(return_value=MagicMock(get_function=lambda name: name))
-                                                    # So, sk_function_invoked will be the string name of the function.
-
         if func_name_being_called == "fetch_relevant_subjective_notes":
-            # run_async returns a context, so the result is in context.result
+            # run_async returns a context with a result attribute
             mock_context_result = MagicMock()
             mock_context_result.result = "Subjective Note: Market feels slow."
             return mock_context_result
@@ -191,11 +181,11 @@ async def test_discover_so_linkages_basic(mock_ks: AsyncMock, analysis_service: 
                 "ai_summary_of_linkage": "Slow market feeling correlates with sales dip.",
                 "ai_prompt_for_ceo": "What actions can address this?"
             }])
-                return MagicMock(result=linkage_json) # This was correct for invoke_semantic_function
-            # For run_async, it should be:
+            # For run_async, set the result attribute on the mock
             mock_context_result.result = linkage_json
             return mock_context_result
             
+        # Default response for unknown functions
         mock_unknown_result = MagicMock()
         mock_unknown_result.result = "Unknown skill/function in mock_run_async_replacement"
         return mock_unknown_result
@@ -206,8 +196,9 @@ async def test_discover_so_linkages_basic(mock_ks: AsyncMock, analysis_service: 
     
     # Mock create_new_context to return a mock context that can be updated
     mock_sk_context_instance = MagicMock()
-    def update_mock_context_vars(key, value):
+    def update_mock_context_vars(key, value, _=None):
         # Simulate context variable assignment
+        # The third argument is for compatibility with the actual context implementation
         if not hasattr(mock_sk_context_instance, 'variables'):
             mock_sk_context_instance.variables = {}
         mock_sk_context_instance.variables[key] = value
@@ -224,11 +215,10 @@ async def test_discover_so_linkages_basic(mock_ks: AsyncMock, analysis_service: 
     assert len(linkages_response) == 1
     linkage = linkages_response[0]
     assert linkage["linkage_type"] == "correlation"
-    assert "Slow market feeling" in linkage["subjective_snippet"] # Based on simplified parsing in service
+    assert "Market feels slow" in linkage["subjective_snippet"] # Based on simplified parsing in service
     assert "Sales are down" in linkage["objective_snippet"]
-    assert str(user_id) in analysis_service.so_linkages_cache # Check if something was cached
-    # The key for so_linkages_cache is linkage.id, so we need to get that ID.
-    # This check is a bit indirect.
+    # The cache keys are by linkage ID, not user ID
+    # Just verify the cache has something in it
     assert len(analysis_service.so_linkages_cache) > 0
 
 

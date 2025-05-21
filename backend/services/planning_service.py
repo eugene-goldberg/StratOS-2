@@ -12,7 +12,7 @@ from fastapi import HTTPException, Depends # Added Depends
 from ..models.planning import (
     StrategicPlan, StrategicPlanCreate, Initiative, InitiativeCreate,
     Action, ActionCreate, Resource, ResourceCreate, Risk, RiskCreate,
-    PlanStatus, InitiativeType
+    PlanStatus, InitiativeType, ActionStatus
 )
 from ..ai.kernel_service import kernel_service
 from ..services.strategic_foundation_service import StrategicFoundationService
@@ -66,7 +66,7 @@ class PlanningService:
             self.initiatives_cache[str(initiative.id)] = initiative
             return
 
-        initiative_dict = initiative.dict()
+        initiative_dict = initiative.model_dump()
         initiative_dict["id"] = str(initiative.id) # PK
         # Assuming Initiative model has user_id and plan_id for partitioning/querying
         if hasattr(initiative, 'user_id') and initiative.user_id:
@@ -111,7 +111,7 @@ class PlanningService:
             created_at=current_time, updated_at=current_time
         )
         
-        initiative_dict_for_db = initiative.dict()
+        initiative_dict_for_db = initiative.model_dump()
         initiative_dict_for_db["id"] = str(initiative.id)
         initiative_dict_for_db["plan_id"] = str(initiative.plan_id)
         initiative_dict_for_db["user_id"] = str(initiative.user_id)
@@ -255,7 +255,7 @@ class PlanningService:
         ModelClass = {"action": Action, "resource": Resource, "risk": Risk}[item_type]
         list_attr = {"action": "actions", "resource": "resources", "risk": "risks"}[item_type]
 
-        item = ModelClass(id=item_id, **item_data.dict(), created_at=current_time, updated_at=current_time)
+        item = ModelClass(id=item_id, **item_data.model_dump(), created_at=current_time, updated_at=current_time)
         getattr(initiative, list_attr).append(item)
         initiative.updated_at = current_time
         await self._save_initiative_to_db(initiative)
@@ -286,8 +286,14 @@ class PlanningService:
 
         update_payload = CreateClass(**item_update_data)
         original_item = item_list[item_index]
-        updated_item_dict = original_item.dict()
-        updated_item_dict.update(update_payload.dict(exclude_unset=True))
+        updated_item_dict = original_item.model_dump()
+        updated_item_dict.update(update_payload.model_dump(exclude_unset=True))
+        
+        # Handle Enum fields that might be passed as strings
+        if item_type == "action" and "status" in item_update_data:
+            if isinstance(item_update_data["status"], str):
+                updated_item_dict["status"] = ActionStatus(item_update_data["status"])
+                
         updated_item_dict["updated_at"] = datetime.now()
         
         updated_item = ModelClass(**updated_item_dict)
@@ -323,9 +329,9 @@ class PlanningService:
     async def create_strategic_plan(self, user_id: UUID, plan_data: StrategicPlanCreate) -> StrategicPlan:
         plan_id = uuid.uuid4()
         current_time = datetime.now()
-        plan = StrategicPlan(id=plan_id, user_id=user_id, **plan_data.dict(), created_at=current_time, updated_at=current_time)
+        plan = StrategicPlan(id=plan_id, user_id=user_id, **plan_data.model_dump(), created_at=current_time, updated_at=current_time)
         
-        plan_dict_for_db = plan.dict()
+        plan_dict_for_db = plan.model_dump()
         plan_dict_for_db["id"] = str(plan.id)
         plan_dict_for_db["user_id"] = str(plan.user_id)
 
@@ -400,7 +406,7 @@ class PlanningService:
         existing_plan.end_date = update_payload.end_date
         existing_plan.updated_at = datetime.now()
         
-        plan_dict_for_db = existing_plan.dict()
+        plan_dict_for_db = existing_plan.model_dump()
         plan_dict_for_db["id"] = str(existing_plan.id)
         plan_dict_for_db["user_id"] = str(existing_plan.user_id)
 
@@ -503,7 +509,7 @@ class PlanningService:
             variant = await self.create_strategic_plan(user_id, variant_create_data)
             if focus_areas and hasattr(variant, 'ai_recommendations'): # If model supports this field
                  variant.ai_recommendations = [f"Generated based on focus: {fa}" for fa in focus_areas]
-                 await self.update_strategic_plan(variant.id, user_id, variant.dict())
+                 await self.update_strategic_plan(variant.id, user_id, variant.model_dump())
             variants.append(variant)
         return variants
 
@@ -560,7 +566,7 @@ class PlanningService:
             action_titles = [f"Define detailed scope for {initiative.title}", f"Assign team and resources for {initiative.title}", f"Establish key milestones for {initiative.title}"]
 
         for title in action_titles[:3]: # Max 3 actions
-            action_data = ActionCreate(title=title, description=f"AI-generated action for '{initiative.title}'", status="todo")
+            action_data = ActionCreate(title=title, description=f"AI-generated action for '{initiative.title}'")
             action = await self.create_action(initiative_id, user_id, action_data)
             new_actions.append(action)
         return new_actions

@@ -134,6 +134,7 @@ class InitiativeCreate(BaseModel):
     owner: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    status: PlanStatus = PlanStatus.DRAFT
     
 class StrategicPlanCreate(BaseModel):
     title: str

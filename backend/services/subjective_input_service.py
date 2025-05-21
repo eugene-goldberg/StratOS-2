@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import uuid
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 import azure.cognitiveservices.speech as speechsdk
@@ -285,6 +286,7 @@ class SubjectiveInputService:
         if not self.speech_config:
             self.logger.error("Speech service not configured, cannot process voice to text.")
             return ""
+        temp_filename = None
         try:
             temp_filename = f"temp_audio_{uuid.uuid4()}.wav" # Unique filename
             with open(temp_filename, "wb") as f:
@@ -302,7 +304,7 @@ class SubjectiveInputService:
             return ""
         except Exception as e:
             self.logger.error(f"Error processing voice to text: {str(e)}")
-            if os.path.exists(temp_filename): os.remove(temp_filename) # Ensure cleanup on error
+            if temp_filename and os.path.exists(temp_filename): os.remove(temp_filename) # Ensure cleanup on error
             return ""
     
     # Strategic Canvas Methods
