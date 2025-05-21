@@ -80,7 +80,6 @@ const CEOLog: React.FC = () => {
   const [sortMenuAnchorEl, setSortMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [showNewEntryDialog, setShowNewEntryDialog] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [entryTypeFilter, setEntryTypeFilter] = useState<string | null>(null);
   
   // Get state and actions from store
   const { 

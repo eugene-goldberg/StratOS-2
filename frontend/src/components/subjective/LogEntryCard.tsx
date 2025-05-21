@@ -67,7 +67,7 @@ export const LogEntryCard: React.FC<LogEntryCardProps> = ({
   // Has AI analysis?
   const hasAiAnalysis = entry.ai_generated_tags?.length > 0 || 
                          entry.ai_summary || 
-                         entry.ai_insights?.length > 0;
+                         (entry.ai_insights && entry.ai_insights.length > 0);
   
   // Handle menu open
   const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {

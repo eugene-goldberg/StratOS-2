@@ -329,9 +329,9 @@ const Planning: React.FC = () => {
                               sx={{ ml: 1 }} 
                             />
                             <Chip 
-                              label={`Alignment: ${plan.alignmentScore}/10`} 
+                              label={`Alignment: ${plan.alignmentScore || 0}/10`} 
                               size="small" 
-                              color={plan.alignmentScore > 8 ? "success" : "default"}
+                              color={(plan.alignmentScore || 0) > 8 ? "success" : "default"}
                               sx={{ ml: 1 }} 
                             />
                           </Box>
@@ -652,12 +652,12 @@ const Planning: React.FC = () => {
                     <Divider sx={{ my: 1 }} />
                     <Box sx={{ mt: 2 }}>
                       <Typography variant="body2" color="text.secondary" gutterBottom>
-                        WHY Alignment Score: {initiative.alignmentScore}/10
+                        WHY Alignment Score: {initiative.alignmentScore || 0}/10
                       </Typography>
                       <LinearProgress 
                         variant="determinate" 
-                        value={initiative.alignmentScore * 10} 
-                        color={initiative.alignmentScore > 8 ? "success" : "primary"}
+                        value={(initiative.alignmentScore || 0) * 10} 
+                        color={(initiative.alignmentScore || 0) > 8 ? "success" : "primary"}
                         sx={{ height: 8, borderRadius: 5 }}
                       />
                     </Box>

@@ -52,6 +52,8 @@ export interface StrategicPlan {
   description?: string;
   status: string;
   initiatives: Initiative[];
+  alignmentScore?: number;
+  progress?: number;
 }
 
 const planningService = {

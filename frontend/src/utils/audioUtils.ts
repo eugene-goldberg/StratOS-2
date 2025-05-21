@@ -5,9 +5,9 @@
 // Check if browser supports the necessary audio APIs
 export const isAudioRecordingSupported = (): boolean => {
   return !!(navigator.mediaDevices &&
-    navigator.mediaDevices.getUserMedia &&
-    window.MediaRecorder &&
-    window.AudioContext);
+    typeof navigator.mediaDevices.getUserMedia === 'function' &&
+    typeof window.MediaRecorder === 'function' &&
+    typeof window.AudioContext === 'function');
 };
 
 // Convert audio buffer to WAV format

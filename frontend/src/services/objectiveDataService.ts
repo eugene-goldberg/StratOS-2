@@ -1,4 +1,5 @@
 import api from './apiService';
+import { AxiosProgressEvent } from 'axios';
 
 
 export interface KPI {
@@ -123,7 +124,7 @@ export const objectiveDataService = {
     description?: string,
     tags?: string[],
     linkedGoals?: string[],
-    onUploadProgress?: (progressEvent: ProgressEvent) => void
+    onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
   ): Promise<DataSet> => {
     const formData = new FormData();
     formData.append('file', file);

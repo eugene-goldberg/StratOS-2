@@ -4,6 +4,20 @@ import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 // Types
+export enum LogEntryType {
+  MEETING = 'meeting',
+  REFLECTION = 'reflection',
+  DECISION = 'decision',
+  INSIGHT = 'insight',
+  STRATEGY = 'strategy',
+  PERSONAL = 'personal',
+  IDEA = 'idea',
+  OBSERVATION = 'observation',
+  CONCERN = 'concern',
+  QUESTION = 'question',
+  OTHER = 'other'
+}
+
 export interface LogEntry {
   id: string;
   content: string;

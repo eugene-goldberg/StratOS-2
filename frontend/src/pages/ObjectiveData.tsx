@@ -195,6 +195,7 @@ const ObjectiveData: React.FC = () => {
   const [datasetName, setDatasetName] = useState('');
   const [datasetDesc, setDatasetDesc] = useState('');
   const [datasetFile, setDatasetFile] = useState<File | null>(null);
+  const [selectedDataset, setSelectedDataset] = useState<any>(null);
 
   useEffect(() => {
     loadKPIs();
@@ -290,7 +291,7 @@ const ObjectiveData: React.FC = () => {
                       <IconButton size="small">
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton size="small" onClick={() => handleConfirmDelete(dataset.id)}>
+                      <IconButton size="small" onClick={() => handleConfirmDelete(kpi.id)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
@@ -623,4 +624,6 @@ const ObjectiveData: React.FC = () => {
       </Snackbar>
     </Box>
   );
+};
+
 export default ObjectiveData;
