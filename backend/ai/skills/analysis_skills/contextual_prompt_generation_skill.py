@@ -1,6 +1,7 @@
 import json
 from typing import List, Dict, Any
 from semantic_kernel.skill_definition import sk_function, sk_function_context_parameter
+from ...prompt_templates import render_template
 
 class ContextualPromptGenerationSkill:
     """
@@ -132,20 +133,9 @@ class ContextualPromptGenerationSkill:
         """
         category_name = self._get_category_full_name(category)
         
-        # Build the prompt with all available context
-        prompt = f"""You are an expert strategic advisor helping a CEO conduct a SWOT analysis for {company_name}.
-        
-Topic of analysis: {topic}
-Current quadrant: {category_name.upper()}
-
-Your task is to generate 5-7 thought-provoking guiding questions to help the CEO identify {category_name}s for {company_name} regarding {topic}.
-
-"""
-        
-        # Add current SWOT state for context if items exist
+        # Format the SWOT context for the template
         swot_context = ""
         if any([strengths, weaknesses, opportunities, threats]):
-            swot_context += "Current SWOT Analysis state:\n"
             if strengths:
                 swot_context += f"STRENGTHS: {self._format_items(strengths)}\n"
             if weaknesses:
@@ -154,73 +144,20 @@ Your task is to generate 5-7 thought-provoking guiding questions to help the CEO
                 swot_context += f"OPPORTUNITIES: {self._format_items(opportunities)}\n"
             if threats:
                 swot_context += f"THREATS: {self._format_items(threats)}\n"
-            
-            prompt += f"{swot_context}\n"
         
-        # Add subjective data if available
-        if subjective_data:
-            prompt += f"""
-Relevant notes from CEO's Log:
-{subjective_data}
-
-"""
-        
-        # Add objective data if available
-        if objective_data:
-            prompt += f"""
-Relevant business metrics and data:
-{objective_data}
-
-"""
-        
-        # Add specific instructions based on the category
-        category_prompts = {
-            "strength": """
-Focus on INTERNAL, CURRENT POSITIVE factors that give the company an advantage:
-- What does the company do exceptionally well?
-- What unique resources, assets, or capabilities does the company possess?
-- What advantages does the company have over competitors?
-- What do customers or partners see as the company's strengths?
-""",
-            "weakness": """
-Focus on INTERNAL, CURRENT NEGATIVE factors that place the company at a disadvantage:
-- What areas could the company improve in?
-- What necessary skills, resources, or technologies is the company lacking?
-- What do competitors do better?
-- What processes or activities might be limiting performance?
-""",
-            "opportunity": """
-Focus on EXTERNAL, FUTURE POSITIVE factors that the company could capitalize on:
-- What market trends or conditions could benefit the company?
-- What changes in technology, policy, or society present new openings?
-- What gaps exist in the market that the company could fill?
-- What moves could open new markets or customer segments?
-""",
-            "threat": """
-Focus on EXTERNAL, FUTURE NEGATIVE factors that could harm the company's position:
-- What obstacles or challenges does the company face?
-- What are competitors doing that could impact the company?
-- What changing regulations or standards might cause problems?
-- What negative market or economic trends could affect the company?
-"""
+        # Create a context dictionary for the template
+        template_context = {
+            "topic": topic,
+            "company_name": company_name,
+            "category": category,
+            "category_name": category_name,
+            "swot_context": swot_context.strip(),
+            "subjective_data": subjective_data,
+            "objective_data": objective_data
         }
         
-        prompt += category_prompts[category]
-        
-        # Add final instructions for response format
-        prompt += f"""
-Based on all this information, generate 5-7 specific, thought-provoking questions to help the CEO identify {category_name}s for {company_name} regarding {topic}.
-
-Each question should:
-1. Be specific to {company_name} and {topic}
-2. Build on existing analysis data where relevant
-3. Incorporate insights from the CEO's notes and business metrics when applicable
-4. Help uncover {category_name}s that might not be immediately obvious
-
-Format your response as a list of questions, one per line, without numbering or bullet points.
-"""
-        
-        return prompt
+        # Render the template with context
+        return render_template("generate_swot_quadrant", template_context)
     
     @sk_function(
         description="Generates contextual prompts for a TOWS cell using LLM",
@@ -291,7 +228,7 @@ Format your response as a list of questions, one per line, without numbering or 
             # Filter strategies for the current cell type
             cell_strategies = [s for s in strategies if s.get("strategy_type") == cell_type]
             
-            # Create a dynamic LLM prompt that incorporates all context
+            # Create a dynamic LLM prompt that incorporates all context and few-shot examples
             llm_prompt = self._create_tows_prompt(
                 topic=topic,
                 company_name=company_name,
@@ -344,103 +281,33 @@ Format your response as a list of questions, one per line, without numbering or 
         
         # Determine which two SWOT components are relevant for this TOWS cell
         primary_component, secondary_component = self._get_tows_components(cell_type)
-        primary_items = strengths if primary_component == "strengths" else weaknesses
-        secondary_items = opportunities if secondary_component == "opportunities" else threats
         
-        # Build the prompt with all available context
-        prompt = f"""You are an expert strategic advisor helping a CEO develop a TOWS matrix based on their SWOT analysis for {company_name}.
-
-Topic of analysis: {topic}
-Current TOWS cell: {cell_type} - {cell_description}
-
-Your task is to generate 5-7 thought-provoking guiding questions to help the CEO develop strategic actions for the {cell_type} cell of their TOWS matrix.
-
-"""
+        # Format empty lists with appropriate message
+        strengths_formatted = self._format_items(strengths) if strengths else "None identified yet"
+        weaknesses_formatted = self._format_items(weaknesses) if weaknesses else "None identified yet"
+        opportunities_formatted = self._format_items(opportunities) if opportunities else "None identified yet" 
+        threats_formatted = self._format_items(threats) if threats else "None identified yet"
         
-        # Add current SWOT items for context
-        prompt += "SWOT Analysis data:\n"
-        if strengths:
-            prompt += f"STRENGTHS: {self._format_items(strengths)}\n"
-        else:
-            prompt += "STRENGTHS: None identified yet\n"
-            
-        if weaknesses:
-            prompt += f"WEAKNESSES: {self._format_items(weaknesses)}\n"
-        else:
-            prompt += "WEAKNESSES: None identified yet\n"
-            
-        if opportunities:
-            prompt += f"OPPORTUNITIES: {self._format_items(opportunities)}\n"
-        else:
-            prompt += "OPPORTUNITIES: None identified yet\n"
-            
-        if threats:
-            prompt += f"THREATS: {self._format_items(threats)}\n"
-        else:
-            prompt += "THREATS: None identified yet\n"
-        
-        # Add existing strategies for this cell if available
-        if cell_strategies:
-            prompt += f"\nExisting {cell_type} strategies:\n"
-            for i, strategy in enumerate(cell_strategies, 1):
-                prompt += f"{i}. {strategy.get('text', '')}\n"
-        
-        # Get the singular forms of the components
-        primary_singular = primary_component[:-1] if primary_component.endswith("s") else primary_component
-        secondary_singular = secondary_component[:-1] if secondary_component.endswith("s") else secondary_component
-        
-        # Add specific instructions based on the cell type
-        cell_prompts = {
-            "SO": f"""
-For the SO cell (Strengths-Opportunities), I need questions that help the CEO identify strategies that use {company_name}'s strengths to capitalize on external opportunities.
-
-Focus on how each strength can be leveraged to take advantage of specific opportunities:
-- How can {company_name} use its internal advantages to exploit external possibilities?
-- What capabilities can be directed toward emerging opportunities?
-- How might existing strengths be enhanced to capitalize on market openings?
-""",
-            "WO": f"""
-For the WO cell (Weaknesses-Opportunities), I need questions that help the CEO identify strategies to overcome {company_name}'s weaknesses by taking advantage of external opportunities.
-
-Focus on how opportunities might help address or compensate for weaknesses:
-- How can {company_name} use external opportunities to improve internal weaknesses?
-- What market trends or conditions might provide resources or approaches to overcome limitations?
-- How can emerging opportunities help transform weaknesses into strengths?
-""",
-            "ST": f"""
-For the ST cell (Strengths-Threats), I need questions that help the CEO identify strategies that use {company_name}'s strengths to mitigate external threats.
-
-Focus on how strengths can be used as shields or counters against threats:
-- How can {company_name} leverage its internal advantages to reduce vulnerability to external threats?
-- What strengths can be deployed to neutralize or minimize specific threats?
-- How might existing capabilities be repurposed to address emerging challenges?
-""",
-            "WT": f"""
-For the WT cell (Weaknesses-Threats), I need questions that help the CEO identify strategies to minimize {company_name}'s weaknesses and avoid external threats.
-
-Focus on defensive approaches that address vulnerabilities and risks:
-- How can {company_name} minimize exposure of weaknesses to threats?
-- What defensive measures might reduce the combined impact of internal limitations and external challenges?
-- What partnerships or restructuring could help address both weaknesses and threats simultaneously?
-"""
+        # Create a context dictionary for the template
+        template_context = {
+            "topic": topic,
+            "company_name": company_name,
+            "cell_type": cell_type,
+            "cell_description": cell_description,
+            "strengths": strengths_formatted,
+            "weaknesses": weaknesses_formatted,
+            "opportunities": opportunities_formatted,
+            "threats": threats_formatted,
+            "cell_strategies": cell_strategies,
+            "primary_component": primary_component,
+            "secondary_component": secondary_component
         }
         
-        prompt += cell_prompts[cell_type]
+        # Use few-shot examples to improve response quality
+        include_examples = True
         
-        # Add final instructions for response format
-        prompt += f"""
-Based on the specific {primary_component} and {secondary_component} from the SWOT analysis, generate 5-7 thought-provoking questions that will help the CEO develop strategic actions for the {cell_type} cell.
-
-Each question should:
-1. Connect specific {primary_component} with specific {secondary_component} where possible
-2. Be tailored to {company_name} and {topic}
-3. Build on existing {cell_type} strategies where relevant
-4. Help uncover strategic approaches that might not be immediately obvious
-
-Format your response as a list of questions, one per line, without numbering or bullet points.
-"""
-        
-        return prompt
+        # Render the template with context and examples
+        return render_template("generate_tows_cell", template_context, include_examples)
     
     def _parse_items(self, items_data) -> List[str]:
         """Parse SWOT items from context data which may be a string or a list"""
