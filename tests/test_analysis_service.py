@@ -154,7 +154,9 @@ async def test_discover_so_linkages_basic(mock_ks: AsyncMock, analysis_service: 
     
     # Mock responses from kernel_service skills
     async def mock_run_async_replacement(*args, **kwargs):
-        # args[0] is the sk_function object
+        # args[0] is the sk_function object (the function itself)
+        # In the real code, kernel_service.run_async is called with:
+        # (sk_function_object, input_vars=context_vars)
         # The mock setup is:
         # mock_ks.get_skill = MagicMock(return_value=MagicMock(get_function=lambda name: name))
         # So sk_function_invoked will be the string name of the function
@@ -162,6 +164,11 @@ async def test_discover_so_linkages_basic(mock_ks: AsyncMock, analysis_service: 
         
         # Identify which function is being called based on the function name
         func_name_being_called = sk_function_invoked
+        
+        # For debugging, we could access context variables with:
+        # input_vars = kwargs.get('input_vars', {})
+        # user_id_from_context = input_vars.get('user_id')
+        # topic_from_context = input_vars.get('topic')
         
         if func_name_being_called == "fetch_relevant_subjective_notes":
             # run_async returns a context with a result attribute
