@@ -1,9 +1,11 @@
 import os
 from typing import Optional
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict # Import SettingsConfigDict
 
 class Settings(BaseSettings):
     """Application settings"""
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+
     # API configuration
     API_V1_STR: str = "/api"
     PROJECT_NAME: str = "StratOS"

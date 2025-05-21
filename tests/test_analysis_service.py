@@ -152,16 +152,38 @@ async def test_discover_so_linkages_basic(mock_ks: AsyncMock, analysis_service: 
     user_id = uuid4()
     
     # Mock responses from kernel_service skills
-    async def mock_invoke_skill(*args, **kwargs):
-        skill_name = args[0] # skill_name is the first arg to invoke_semantic_function
-        func_name = args[1]  # function_name is the second
+    async def mock_run_async_replacement(*args, **kwargs):
+        # args[0] is the sk_function object
+        # kwargs might contain input_vars or input_text
+        sk_function_invoked = args[0]
         
-        if func_name == "fetch_relevant_subjective_notes":
-            return MagicMock(result="Subjective Note: Market feels slow.") # Simple string result
-        elif func_name == "fetch_relevant_objective_data":
-            return MagicMock(result="Objective Data: Sales are down 5%.") # Simple string result
-        elif func_name == "FindPotentialLinkages":
-            # Simulate LLM returning a JSON string for linkages
+        # We need to identify which function is being called.
+        # The sk_function_invoked object might have a .name or similar attribute.
+        # Or we can check its __name__ if it's a direct method reference from a skill instance.
+        # For this test, the functions are obtained via kernel_service.get_skill(...).get_function(...)
+        # Let's assume sk_function_invoked.name gives us the function name.
+        
+        # To make this robust, we'd ideally check the skill name too,
+        # but the mock setup for get_skill().get_function() is simplified.
+        # Let's assume the function names are unique enough for this test.
+        
+        func_name_being_called = sk_function_invoked # This is the function object itself
+                                                    # We need its name.
+                                                    # The mock setup is:
+                                                    # mock_ks.get_skill = MagicMock(return_value=MagicMock(get_function=lambda name: name))
+                                                    # So, sk_function_invoked will be the string name of the function.
+
+        if func_name_being_called == "fetch_relevant_subjective_notes":
+            # run_async returns a context, so the result is in context.result
+            mock_context_result = MagicMock()
+            mock_context_result.result = "Subjective Note: Market feels slow."
+            return mock_context_result
+        elif func_name_being_called == "fetch_relevant_objective_data":
+            mock_context_result = MagicMock()
+            mock_context_result.result = "Objective Data: Sales are down 5%."
+            return mock_context_result
+        elif func_name_being_called == "FindPotentialLinkages":
+            mock_context_result = MagicMock()
             linkage_json = json.dumps([{
                 "subjective_ref_id": f"s_{user_id}_1",
                 "objective_ref_id": f"o_{user_id}_1",
@@ -169,13 +191,30 @@ async def test_discover_so_linkages_basic(mock_ks: AsyncMock, analysis_service: 
                 "ai_summary_of_linkage": "Slow market feeling correlates with sales dip.",
                 "ai_prompt_for_ceo": "What actions can address this?"
             }])
-            return MagicMock(result=linkage_json)
-        return MagicMock(result="Unknown skill/function")
+                return MagicMock(result=linkage_json) # This was correct for invoke_semantic_function
+            # For run_async, it should be:
+            mock_context_result.result = linkage_json
+            return mock_context_result
+            
+        mock_unknown_result = MagicMock()
+        mock_unknown_result.result = "Unknown skill/function in mock_run_async_replacement"
+        return mock_unknown_result
 
-    mock_ks.invoke_semantic_function = mock_invoke_skill
-    mock_ks.get_skill = MagicMock(return_value=MagicMock(get_function=lambda name: name)) # Mock get_skill().get_function()
-    mock_ks.run_async = mock_invoke_skill # If run_async is used directly for skills
-    mock_ks.create_new_context = MagicMock(return_value={}) # Mock context creation
+    # mock_ks.invoke_semantic_function = mock_invoke_skill # Not used by AnalysisService directly
+    mock_ks.get_skill = MagicMock(return_value=MagicMock(get_function=lambda name: name))
+    mock_ks.run_async = mock_run_async_replacement # This is what AnalysisService calls
+    
+    # Mock create_new_context to return a mock context that can be updated
+    mock_sk_context_instance = MagicMock()
+    def update_mock_context_vars(key, value):
+        # Simulate context variable assignment
+        if not hasattr(mock_sk_context_instance, 'variables'):
+            mock_sk_context_instance.variables = {}
+        mock_sk_context_instance.variables[key] = value
+    mock_sk_context_instance.__setitem__ = update_mock_context_vars
+    mock_sk_context_instance.variables = {} # Initialize variables
+
+    mock_ks.create_new_context = MagicMock(return_value=mock_sk_context_instance)
 
     analysis_service.so_linkages_container = None # Force cache for _save_so_linkage
 

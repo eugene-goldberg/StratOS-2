@@ -1,6 +1,6 @@
 import os
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone # Added timezone
 from typing import Optional, Dict, List, Any, Union
 from uuid import UUID
 
@@ -176,7 +176,7 @@ class AuthService:
             updated_at=current_time
         )
         
-        user_dict_for_db = user_in_db.dict()
+        user_dict_for_db = user_in_db.model_dump() # Changed .dict() to .model_dump()
         # Ensure 'id' (UUID) is string for Cosmos, and 'email' is present for partition key.
         user_dict_for_db["id"] = str(user_in_db.id) 
         # The 'email' field itself is the partition key value.
@@ -225,7 +225,7 @@ class AuthService:
     def create_access_token(self, data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
         """Create a JWT access token."""
         to_encode = data.copy()
-        expire_time = datetime.utcnow() + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+        expire_time = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)) # Use timezone.utc
         to_encode.update({"exp": expire_time})
         return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     
@@ -256,13 +256,13 @@ class AuthService:
         if not existing_user:
             return None
 
-        update_data_dict = user_update.dict(exclude_unset=True)
+        update_data_dict = user_update.model_dump(exclude_unset=True) # Changed .dict() to .model_dump()
         if "password" in update_data_dict and update_data_dict["password"]:
             update_data_dict["hashed_password"] = self.get_password_hash(update_data_dict.pop("password"))
         
         # Create a new UserInDB instance with updated fields
         # This ensures that Pydantic model validation is applied
-        updated_user_model_data = existing_user.dict()
+        updated_user_model_data = existing_user.model_dump() # Changed .dict() to .model_dump()
         updated_user_model_data.update(update_data_dict)
         updated_user_model_data["updated_at"] = datetime.now()
         
@@ -272,7 +272,7 @@ class AuthService:
         updated_user = UserInDB(**updated_user_model_data)
 
         # Prepare dict for Cosmos DB, ensuring 'id' is string
-        user_dict_for_db = updated_user.dict()
+        user_dict_for_db = updated_user.model_dump() # Changed .dict() to .model_dump()
         user_dict_for_db["id"] = str(updated_user.id)
         # Email (partition key) should not change, it's taken from existing_user.email
 

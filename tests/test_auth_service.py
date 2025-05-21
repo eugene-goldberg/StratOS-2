@@ -1,7 +1,6 @@
 import pytest
 import pytest_asyncio
-from uuid_extensions import uuid7 # Assuming uuid7 is used for user IDs if not uuid4
-from uuid import uuid4
+from uuid import uuid4 # uuid7 from uuid_extensions was not used
 
 from fastapi import HTTPException, status
 from jose import jwt

@@ -911,15 +911,17 @@ class ObjectiveDataService:
             )
             
             # Convert to dict for DB, ensuring UUIDs are strings if model stores them as UUID
-            dataset_db_dict = dataset.dict()
+            dataset_db_dict = dataset.model_dump() # Changed to model_dump()
             dataset_db_dict["id"] = str(dataset.id) # id is already UUID from default_factory
             # tags and linked_strategic_elements are already in correct format from model
             
             # Save to Cosmos DB
-            await self.datasets_container.create_item(body=dataset_db_dict)
+            # This line seems to be duplicated, the one above already prepares dataset_db_dict
+            # await self.datasets_container.create_item(body=dataset_db_dict) 
             
             # Save to Cosmos DB
-            await self.datasets_container.create_item(body=dataset.dict())
+            # Assuming the intent was to use dataset_db_dict which has id as string
+            await self.datasets_container.create_item(body=dataset_db_dict) # Using the prepared dict
             
             # Start background task for parsing and indexing
             asyncio.create_task(self._process_file_background(dataset))
@@ -956,7 +958,7 @@ class ObjectiveDataService:
             # Parse content based on file format
             content_chunks = []
             dataset_name = dataset.name
-            dataset_dict = dataset.dict()
+            # dataset_dict = dataset.model_dump() # Changed to model_dump(), though not immediately used here
             
             if dataset.data_format == 'csv':
                 content_chunks = await self._parse_spreadsheet_content(
@@ -1079,7 +1081,7 @@ class ObjectiveDataService:
             # file_path and import_date would typically be None or set if applicable
         )
         
-        dataset_db_dict = dataset.dict()
+        dataset_db_dict = dataset.model_dump() # Changed to model_dump()
         dataset_db_dict["id"] = str(dataset.id)
 
         # Save to Cosmos DB
@@ -1210,7 +1212,7 @@ class ObjectiveDataService:
                 return None
             
             # Update fields
-            existing_dict = existing.dict()
+            existing_dict = existing.model_dump() # Changed to model_dump()
             existing_dict.update(dataset_data)
             existing_dict["updated_at"] = datetime.now()
             
@@ -1256,7 +1258,7 @@ class ObjectiveDataService:
                 return None
             
             # Update metadata
-            existing_dict = existing.dict()
+            existing_dict = existing.model_dump() # Changed to model_dump()
             if not existing_dict.get("metadata"):
                 existing_dict["metadata"] = {}
             
@@ -1488,7 +1490,7 @@ class ObjectiveDataService:
         try:
             # Create KPI record
             kpi_id = uuid.uuid4()
-            kpi_dict = kpi_data.dict()
+            kpi_dict = kpi_data.model_dump() # Changed to model_dump()
             
             # Convert string IDs to UUIDs
             if "linked_goals" in kpi_dict and kpi_dict["linked_goals"]:
@@ -1505,7 +1507,7 @@ class ObjectiveDataService:
             kpi = KPI(**kpi_dict)
             
             # Save to Cosmos DB
-            await self.kpis_container.create_item(body=kpi.dict())
+            await self.kpis_container.create_item(body=kpi.model_dump()) # Changed to model_dump()
             
             return kpi
             
@@ -1644,7 +1646,7 @@ class ObjectiveDataService:
                                            if isinstance(goal_id, str)]
             
             # Update fields
-            existing_dict = existing.dict()
+            existing_dict = existing.model_dump() # Changed to model_dump()
             existing_dict.update(kpi_data)
             existing_dict["updated_at"] = datetime.now()
             
@@ -1741,7 +1743,7 @@ class ObjectiveDataService:
             
             # Create data point record
             datapoint_id = uuid.uuid4()
-            datapoint_dict = datapoint_data.dict()
+            datapoint_dict = datapoint_data.model_dump() # Changed to model_dump()
             current_time = datetime.now()
             
             datapoint_dict.update({
@@ -1754,7 +1756,7 @@ class ObjectiveDataService:
             datapoint = DataPoint(**datapoint_dict)
             
             # Save to Cosmos DB
-            await self.datapoints_container.create_item(body=datapoint.dict())
+            await self.datapoints_container.create_item(body=datapoint.model_dump()) # Changed to model_dump()
             
             return datapoint
             

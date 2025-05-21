@@ -1,399 +1,271 @@
 import json
 from typing import List, Dict, Any
-from semantic_kernel.skill_definition import sk_function, sk_function_context_parameter
-from ...prompt_templates import render_template
+from semantic_kernel.functions import kernel_function # Updated import
+# from semantic_kernel.orchestration.sk_context import SKContext # SKContext might be replaced by KernelArguments or direct params
+from ...prompt_templates import render_template # Assuming this utility is available
 
 class ContextualPromptGenerationSkill:
     """
     Semantic Kernel skill for generating contextual prompts for SWOT/TOWS analysis
-    by dynamically creating LLM prompts and invoking the AI to generate guiding questions
+    by dynamically creating LLM prompts and invoking the AI to generate guiding questions.
     """
     
-    @sk_function(
-        description="Generates contextual prompts for a SWOT quadrant using LLM",
+    @kernel_function(
+        description="Generates contextual prompts for a SWOT quadrant using LLM.",
         name="generate_swot_quadrant_prompt"
     )
-    @sk_function_context_parameter(
-        name="topic",
-        description="The topic of the SWOT analysis"
-    )
-    @sk_function_context_parameter(
-        name="company_name",
-        description="The company name"
-    )
-    @sk_function_context_parameter(
-        name="category",
-        description="The SWOT category (strength, weakness, opportunity, threat)"
-    )
-    @sk_function_context_parameter(
-        name="strengths",
-        description="List of existing strengths",
-        default_value="[]"
-    )
-    @sk_function_context_parameter(
-        name="weaknesses",
-        description="List of existing weaknesses",
-        default_value="[]"
-    )
-    @sk_function_context_parameter(
-        name="opportunities",
-        description="List of existing opportunities",
-        default_value="[]"
-    )
-    @sk_function_context_parameter(
-        name="threats",
-        description="List of existing threats",
-        default_value="[]"
-    )
-    @sk_function_context_parameter(
-        name="subjective_data",
-        description="Relevant subjective data from CEO logs",
-        default_value=""
-    )
-    @sk_function_context_parameter(
-        name="objective_data",
-        description="Relevant objective data from business metrics",
-        default_value=""
-    )
-    async def generate_swot_quadrant_prompt(self, context) -> str:
+    async def generate_swot_quadrant_prompt(
+        self,
+        topic: str,
+        company_name: str,
+        category: str,
+        strengths: str = "[]", # JSON string list
+        weaknesses: str = "[]", # JSON string list
+        opportunities: str = "[]", # JSON string list
+        threats: str = "[]", # JSON string list
+        subjective_data: str = "",
+        objective_data: str = ""
+        # context: SKContext # Old way of passing context
+    ) -> str:
         """
-        Generates contextual prompts for a SWOT quadrant by using an LLM to provide
-        tailored guiding questions based on the current analysis context
+        Generates contextual prompts for a SWOT quadrant by using an LLM.
+        :param topic: The topic of the SWOT analysis.
+        :param company_name: The company name.
+        :param category: The SWOT category (strength, weakness, opportunity, threat).
+        :param strengths: JSON string list of existing strengths.
+        :param weaknesses: JSON string list of existing weaknesses.
+        :param opportunities: JSON string list of existing opportunities.
+        :param threats: JSON string list of existing threats.
+        :param subjective_data: Relevant subjective data from CEO logs.
+        :param objective_data: Relevant objective data from business metrics.
+        :return: JSON string with guiding questions and analysis context.
         """
         try:
-            from ..kernel_service import kernel_service
+            # kernel_service is imported locally to avoid circular dependencies at module load time
+            # This is a common pattern if skills need to call back into the main kernel service.
+            # Ideally, the kernel instance or a way to get services would be injected.
+            from ..kernel_service import kernel_service 
             
-            # Extract context variables
-            topic = context["topic"]
-            company_name = context["company_name"]
-            category = context["category"].lower()
+            category_internal = category.lower()
             
-            # Validate category
             valid_categories = ["strength", "weakness", "opportunity", "threat"]
-            if category not in valid_categories:
+            if category_internal not in valid_categories:
                 return json.dumps({"error": f"Invalid category. Must be one of: {', '.join(valid_categories)}"})
             
-            # Parse SWOT items from context
-            strengths = self._parse_items(context.get("strengths", "[]"))
-            weaknesses = self._parse_items(context.get("weaknesses", "[]"))
-            opportunities = self._parse_items(context.get("opportunities", "[]"))
-            threats = self._parse_items(context.get("threats", "[]"))
+            parsed_strengths = self._parse_items(strengths)
+            parsed_weaknesses = self._parse_items(weaknesses)
+            parsed_opportunities = self._parse_items(opportunities)
+            parsed_threats = self._parse_items(threats)
             
-            # Get contextual data
-            subjective_data = context.get("subjective_data", "").strip()
-            objective_data = context.get("objective_data", "").strip()
-            
-            # Create a dynamic LLM prompt that incorporates all context
             llm_prompt = self._create_swot_prompt(
                 topic=topic,
                 company_name=company_name,
-                category=category,
-                strengths=strengths,
-                weaknesses=weaknesses,
-                opportunities=opportunities,
-                threats=threats,
-                subjective_data=subjective_data,
-                objective_data=objective_data
+                category=category_internal,
+                strengths=parsed_strengths,
+                weaknesses=parsed_weaknesses,
+                opportunities=parsed_opportunities,
+                threats=parsed_threats,
+                subjective_data=subjective_data.strip(),
+                objective_data=objective_data.strip()
             )
             
-            # Invoke the LLM to generate contextual guiding questions
             llm_response = await kernel_service.generate_completion(llm_prompt, max_tokens=800)
             
-            # Process the LLM response and format it as JSON for the frontend
-            category_name = self._get_category_full_name(category)
+            category_name_full = self._get_category_full_name(category_internal)
             
-            completion_percentage = len(locals().get(f"{category}s", [])) / 5 * 100
+            current_items_for_category = locals().get(f"parsed_{category_internal}s", []) # e.g. parsed_strengths
+            completion_percentage = len(current_items_for_category) / 5 * 100 # Assuming target of 5 items
             completion_percentage = min(completion_percentage, 100)
             
-            # Format the response as JSON
             response = {
-                "category": category,
-                "category_name": category_name,
-                "guiding_questions": llm_response.strip().split("\n"),
+                "category": category_internal,
+                "category_name": category_name_full,
+                "guiding_questions": llm_response.strip().split("\n") if llm_response else [],
                 "existing_items": {
-                    "strengths": strengths,
-                    "weaknesses": weaknesses,
-                    "opportunities": opportunities,
-                    "threats": threats
+                    "strengths": parsed_strengths,
+                    "weaknesses": parsed_weaknesses,
+                    "opportunities": parsed_opportunities,
+                    "threats": parsed_threats
                 },
                 "guidance": {
-                    "suggested_focus": f"Add at least 3-5 items to the {category_name} quadrant",
+                    "suggested_focus": f"Add at least 3-5 items to the {category_name_full} quadrant",
                     "completion": completion_percentage
                 }
             }
             
             return json.dumps(response)
         except Exception as e:
+            # Log the exception
             return json.dumps({"error": str(e)})
     
     def _create_swot_prompt(self, topic, company_name, category, strengths, weaknesses, 
                            opportunities, threats, subjective_data, objective_data) -> str:
-        """
-        Creates a detailed prompt for the LLM to generate guiding questions for a SWOT quadrant
-        """
-        category_name = self._get_category_full_name(category)
+        category_name_full = self._get_category_full_name(category)
         
-        # Format the SWOT context for the template
-        swot_context = ""
-        if any([strengths, weaknesses, opportunities, threats]):
-            if strengths:
-                swot_context += f"STRENGTHS: {self._format_items(strengths)}\n"
-            if weaknesses:
-                swot_context += f"WEAKNESSES: {self._format_items(weaknesses)}\n"
-            if opportunities:
-                swot_context += f"OPPORTUNITIES: {self._format_items(opportunities)}\n"
-            if threats:
-                swot_context += f"THREATS: {self._format_items(threats)}\n"
-        
-        # Create a context dictionary for the template
+        swot_context_parts = []
+        if strengths: swot_context_parts.append(f"STRENGTHS: {self._format_items(strengths)}")
+        if weaknesses: swot_context_parts.append(f"WEAKNESSES: {self._format_items(weaknesses)}")
+        if opportunities: swot_context_parts.append(f"OPPORTUNITIES: {self._format_items(opportunities)}")
+        if threats: swot_context_parts.append(f"THREATS: {self._format_items(threats)}")
+        swot_context_str = "\n".join(swot_context_parts) if swot_context_parts else "No SWOT items identified yet."
+
         template_context = {
             "topic": topic,
             "company_name": company_name,
             "category": category,
-            "category_name": category_name,
-            "swot_context": swot_context.strip(),
-            "subjective_data": subjective_data,
-            "objective_data": objective_data
+            "category_name": category_name_full,
+            "swot_context": swot_context_str,
+            "subjective_data": subjective_data if subjective_data else "No subjective data provided.",
+            "objective_data": objective_data if objective_data else "No objective data provided."
         }
-        
-        # Render the template with context
         return render_template("generate_swot_quadrant", template_context)
     
-    @sk_function(
-        description="Generates contextual prompts for a TOWS cell using LLM",
+    @kernel_function(
+        description="Generates contextual prompts for a TOWS cell using LLM.",
         name="generate_tows_cell_prompt"
     )
-    @sk_function_context_parameter(
-        name="topic",
-        description="The topic of the analysis"
-    )
-    @sk_function_context_parameter(
-        name="company_name",
-        description="The company name"
-    )
-    @sk_function_context_parameter(
-        name="cell_type",
-        description="The TOWS cell type (SO, WO, ST, WT)"
-    )
-    @sk_function_context_parameter(
-        name="strengths",
-        description="List of strengths",
-        default_value="[]"
-    )
-    @sk_function_context_parameter(
-        name="weaknesses",
-        description="List of weaknesses",
-        default_value="[]"
-    )
-    @sk_function_context_parameter(
-        name="opportunities",
-        description="List of opportunities",
-        default_value="[]"
-    )
-    @sk_function_context_parameter(
-        name="threats",
-        description="List of threats",
-        default_value="[]"
-    )
-    @sk_function_context_parameter(
-        name="strategies",
-        description="Existing TOWS strategies",
-        default_value="[]"
-    )
-    async def generate_tows_cell_prompt(self, context) -> str:
+    async def generate_tows_cell_prompt(
+        self,
+        topic: str,
+        company_name: str,
+        cell_type: str, # SO, WO, ST, WT
+        strengths: str = "[]", # JSON string list
+        weaknesses: str = "[]", # JSON string list
+        opportunities: str = "[]", # JSON string list
+        threats: str = "[]", # JSON string list
+        strategies: str = "[]" # JSON string list of existing strategies
+        # context: SKContext # Old way
+    ) -> str:
         """
-        Generates contextual prompts for a TOWS cell by using an LLM to provide
-        tailored guiding questions based on the current analysis data
+        Generates contextual prompts for a TOWS cell.
+        :param topic: The topic of the analysis.
+        :param company_name: The company name.
+        :param cell_type: The TOWS cell type (SO, WO, ST, WT).
+        :param strengths: JSON string list of strengths.
+        :param weaknesses: JSON string list of weaknesses.
+        :param opportunities: JSON string list of opportunities.
+        :param threats: JSON string list of threats.
+        :param strategies: JSON string list of existing TOWS strategies.
+        :return: JSON string with guiding questions and TOWS context.
         """
         try:
             from ..kernel_service import kernel_service
             
-            # Extract context variables
-            topic = context["topic"]
-            company_name = context["company_name"]
-            cell_type = context["cell_type"].upper()
-            
-            # Validate cell type
+            cell_type_upper = cell_type.upper()
             valid_cell_types = ["SO", "WO", "ST", "WT"]
-            if cell_type not in valid_cell_types:
+            if cell_type_upper not in valid_cell_types:
                 return json.dumps({"error": f"Invalid cell type. Must be one of: {', '.join(valid_cell_types)}"})
             
-            # Parse SWOT items and strategies from context
-            strengths = self._parse_items(context.get("strengths", "[]"))
-            weaknesses = self._parse_items(context.get("weaknesses", "[]"))
-            opportunities = self._parse_items(context.get("opportunities", "[]"))
-            threats = self._parse_items(context.get("threats", "[]"))
-            strategies = self._parse_strategies(context.get("strategies", "[]"))
+            parsed_strengths = self._parse_items(strengths)
+            parsed_weaknesses = self._parse_items(weaknesses)
+            parsed_opportunities = self._parse_items(opportunities)
+            parsed_threats = self._parse_items(threats)
+            parsed_strategies = self._parse_strategies(strategies)
             
-            # Filter strategies for the current cell type
-            cell_strategies = [s for s in strategies if s.get("strategy_type") == cell_type]
+            cell_strategies_filtered = [s for s in parsed_strategies if s.get("strategy_type") == cell_type_upper]
             
-            # Create a dynamic LLM prompt that incorporates all context and few-shot examples
             llm_prompt = self._create_tows_prompt(
                 topic=topic,
                 company_name=company_name,
-                cell_type=cell_type,
-                strengths=strengths,
-                weaknesses=weaknesses,
-                opportunities=opportunities,
-                threats=threats,
-                cell_strategies=cell_strategies
+                cell_type=cell_type_upper,
+                strengths=parsed_strengths,
+                weaknesses=parsed_weaknesses,
+                opportunities=parsed_opportunities,
+                threats=parsed_threats,
+                cell_strategies=cell_strategies_filtered
             )
             
-            # Invoke the LLM to generate contextual guiding questions
             llm_response = await kernel_service.generate_completion(llm_prompt, max_tokens=800)
             
-            # Get the cell description
-            cell_description = self._get_cell_description(cell_type)
-            
-            # Calculate completion percentage
-            completion_percentage = len(cell_strategies) / 3 * 100
+            cell_description_full = self._get_cell_description(cell_type_upper)
+            completion_percentage = len(cell_strategies_filtered) / 3 * 100 # Assuming target of 3 strategies
             completion_percentage = min(completion_percentage, 100)
             
-            # Format the response as JSON
             response = {
-                "cell_type": cell_type,
-                "description": cell_description,
-                "guiding_questions": llm_response.strip().split("\n"),
+                "cell_type": cell_type_upper,
+                "description": cell_description_full,
+                "guiding_questions": llm_response.strip().split("\n") if llm_response else [],
                 "existing_items": {
-                    "strengths": strengths,
-                    "weaknesses": weaknesses,
-                    "opportunities": opportunities,
-                    "threats": threats
+                    "strengths": parsed_strengths,
+                    "weaknesses": parsed_weaknesses,
+                    "opportunities": parsed_opportunities,
+                    "threats": parsed_threats
                 },
-                "existing_strategies": cell_strategies,
+                "existing_strategies": cell_strategies_filtered,
                 "guidance": {
-                    "suggested_focus": f"Add at least 2-3 strategies to the {cell_type} cell",
+                    "suggested_focus": f"Add at least 2-3 strategies to the {cell_type_upper} cell",
                     "completion": completion_percentage
                 }
             }
-            
             return json.dumps(response)
         except Exception as e:
+            # Log the exception
             return json.dumps({"error": str(e)})
-    
+
     def _create_tows_prompt(self, topic, company_name, cell_type, strengths, weaknesses, 
                             opportunities, threats, cell_strategies) -> str:
-        """
-        Creates a detailed prompt for the LLM to generate guiding questions for a TOWS cell
-        """
-        cell_description = self._get_cell_description(cell_type)
-        
-        # Determine which two SWOT components are relevant for this TOWS cell
+        cell_description_full = self._get_cell_description(cell_type)
         primary_component, secondary_component = self._get_tows_components(cell_type)
         
-        # Format empty lists with appropriate message
-        strengths_formatted = self._format_items(strengths) if strengths else "None identified yet"
-        weaknesses_formatted = self._format_items(weaknesses) if weaknesses else "None identified yet"
-        opportunities_formatted = self._format_items(opportunities) if opportunities else "None identified yet" 
-        threats_formatted = self._format_items(threats) if threats else "None identified yet"
+        strengths_f = self._format_items(strengths) if strengths else "None identified yet"
+        weaknesses_f = self._format_items(weaknesses) if weaknesses else "None identified yet"
+        opportunities_f = self._format_items(opportunities) if opportunities else "None identified yet" 
+        threats_f = self._format_items(threats) if threats else "None identified yet"
         
-        # Create a context dictionary for the template
         template_context = {
             "topic": topic,
             "company_name": company_name,
             "cell_type": cell_type,
-            "cell_description": cell_description,
-            "strengths": strengths_formatted,
-            "weaknesses": weaknesses_formatted,
-            "opportunities": opportunities_formatted,
-            "threats": threats_formatted,
-            "cell_strategies": cell_strategies,
+            "cell_description": cell_description_full,
+            "strengths": strengths_f,
+            "weaknesses": weaknesses_f,
+            "opportunities": opportunities_f,
+            "threats": threats_f,
+            "cell_strategies": cell_strategies, # Assumes this is a list of strategy strings or dicts
             "primary_component": primary_component,
             "secondary_component": secondary_component
         }
-        
-        # Use few-shot examples to improve response quality
-        include_examples = True
-        
-        # Render the template with context and examples
-        return render_template("generate_tows_cell", template_context, include_examples)
+        return render_template("generate_tows_cell", template_context, include_examples=True)
     
-    def _parse_items(self, items_data) -> List[str]:
-        """Parse SWOT items from context data which may be a string or a list"""
-        if not items_data:
+    def _parse_items(self, items_data: str) -> List[str]:
+        try:
+            items = json.loads(items_data)
+            if isinstance(items, list):
+                # Handle list of strings or list of dicts with 'text' or 'content'
+                processed_items = []
+                for item in items:
+                    if isinstance(item, str):
+                        processed_items.append(item)
+                    elif isinstance(item, dict):
+                        processed_items.append(item.get("text", item.get("content", "")))
+                return [str(pi) for pi in processed_items if pi] # Ensure all are strings
+            return [str(items)] # If not a list, treat as single item
+        except (json.JSONDecodeError, TypeError):
+            return [str(items_data)] if items_data else [] # Fallback for non-JSON string
+
+    def _parse_strategies(self, strategies_data: str) -> List[Dict[str, Any]]:
+        try:
+            strategies = json.loads(strategies_data)
+            return strategies if isinstance(strategies, list) else []
+        except (json.JSONDecodeError, TypeError):
             return []
-        
-        if isinstance(items_data, str):
-            try:
-                items = json.loads(items_data)
-                if isinstance(items, list):
-                    # If items are objects with 'text' property, extract just the text
-                    if items and isinstance(items[0], dict) and 'text' in items[0]:
-                        return [item['text'] for item in items]
-                    # If items are strings, return as is
-                    if items and isinstance(items[0], str):
-                        return items
-                    # Default case
-                    return items
-            except json.JSONDecodeError:
-                # If not valid JSON, treat as a single text item
-                return [items_data]
-        
-        # If already a list
-        if isinstance(items_data, list):
-            # If items are objects with 'text' property, extract just the text
-            if items_data and isinstance(items_data[0], dict) and 'text' in items_data[0]:
-                return [item['text'] for item in items_data]
-            # If items are strings, return as is
-            if items_data and isinstance(items_data[0], str):
-                return items_data
-        
-        # Default case
-        return []
-    
-    def _parse_strategies(self, strategies_data) -> List[Dict[str, Any]]:
-        """Parse TOWS strategies from context data which may be a string or a list"""
-        if not strategies_data:
-            return []
-        
-        if isinstance(strategies_data, str):
-            try:
-                strategies = json.loads(strategies_data)
-                if isinstance(strategies, list):
-                    return strategies
-            except json.JSONDecodeError:
-                return []
-        
-        # If already a list
-        if isinstance(strategies_data, list):
-            return strategies_data
-        
-        # Default case
-        return []
-    
+
     def _format_items(self, items: List[str]) -> str:
-        """Format a list of items for inclusion in an LLM prompt"""
-        if not items:
-            return "None"
-        return "; ".join(items)
+        return "; ".join(items) if items else "None"
     
     def _get_category_full_name(self, category: str) -> str:
-        """Get the full name of a SWOT category"""
-        category_names = {
-            "strength": "Strength",
-            "weakness": "Weakness",
-            "opportunity": "Opportunity",
-            "threat": "Threat"
-        }
-        return category_names.get(category, category)
+        return {"strength": "Strength", "weakness": "Weakness", "opportunity": "Opportunity", "threat": "Threat"}.get(category, category)
     
     def _get_cell_description(self, cell_type: str) -> str:
-        """Get the description of a TOWS cell"""
-        cell_descriptions = {
+        return {
             "SO": "Strengths-Opportunities (Using strengths to capitalize on opportunities)",
             "WO": "Weaknesses-Opportunities (Overcoming weaknesses by taking advantage of opportunities)",
             "ST": "Strengths-Threats (Using strengths to mitigate threats)",
             "WT": "Weaknesses-Threats (Minimizing weaknesses and avoiding threats)"
-        }
-        return cell_descriptions.get(cell_type, cell_type)
+        }.get(cell_type, cell_type)
     
     def _get_tows_components(self, cell_type: str) -> tuple:
-        """Get the two SWOT components that make up a TOWS cell"""
-        components = {
-            "SO": ("strengths", "opportunities"),
-            "WO": ("weaknesses", "opportunities"),
-            "ST": ("strengths", "threats"),
-            "WT": ("weaknesses", "threats")
-        }
-        return components.get(cell_type, ("", ""))
+        return {
+            "SO": ("strengths", "opportunities"), "WO": ("weaknesses", "opportunities"),
+            "ST": ("strengths", "threats"), "WT": ("weaknesses", "threats")
+        }.get(cell_type, ("", ""))
