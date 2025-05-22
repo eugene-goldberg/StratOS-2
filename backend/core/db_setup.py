@@ -41,7 +41,10 @@ CONTAINER_CONFIGS = {
     
     # Conversation Service containers
     "conversations": "/user_id",
-    "conversation_messages": "/conversation_id"
+    "conversation_messages": "/conversation_id",
+    
+    # Alert Service containers  
+    "alerts": "/user_id"
 }
 
 async def initialize_database() -> bool:

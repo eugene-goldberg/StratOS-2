@@ -1,7 +1,78 @@
-import React from 'react';
-import { Box, Typography, Grid, Paper, Card, CardContent, CardHeader, Divider } from '@mui/material';
+import React, { useEffect } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Paper, 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  Divider,
+  Chip,
+  Button,
+  IconButton,
+  LinearProgress,
+  Alert,
+  Stack
+} from '@mui/material';
+import {
+  Warning as WarningIcon,
+  TrendingUp as OpportunityIcon,
+  Lightbulb as InsightIcon,
+  CheckCircle as CheckIcon,
+  Refresh as RefreshIcon,
+  ArrowForward as ArrowForwardIcon
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { useAlertStore } from '../store/alertStore';
+import { AlertType, AlertSeverity, AlertStatus } from '../types/alerts';
+import { format } from 'date-fns';
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const { alerts, stats, loadAlerts, loadStats, triggerScan, acknowledgeAlert } = useAlertStore();
+
+  useEffect(() => {
+    loadAlerts();
+    loadStats();
+  }, [loadAlerts, loadStats]);
+
+  const getAlertIcon = (type: AlertType) => {
+    switch (type) {
+      case AlertType.RISK:
+        return <WarningIcon />;
+      case AlertType.OPPORTUNITY:
+        return <OpportunityIcon />;
+      case AlertType.INSIGHT:
+        return <InsightIcon />;
+      default:
+        return <CheckIcon />;
+    }
+  };
+
+  const getSeverityColor = (severity: AlertSeverity): "error" | "warning" | "success" | "info" => {
+    switch (severity) {
+      case AlertSeverity.CRITICAL:
+        return 'error';
+      case AlertSeverity.HIGH:
+        return 'error';
+      case AlertSeverity.MEDIUM:
+        return 'warning';
+      default:
+        return 'info';
+    }
+  };
+
+  // Get recent unacknowledged alerts
+  const recentAlerts = alerts
+    .filter(a => a.status === AlertStatus.NEW || a.status === AlertStatus.VIEWED)
+    .slice(0, 5);
+
+  const handleTriggerScan = async () => {
+    await triggerScan();
+    // Show success message
+  };
+
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
@@ -41,40 +112,86 @@ const Dashboard: React.FC = () => {
         {/* AI Alerts */}
         <Grid item xs={12} md={4}>
           <Paper elevation={0} sx={{ p: 2, height: '100%' }}>
-            <Typography variant="h6" gutterBottom>
-              AI Alerts & Insights
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h6">
+                AI Alerts & Insights
+              </Typography>
+              <Box>
+                <IconButton size="small" onClick={handleTriggerScan} title="Trigger risk/opportunity scan">
+                  <RefreshIcon />
+                </IconButton>
+              </Box>
+            </Box>
             <Divider sx={{ mb: 2 }} />
-            <Card variant="outlined" sx={{ mb: 2 }}>
-              <CardContent>
-                <Typography color="error.main" gutterBottom>
-                  High Priority
-                </Typography>
-                <Typography variant="body1">
-                  Marketing campaign performance below projection by 15%
-                </Typography>
-              </CardContent>
-            </Card>
-            <Card variant="outlined" sx={{ mb: 2 }}>
-              <CardContent>
-                <Typography color="warning.main" gutterBottom>
-                  Medium Priority
-                </Typography>
-                <Typography variant="body1">
-                  Competitor launched new product in East region
-                </Typography>
-              </CardContent>
-            </Card>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography color="success.main" gutterBottom>
-                  Opportunity
-                </Typography>
-                <Typography variant="body1">
-                  Customer feedback suggests strong interest in premium offering
-                </Typography>
-              </CardContent>
-            </Card>
+            
+            {recentAlerts.length === 0 ? (
+              <Alert severity="info">
+                No new alerts. System is continuously monitoring for risks and opportunities.
+              </Alert>
+            ) : (
+              <Stack spacing={2}>
+                {recentAlerts.map((alert) => (
+                  <Card 
+                    key={alert.id} 
+                    variant="outlined"
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' }
+                    }}
+                    onClick={() => acknowledgeAlert(alert.id)}
+                  >
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                        <Box sx={{ color: `${getSeverityColor(alert.severity)}.main` }}>
+                          {getAlertIcon(alert.alert_type)}
+                        </Box>
+                        <Box sx={{ flexGrow: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                            <Typography variant="body2" fontWeight="medium">
+                              {alert.title}
+                            </Typography>
+                            <Chip 
+                              label={alert.severity} 
+                              size="small"
+                              color={getSeverityColor(alert.severity)}
+                            />
+                          </Box>
+                          <Typography variant="body2" color="text.secondary">
+                            {alert.description.substring(0, 100)}...
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {format(new Date(alert.created_at), 'MMM d, h:mm a')}
+                          </Typography>
+                          {alert.confidence_score && (
+                            <Box sx={{ mt: 1 }}>
+                              <LinearProgress 
+                                variant="determinate" 
+                                value={alert.confidence_score} 
+                                sx={{ height: 4 }}
+                              />
+                              <Typography variant="caption" color="text.secondary">
+                                {alert.confidence_score}% confidence
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            )}
+            
+            {stats && stats.total_alerts > 5 && (
+              <Button 
+                fullWidth 
+                sx={{ mt: 2 }}
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => navigate('/analysis')}
+              >
+                View All {stats.total_alerts} Alerts
+              </Button>
+            )}
           </Paper>
         </Grid>
         

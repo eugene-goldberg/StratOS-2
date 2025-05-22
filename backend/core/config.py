@@ -20,5 +20,8 @@ class Settings(BaseSettings):
     AZURE_COSMOS_ENDPOINT: Optional[str] = os.getenv("AZURE_COSMOS_ENDPOINT")
     AZURE_COSMOS_KEY: Optional[str] = os.getenv("AZURE_COSMOS_KEY")
     AZURE_COSMOS_DATABASE_NAME: str = os.getenv("AZURE_COSMOS_DATABASE_NAME", "stratosdb")
+    
+    # Redis configuration
+    REDIS_URL: Optional[str] = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 settings = Settings()

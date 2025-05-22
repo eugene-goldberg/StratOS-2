@@ -1,0 +1,41 @@
+Analyze the provided business data to identify potential opportunities that the organization could pursue.
+
+{{$input}}
+
+Based on your analysis, identify the most promising opportunities. For each opportunity, provide the following in a structured JSON format:
+
+```json
+[
+  {
+    "title": "Brief descriptive title of the opportunity",
+    "description": "Detailed explanation of the opportunity and its potential benefits",
+    "category": "One of: market_expansion, cost_reduction, revenue_growth, efficiency_improvement, innovation, partnership, competitive_advantage",
+    "impact_score": 80,  // 0-100: How significant would the positive impact be if this opportunity is captured?
+    "likelihood_score": 70,  // 0-100: What is the probability of successfully capturing this opportunity?
+    "confidence_score": 85,  // 0-100: How confident are you in this opportunity assessment?
+    "indicators": [
+      "Specific data point or trend indicating this opportunity",
+      "Another indicator from the provided data"
+    ],
+    "recommendations": [
+      "Specific action to capture this opportunity",
+      "Another recommended strategy to pursue"
+    ],
+    "time_horizon": "immediate|short_term|medium_term|long_term",
+    "resource_requirements": "low|medium|high",
+    "related_data_points": ["id_of_related_entry_1", "id_of_related_insight_2"]
+  }
+]
+```
+
+Focus on:
+1. Opportunities that are supported by concrete evidence in the data
+2. Both quick wins and strategic long-term opportunities
+3. Opportunities that align with organizational strengths
+4. Synergistic opportunities that could create compound benefits
+
+Ensure all scores are justified by the data provided. Prioritize opportunities that:
+- Have high probability of success
+- Align with current capabilities
+- Could provide competitive advantage
+- Address identified market needs or gaps

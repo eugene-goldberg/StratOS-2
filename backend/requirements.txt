@@ -21,3 +21,6 @@ PyPDF2>=3.0.0 # For PDF parsing
 passlib[bcrypt]>=1.7.4 # For password hashing
 python-jose[cryptography]>=3.3.0 # For JWTs
 aiofiles>=23.1.0 # For async file operations
+celery[redis]>=5.3.0 # For background tasks
+redis>=5.0.0 # Redis client
+APScheduler>=3.10.0 # For scheduled tasks
