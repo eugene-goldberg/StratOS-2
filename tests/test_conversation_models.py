@@ -76,13 +76,13 @@ class TestConversationCreateModel:
         # Empty title should fail
         with pytest.raises(ValidationError) as exc_info:
             ConversationCreate(title="")
-        assert "ensure this value has at least 1 characters" in str(exc_info.value)
+        assert "String should have at least 1 character" in str(exc_info.value)
         
         # Title too long should fail
         long_title = "x" * 201
         with pytest.raises(ValidationError) as exc_info:
             ConversationCreate(title=long_title)
-        assert "ensure this value has at most 200 characters" in str(exc_info.value)
+        assert "String should have at most 200 characters" in str(exc_info.value)
     
     def test_conversation_create_description_validation(self):
         """Test description field validation."""
@@ -93,7 +93,7 @@ class TestConversationCreateModel:
                 title="Test",
                 description=long_description
             )
-        assert "ensure this value has at most 1000 characters" in str(exc_info.value)
+        assert "String should have at most 1000 characters" in str(exc_info.value)
 
 
 class TestConversationMessageCreateModel:
@@ -124,13 +124,13 @@ class TestConversationMessageCreateModel:
         # Empty content should fail
         with pytest.raises(ValidationError) as exc_info:
             ConversationMessageCreate(content="")
-        assert "ensure this value has at least 1 characters" in str(exc_info.value)
+        assert "String should have at least 1 character" in str(exc_info.value)
         
         # Content too long should fail
         long_content = "x" * 10001
         with pytest.raises(ValidationError) as exc_info:
             ConversationMessageCreate(content=long_content)
-        assert "ensure this value has at most 10000 characters" in str(exc_info.value)
+        assert "String should have at most 10000 characters" in str(exc_info.value)
 
 
 class TestConversationModel:
