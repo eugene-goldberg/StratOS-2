@@ -78,10 +78,10 @@ async def analyze_connections(
     try:
         logger.info(f"Connection analysis request from user {current_user_id}")
         
-        if not request.canvas_data.nodes:
+        if not request.nodes:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Canvas must contain at least one node for connection analysis"
+                detail="Must provide at least one node for connection analysis"
             )
         
         result = await canvas_ai_service.analyze_connections(request, current_user_id)
@@ -118,7 +118,7 @@ async def identify_themes(
     try:
         logger.info(f"Theme analysis request from user {current_user_id}")
         
-        if not request.canvas_data.nodes:
+        if not request.canvas_elements.get("nodes"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Canvas must contain at least one node for theme analysis"
@@ -158,7 +158,7 @@ async def optimize_canvas(
     try:
         logger.info(f"Canvas optimization request from user {current_user_id}")
         
-        if not request.canvas_data.nodes:
+        if not request.current_canvas.get("nodes"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Canvas must contain at least one node for optimization analysis"
