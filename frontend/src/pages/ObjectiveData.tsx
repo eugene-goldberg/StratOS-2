@@ -15,7 +15,6 @@ import {
   TableRow,
   Card,
   CardContent,
-  CardHeader,
   IconButton,
   TextField,
   InputAdornment,
@@ -195,7 +194,7 @@ const ObjectiveData: React.FC = () => {
   const [datasetName, setDatasetName] = useState('');
   const [datasetDesc, setDatasetDesc] = useState('');
   const [datasetFile, setDatasetFile] = useState<File | null>(null);
-  const [selectedDataset, setSelectedDataset] = useState<any>(null);
+  const [selectedDataset] = useState<any>(null);
 
   useEffect(() => {
     loadKPIs();

@@ -7,7 +7,6 @@ import {
   TextField,
   Button,
   IconButton,
-  Divider,
   Chip,
   Tabs,
   Tab,
@@ -19,19 +18,13 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  SelectChangeEvent
+  DialogActions
 } from '@mui/material';
 import {
   Add as AddIcon,
   FilterList as FilterIcon,
   Sort as SortIcon,
   Search as SearchIcon,
-  Bookmark as BookmarkIcon,
-  BookmarkBorder as BookmarkBorderIcon,
   ViewList as ViewListIcon,
   ViewModule as ViewModuleIcon,
   ExpandMore as ExpandMoreIcon
@@ -89,8 +82,7 @@ const CEOLog: React.FC = () => {
     loadEntries, 
     loadMoreEntries, 
     filters, 
-    setEntryTypeFilter, 
-    setTagFilter,
+    setEntryTypeFilter,
     setSearchQuery,
     clearFilters
   } = useLogStore();

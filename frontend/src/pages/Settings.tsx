@@ -28,7 +28,6 @@ import {
   VpnKey as ApiKeyIcon,
   Storage as StorageIcon,
   DataUsage as DataUsageIcon,
-  Language as LanguageIcon,
   AccessTime as AccessTimeIcon,
   Delete as DeleteIcon,
   Save as SaveIcon

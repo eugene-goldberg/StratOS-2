@@ -6,7 +6,6 @@ import ReactFlow, {
   Panel,
   ReactFlowProvider,
   OnConnect,
-  NodeDragHandler,
   NodeMouseHandler,
   EdgeMouseHandler,
 } from 'reactflow';

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { logService, LogEntry } from '../services/logService';
 import useLogStore from '../store/logStore';
 

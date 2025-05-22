@@ -17,7 +17,6 @@ import {
   MicOff as MicOffIcon
 } from '@mui/icons-material';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
-import { useLogStore } from '../../store/logStore';
 
 interface VoiceInputButtonProps {
   userId: string;
@@ -45,7 +44,6 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
   const { 
     isRecording, 
     isTranscribing, 
-    recordingError, 
     startRecording, 
     stopRecording, 
     cancelRecording 

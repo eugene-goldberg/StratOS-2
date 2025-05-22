@@ -2,8 +2,7 @@ import { create } from 'zustand';
 import objectiveDataService, {
   KPI,
   KPICreate,
-  DataSet,
-  DataSetCreate
+  DataSet
 } from '../services/objectiveDataService';
 
 interface ObjectiveDataState {

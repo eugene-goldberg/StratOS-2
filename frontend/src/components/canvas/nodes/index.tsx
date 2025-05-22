@@ -6,7 +6,6 @@ import {
   Box, 
   TextField, 
   IconButton,
-  Tooltip,
   useTheme
 } from '@mui/material';
 import { 
@@ -180,7 +179,6 @@ const CEOLogNode = memo(({ id, data, selected }: NodeProps<NodeData>) => {
 // Data Snippet Node Component
 const DataSnippetNode = memo(({ id, data, selected }: NodeProps<NodeData>) => {
   const theme = useTheme();
-  const dataSnippetData = data as any; // In a real implementation, this would be properly typed
   
   return (
     <Paper

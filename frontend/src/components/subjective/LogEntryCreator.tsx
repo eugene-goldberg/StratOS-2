@@ -21,8 +21,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Autocomplete
+  DialogActions
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -30,7 +29,6 @@ import {
   LightbulbOutlined as LightbulbIcon,
   CheckCircleOutline as CheckCircleIcon,
   Cancel as CancelIcon,
-  Delete as DeleteIcon,
   ExpandMore as ExpandMoreIcon
 } from '@mui/icons-material';
 import { useLogStore } from '../../store/logStore';
@@ -74,7 +72,7 @@ export const LogEntryCreator: React.FC<LogEntryCreatorProps> = ({
   const textFieldRef = useRef<HTMLDivElement>(null);
   
   // Get functions from store
-  const { isLoading, error, createEntry } = useLogStore();
+  const { isLoading, createEntry } = useLogStore();
   
   // Focus text field on mount if initialFocus is true
   useEffect(() => {
@@ -178,16 +176,7 @@ export const LogEntryCreator: React.FC<LogEntryCreatorProps> = ({
     setLinkMenuAnchorEl(null);
   };
   
-  // Link to strategic elements
-  const handleLinkToValues = () => {
-    setLinkMenuAnchorEl(null);
-    // This would open a dialog or dropdown to select values
-  };
-  
-  const handleLinkToGoals = () => {
-    setLinkMenuAnchorEl(null);
-    // This would open a dialog or dropdown to select goals
-  };
+  // These functions will be implemented when linking to strategic elements is added
   
   const linkMenuOpen = Boolean(linkMenuAnchorEl);
   

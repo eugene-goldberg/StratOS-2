@@ -32,8 +32,7 @@ import {
   FormControl,
   InputLabel,
   Select,
-  Slider,
-  Tooltip
+  Slider
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -112,7 +111,6 @@ const Planning: React.FC = () => {
     loadPlans,
     createInitiative,
     updateInitiative,
-    deleteInitiative,
     addAction,
     updateAction,
     deleteAction

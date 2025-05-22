@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Paper,
   Grid,
   Button,
   Tabs,
@@ -10,10 +9,7 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardActions,
   Divider,
-  Chip,
-  IconButton,
   List,
   ListItem,
   ListItemText,
@@ -35,14 +31,8 @@ import {
 } from '@mui/material';
 import {
   Add as AddIcon,
-  ArrowForward as ArrowForwardIcon,
-  Refresh as RefreshIcon,
-  Link as LinkIcon,
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
-  Help as HelpIcon,
-  Share as ShareIcon,
-  Save as SaveIcon,
   PlayArrow as PlayArrowIcon
 } from '@mui/icons-material';
 import useAnalysisStore from '../store/analysisStore';
@@ -74,7 +64,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-// Mock SWOT component
+/* Mock SWOT component - not currently used but kept for future implementation
 const SWOTAnalysis = () => {
   return (
     <Grid container spacing={2}>
@@ -229,6 +219,7 @@ const SWOTAnalysis = () => {
     </Grid>
   );
 };
+*/
 
 const Analysis: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -241,7 +232,6 @@ const Analysis: React.FC = () => {
   const {
     activeSwot,
     linkages,
-    isLoading,
     error,
     createGuidedSwot,
     addSwotItem,

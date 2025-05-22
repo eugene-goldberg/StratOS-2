@@ -8,8 +8,6 @@ import {
   AIAnalysisResult
 } from '../types/canvas';
 import { 
-  Node, 
-  Edge, 
   NodeChange, 
   EdgeChange, 
   applyNodeChanges, 
