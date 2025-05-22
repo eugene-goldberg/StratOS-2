@@ -10,7 +10,7 @@ from ..models.alerts import (
     Alert, AlertCreate, AlertUpdate, AlertFilter,
     AlertType, AlertSeverity, AlertStatus
 )
-from ..models.user import User
+from ..models.user import UserResponse
 from ..services.alert_service import AlertService
 from ..dependencies import get_current_user
 from ..tasks.analysis_tasks import analyze_user_risks_opportunities
@@ -23,7 +23,7 @@ alert_service = AlertService()
 @router.post("/", response_model=Alert)
 async def create_alert(
     alert_data: AlertCreate,
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """Create a new alert (usually done by system, not users)"""
     # Ensure user can only create alerts for themselves
@@ -34,7 +34,7 @@ async def create_alert(
 @router.get("/{alert_id}", response_model=Alert)
 async def get_alert(
     alert_id: UUID,
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """Get a specific alert"""
     return await alert_service.get_alert(alert_id, current_user.id)
@@ -43,7 +43,7 @@ async def get_alert(
 async def update_alert(
     alert_id: UUID,
     update_data: AlertUpdate,
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """Update an alert (e.g., mark as viewed, acknowledged)"""
     return await alert_service.update_alert(alert_id, update_data, current_user.id)
@@ -51,7 +51,7 @@ async def update_alert(
 @router.delete("/{alert_id}")
 async def delete_alert(
     alert_id: UUID,
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """Delete an alert"""
     await alert_service.delete_alert(alert_id, current_user.id)
@@ -69,7 +69,7 @@ async def list_alerts(
     created_before: Optional[datetime] = None,
     limit: int = Query(50, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """List alerts with filtering"""
     filter_params = AlertFilter(
@@ -90,7 +90,7 @@ async def list_alerts(
 
 @router.get("/stats/summary")
 async def get_alert_stats(
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """Get alert statistics for the current user"""
     return await alert_service.get_alert_stats(current_user.id)
@@ -98,7 +98,7 @@ async def get_alert_stats(
 @router.post("/{alert_id}/acknowledge", response_model=Alert)
 async def acknowledge_alert(
     alert_id: UUID,
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """Acknowledge an alert"""
     update_data = AlertUpdate(status=AlertStatus.ACKNOWLEDGED)
@@ -108,7 +108,7 @@ async def acknowledge_alert(
 async def resolve_alert(
     alert_id: UUID,
     notes: Optional[str] = None,
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """Resolve an alert"""
     update_data = AlertUpdate(status=AlertStatus.RESOLVED)
@@ -122,7 +122,7 @@ async def resolve_alert(
 async def dismiss_alert(
     alert_id: UUID,
     reason: Optional[str] = None,
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """Dismiss an alert"""
     update_data = AlertUpdate(status=AlertStatus.DISMISSED)
@@ -131,7 +131,7 @@ async def dismiss_alert(
 @router.post("/scan/trigger")
 async def trigger_risk_opportunity_scan(
     background_tasks: BackgroundTasks,
-    current_user: User = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
 ):
     """Manually trigger a risk/opportunity scan for the current user"""
     # Queue the analysis task
