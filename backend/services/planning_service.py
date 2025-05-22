@@ -14,7 +14,7 @@ from ..models.planning import (
     StrategicPlan, StrategicPlanCreate, Initiative, InitiativeCreate,
     Action, ActionCreate, Resource, ResourceCreate, ResourceUpdate,
     ResourceAllocation, ResourceAllocationCreate, ResourceAllocationRelease,
-    Risk, RiskCreate, PlanStatus, InitiativeType, ActionStatus, ResourceStatus
+    Risk, RiskCreate, PlanStatus, InitiativeType, ActionStatus, ResourceStatus, ResourceType
 )
 from ..ai.kernel_service import kernel_service
 from ..services.strategic_foundation_service import StrategicFoundationService
