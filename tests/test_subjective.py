@@ -35,8 +35,11 @@ def test_create_log_entry(monkeypatch):
         assert user_id == test_user.id
         return LogEntry(content=entry_data.content, user_id=user_id)
 
+    async def mock_process_ai(entry_id, user_id):
+        return None
+    
     monkeypatch.setattr(subjective_input.input_service, "create_log_entry", mock_create)
-    monkeypatch.setattr(subjective_input, "process_log_entry_with_ai", lambda eid: None)
+    monkeypatch.setattr(subjective_input, "process_log_entry_with_ai", mock_process_ai)
 
     response = client.post("/api/subjective/log", json={"content": "hello"})
     assert response.status_code == 201

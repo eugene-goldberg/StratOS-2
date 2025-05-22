@@ -17,7 +17,7 @@ client = TestClient(app)
 def test_analyze_alignment_valid(monkeypatch):
     plan_id = uuid.uuid4()
 
-    async def mock_analyze(pid: uuid.UUID):
+    async def mock_analyze(pid: uuid.UUID, user_id: uuid.UUID):
         assert pid == plan_id
         return {"alignment": "ok"}
 

@@ -108,7 +108,7 @@ class AnalysisService:
                 updated_at=datetime.now()
             )
             
-            analysis_dict = analysis.dict()
+            analysis_dict = analysis.model_dump()
             # Ensure UUIDs are strings for Cosmos DB
             analysis_dict["id"] = str(analysis_dict["id"])
             analysis_dict["user_id"] = str(analysis_dict["user_id"])
@@ -211,7 +211,7 @@ class AnalysisService:
         analysis.items.append(item)
         analysis.updated_at = datetime.now()
         
-        analysis_dict = analysis.dict()
+        analysis_dict = analysis.model_dump()
         analysis_dict["id"] = str(analysis_dict["id"])
         analysis_dict["user_id"] = str(analysis_dict["user_id"])
 
@@ -238,7 +238,7 @@ class AnalysisService:
         item_updated = None
         for idx, itm in enumerate(analysis.items):
             if itm.id == item_id:
-                updated_fields = itm.dict()
+                updated_fields = itm.model_dump()
                 updated_fields.update(item_data)
                 analysis.items[idx] = SWOTItem(**updated_fields)
                 analysis.updated_at = datetime.now()
@@ -248,7 +248,7 @@ class AnalysisService:
         if not item_updated:
             return None
 
-        analysis_dict = analysis.dict()
+        analysis_dict = analysis.model_dump()
         analysis_dict["id"] = str(analysis_dict["id"])
         analysis_dict["user_id"] = str(analysis_dict["user_id"])
 
@@ -277,7 +277,7 @@ class AnalysisService:
             return False # Item not found or not deleted
             
         analysis.updated_at = datetime.now()
-        analysis_dict = analysis.dict()
+        analysis_dict = analysis.model_dump()
         analysis_dict["id"] = str(analysis_dict["id"])
         analysis_dict["user_id"] = str(analysis_dict["user_id"])
 
@@ -314,7 +314,7 @@ class AnalysisService:
             updated_at=datetime.now()
         )
         
-        insight_dict = insight.dict()
+        insight_dict = insight.model_dump()
         insight_dict["id"] = str(insight_dict["id"])
         insight_dict["user_id"] = str(insight_dict["user_id"])
         # Ensure linked_strategic_goals are strings if they exist
@@ -426,7 +426,7 @@ class AnalysisService:
         if not insight:
             return None
         
-        updated_fields = insight.dict()
+        updated_fields = insight.model_dump()
         updated_fields.update(insight_data)
         # Ensure user_id is not changed by update_data
         updated_fields["user_id"] = insight.user_id 
@@ -438,7 +438,7 @@ class AnalysisService:
 
         updated_insight = Insight(**updated_fields)
         
-        insight_dict_to_save = updated_insight.dict()
+        insight_dict_to_save = updated_insight.model_dump()
         insight_dict_to_save["id"] = str(insight_dict_to_save["id"])
         insight_dict_to_save["user_id"] = str(insight_dict_to_save["user_id"])
         if insight_dict_to_save.get("linked_strategic_goals"):
@@ -520,7 +520,7 @@ class AnalysisService:
         analysis.tows_strategies = strategies
         analysis.updated_at = datetime.now()
         
-        analysis_dict = analysis.dict()
+        analysis_dict = analysis.model_dump()
         analysis_dict["id"] = str(analysis_dict["id"])
         analysis_dict["user_id"] = str(analysis_dict["user_id"])
 
@@ -571,7 +571,7 @@ class AnalysisService:
                 )
 
         analysis.updated_at = datetime.now()
-        analysis_dict = analysis.dict()
+        analysis_dict = analysis.model_dump()
         analysis_dict["id"] = str(analysis_dict["id"])
         analysis_dict["user_id"] = str(analysis_dict["user_id"])
 
@@ -887,7 +887,7 @@ class AnalysisService:
                 created_at=datetime.now()
             )
             
-            linkage_dict = linkage.dict()
+            linkage_dict = linkage.model_dump()
             linkage_dict["id"] = str(linkage_dict["id"])
             linkage_dict["user_id"] = str(linkage_dict["user_id"]) # Stored as string
             linkage_dict["linkage_type"] = linkage_dict["linkage_type"].value # Store enum value
