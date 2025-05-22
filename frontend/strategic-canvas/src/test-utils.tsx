@@ -10,6 +10,14 @@ const mockTheme = createTheme({
       default: '#ffffff',
     },
   },
+  components: {
+    // Disable ripple effect in tests to avoid width/height issues
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: true,
+      },
+    },
+  },
 });
 
 // Custom render function with providers

@@ -50,3 +50,34 @@ global.DOMRect = {
 HTMLElement.prototype.setPointerCapture = jest.fn();
 HTMLElement.prototype.releasePointerCapture = jest.fn();
 HTMLElement.prototype.hasPointerCapture = jest.fn();
+
+// Mock for MUI TouchRipple
+Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+  configurable: true,
+  value: 800,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+  configurable: true,
+  value: 500,
+});
+
+// Mock Touch and TouchList for touch events
+global.Touch = class Touch {
+  constructor(touchInit: TouchInit) {
+    Object.assign(this, touchInit);
+  }
+} as any;
+
+global.TouchList = class TouchList {
+  length = 0;
+  constructor(touches: Touch[] = []) {
+    touches.forEach((touch, index) => {
+      this[index] = touch;
+    });
+    this.length = touches.length;
+  }
+  item(index: number) {
+    return this[index] || null;
+  }
+} as any;
