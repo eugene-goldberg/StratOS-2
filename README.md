@@ -15,6 +15,7 @@ StratOS empowers leaders by seamlessly integrating their subjective insights wit
 - **Objective Data Integration**: KPI tracking and data upload capabilities
 - **AI-Powered Analysis**: SWOT/TOWS analysis, S+O linkage, insights generation
 - **Dynamic Planning**: Initiative creation, plan comparison, action tracking
+- **Conversational AI**: Memory-enabled AI assistant for strategic discussions
 
 ## Technology Stack
 
