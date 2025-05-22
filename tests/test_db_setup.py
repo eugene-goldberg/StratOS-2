@@ -163,7 +163,9 @@ class TestDatabaseInitialization:
             # Subjective Input Service containers
             "log_entries", "strategic_canvases",
             # Conversation Service containers
-            "conversations", "conversation_messages"
+            "conversations", "conversation_messages",
+            # Alert Service containers
+            "alerts"
         }
         
         actual_containers = set(CONTAINER_CONFIGS.keys())
@@ -186,7 +188,8 @@ class TestDatabaseInitialization:
             "log_entries": "/user_id",
             "strategic_canvases": "/user_id",
             "conversations": "/user_id",
-            "conversation_messages": "/conversation_id"
+            "conversation_messages": "/conversation_id",
+            "alerts": "/user_id"
         }
         
         assert CONTAINER_CONFIGS == expected_partition_keys

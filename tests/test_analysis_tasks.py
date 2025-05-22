@@ -81,7 +81,7 @@ class TestAnalysisTasks:
         
         # Mock kernel response
         mock_skill = Mock()
-        mock_context = Mock()
+        mock_context = {}  # Use a dict instead of Mock since the code assigns to it
         mock_result = Mock()
         mock_result.result = json.dumps([
             {
@@ -119,7 +119,7 @@ class TestAnalysisTasks:
         
         # Mock kernel response
         mock_skill = Mock()
-        mock_context = Mock()
+        mock_context = {}  # Use a dict instead of Mock since the code assigns to it
         mock_result = Mock()
         mock_result.result = json.dumps([
             {

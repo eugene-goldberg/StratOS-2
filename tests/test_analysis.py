@@ -1,3 +1,4 @@
+import pytest
 import os
 import sys
 import uuid
@@ -12,25 +13,32 @@ from backend.routers import analysis
 from backend.models.user import UserResponse
 from backend.dependencies import get_current_active_user, get_current_user_id
 
-client = TestClient(app)
 
-# Use a fixed UUID for predictable testing
-test_user_id = uuid.UUID("550e8400-e29b-41d4-a716-446655440000")
-user = UserResponse(
-    id=test_user_id,
-    email="user@example.com",
-    full_name="User",
-    company_name="TestCo",
-    job_title="CEO",
-    is_active=True,
-    created_at=datetime.now()
-)
+@pytest.fixture
+def client():
+    """Create test client with dependency overrides"""
+    # Use a fixed UUID for predictable testing
+    test_user_id = uuid.UUID("550e8400-e29b-41d4-a716-446655440000")
+    user = UserResponse(
+        id=test_user_id,
+        email="user@example.com",
+        full_name="User",
+        company_name="TestCo",
+        job_title="CEO",
+        is_active=True,
+        created_at=datetime.now()
+    )
+    
+    app.dependency_overrides[get_current_active_user] = lambda: user
+    app.dependency_overrides[get_current_user_id] = lambda: user.id
+    
+    yield TestClient(app)
+    
+    # Clean up
+    app.dependency_overrides.clear()
 
-app.dependency_overrides[get_current_active_user] = lambda: user
-app.dependency_overrides[get_current_user_id] = lambda: user.id
 
-
-def test_discover_so_linkages(monkeypatch):
+def test_discover_so_linkages(client, monkeypatch):
     async def mock_discover(uid: str, *args, **kwargs):
         # Don't assert the exact UUID since it can vary, just check it's a string
         assert isinstance(uid, str)
