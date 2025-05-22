@@ -16,11 +16,13 @@ from ..models.subjective_input import (
     LogEntryUpdate, 
     LogEntryTag,
     LogEntryType,
+    StrategyReferenceType,
     StrategicCanvas, 
     StrategicCanvasCreate, 
     CanvasElement,
     CanvasElementCreate
 )
+from ..models.strategic_foundation import Purpose, Vision, Value, StrategicGoal
 from ..ai.kernel_service import kernel_service
 
 class SubjectiveInputService:
@@ -62,6 +64,7 @@ class SubjectiveInputService:
             # Get container proxies. Actual creation should be handled at app startup.
             self.log_container = self.database.get_container_client("log_entries") # PK: /user_id
             self.canvas_container = self.database.get_container_client("strategic_canvases") # PK: /user_id
+            self.northstar_container = self.database.get_container_client("NorthStarConfigurations") # PK: /id
             
             self.cosmos_db_available = True
             self.logger.info("Cosmos DB async client initialized for SubjectiveInputService.")
@@ -72,6 +75,7 @@ class SubjectiveInputService:
             self.database = None
             self.log_container = None
             self.canvas_container = None
+            self.northstar_container = None
     
     def setup_speech_service(self):
         """Initialize Azure Speech Service for voice-to-text"""
@@ -96,7 +100,7 @@ class SubjectiveInputService:
             self.log_entries_cache.setdefault(str(entry.user_id), {})[str(entry.id)] = entry
             return
 
-        entry_dict = entry.dict()
+        entry_dict = entry.model_dump()
         entry_dict["id"] = str(entry.id)
         entry_dict["user_id"] = str(entry.user_id) # Partition Key
         for i, tag_dict in enumerate(entry_dict.get("tags", [])):
@@ -120,7 +124,7 @@ class SubjectiveInputService:
             self.canvases_cache.setdefault(str(canvas.user_id), {})[str(canvas.id)] = canvas
             return
 
-        canvas_dict = canvas.dict()
+        canvas_dict = canvas.model_dump()
         canvas_dict["id"] = str(canvas.id)
         canvas_dict["user_id"] = str(canvas.user_id) # Partition Key
         for i, el_dict in enumerate(canvas_dict.get("elements", [])):
@@ -428,4 +432,113 @@ class SubjectiveInputService:
             self.logger.error(f"Error getting canvas AI assistance for user {user_id}, canvas {canvas_id}: {str(e)}")
             return f"AI assistance unavailable. Error: {str(e)}"
 
+    # Strategic Element Validation Methods
+    async def validate_strategic_element_link(self, user_id: UUID, reference_type: StrategyReferenceType, reference_id: UUID) -> Optional[Dict[str, Any]]:
+        """Validate that a strategic element reference exists and belongs to the user."""
+        if not self.cosmos_db_available or not self.northstar_container:
+            self.logger.warning("Cannot validate strategic element links - Cosmos DB not available")
+            return None
+            
+        try:
+            # Query for North Star configurations belonging to the user
+            query = "SELECT * FROM c WHERE c.user_id = @user_id"
+            parameters = [{"name": "@user_id", "value": str(user_id)}]
+            
+            async for item_data in self.northstar_container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True):
+                northstar = item_data
+                
+                # Check each strategic element type
+                if reference_type == StrategyReferenceType.PURPOSE:
+                    if northstar.get("purpose", {}).get("id") == str(reference_id):
+                        return {
+                            "type": "purpose",
+                            "id": reference_id,
+                            "statement": northstar["purpose"]["statement"],
+                            "description": northstar["purpose"].get("description")
+                        }
+                        
+                elif reference_type == StrategyReferenceType.VISION:
+                    if northstar.get("vision", {}).get("id") == str(reference_id):
+                        return {
+                            "type": "vision", 
+                            "id": reference_id,
+                            "statement": northstar["vision"]["statement"],
+                            "description": northstar["vision"].get("description"),
+                            "time_horizon": northstar["vision"].get("time_horizon")
+                        }
+                        
+                elif reference_type == StrategyReferenceType.VALUE:
+                    for value in northstar.get("values", []):
+                        if value.get("id") == str(reference_id):
+                            return {
+                                "type": "value",
+                                "id": reference_id,
+                                "name": value["name"],
+                                "description": value["description"],
+                                "examples": value.get("examples", [])
+                            }
+                            
+                elif reference_type == StrategyReferenceType.GOAL:
+                    for goal in northstar.get("strategic_goals", []):
+                        if goal.get("id") == str(reference_id):
+                            return {
+                                "type": "goal",
+                                "id": reference_id, 
+                                "title": goal["title"],
+                                "description": goal["description"],
+                                "time_frame": goal.get("time_frame"),
+                                "metrics": goal.get("metrics", [])
+                            }
+            
+            return None  # Element not found
+            
+        except Exception as e:
+            self.logger.error(f"Error validating strategic element link for user {user_id}: {str(e)}")
+            return None
+    
+    async def create_log_entry_with_strategic_links(self, entry_data: LogEntryCreate, user_id: UUID, strategic_links: Optional[List[Dict[str, Any]]] = None) -> LogEntry:
+        """Create a log entry with validated strategic element links."""
+        tags = []
+        
+        # Process regular tags
+        for tag_name in entry_data.tags:
+            tags.append(LogEntryTag(name=tag_name, type=StrategyReferenceType.CUSTOM))
+        
+        # Process strategic element links
+        if strategic_links:
+            for link in strategic_links:
+                try:
+                    ref_type = StrategyReferenceType(link.get("type", "custom"))
+                    ref_id = UUID(link["reference_id"]) if link.get("reference_id") else None
+                    
+                    if ref_type != StrategyReferenceType.CUSTOM and ref_id:
+                        # Validate the strategic element exists
+                        element_data = await self.validate_strategic_element_link(user_id, ref_type, ref_id)
+                        if element_data:
+                            tag = LogEntryTag(
+                                name=link.get("name", f"{ref_type.value}_{ref_id}"),
+                                type=ref_type,
+                                reference_id=ref_id,
+                                strategic_element_data=element_data
+                            )
+                            tags.append(tag)
+                        else:
+                            self.logger.warning(f"Strategic element {ref_type.value}:{ref_id} not found for user {user_id}")
+                    else:
+                        # Custom tag without reference
+                        tags.append(LogEntryTag(name=link.get("name", "custom"), type=StrategyReferenceType.CUSTOM))
+                        
+                except (ValueError, KeyError) as e:
+                    self.logger.warning(f"Invalid strategic link format: {link}, error: {str(e)}")
+                    continue
+        
+        entry = LogEntry(
+            content=entry_data.content, 
+            entry_type=entry_data.entry_type, 
+            tags=tags, 
+            user_id=user_id
+        )
+        await self._save_log_entry_to_db(entry)
+        return entry
+    
     # process_voice_note_stream method is removed as the router uses kernel_service directly for streaming.

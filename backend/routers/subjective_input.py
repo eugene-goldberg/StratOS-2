@@ -45,6 +45,58 @@ async def create_log_entry(
     
     return entry
 
+@router.post("/log/strategic", response_model=LogEntry, status_code=status.HTTP_201_CREATED)
+async def create_log_entry_with_strategic_links(
+    request: Request,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
+    """
+    Create a new CEO Log entry with strategic element links
+    
+    Request body format:
+    {
+        "content": "Log entry content",
+        "entry_type": "idea|observation|concern|reflection|question|other",
+        "tags": ["tag1", "tag2"],
+        "strategic_links": [
+            {
+                "name": "Link name",
+                "type": "purpose|vision|value|goal",
+                "reference_id": "uuid-of-strategic-element"
+            }
+        ]
+    }
+    """
+    try:
+        body = await request.json()
+        
+        # Extract log entry data
+        entry_data = LogEntryCreate(
+            content=body["content"],
+            entry_type=LogEntryType(body.get("entry_type", "other")),
+            tags=body.get("tags", [])
+        )
+        
+        # Extract strategic links
+        strategic_links = body.get("strategic_links", [])
+        
+        # Create the log entry with strategic links
+        entry = await input_service.create_log_entry_with_strategic_links(
+            entry_data, current_user_id, strategic_links
+        )
+        
+        # Process with AI for additional tagging and insights
+        await process_log_entry_with_ai(entry.id, current_user_id)
+        
+        return entry
+        
+    except KeyError as e:
+        raise HTTPException(status_code=400, detail=f"Missing required field: {str(e)}")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid value: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating log entry: {str(e)}")
+
 @router.get("/log/{entry_id}", response_model=LogEntry)
 async def get_log_entry(entry_id: UUID, current_user_id: UUID = Depends(get_current_user_id)):
     """

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Literal
 from datetime import datetime
 from uuid import UUID, uuid4
 from enum import Enum
@@ -12,11 +12,19 @@ class LogEntryType(str, Enum):
     QUESTION = "question"
     OTHER = "other"
 
+class StrategyReferenceType(str, Enum):
+    PURPOSE = "purpose"
+    VISION = "vision"
+    VALUE = "value"
+    GOAL = "goal"
+    CUSTOM = "custom"
+
 class LogEntryTag(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     name: str
-    type: str  # e.g., "strategic_goal", "value", "custom"
-    reference_id: Optional[UUID] = None  # If it references a strategic goal, value, etc.
+    type: StrategyReferenceType = StrategyReferenceType.CUSTOM
+    reference_id: Optional[UUID] = None  # If it references a strategic element
+    strategic_element_data: Optional[Dict[str, Any]] = None  # Cache of referenced element
 
 class LogEntry(BaseModel):
     id: UUID = Field(default_factory=uuid4)
