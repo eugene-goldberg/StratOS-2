@@ -21,6 +21,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:coverage": "react-scripts test --coverage --watchAll=false",
+    "test:ci": "react-scripts test --watchAll=false --testPathPattern='(types|store|services)' --verbose",
+    "test:all": "react-scripts test --watchAll=false",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -41,8 +44,22 @@
       "last 1 safari version"
     ]
   },
+  "jest": {
+    "moduleNameMapper": {
+      "^reactflow$": "<rootDir>/src/__mocks__/reactflow.js"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(axios|reactflow|@reactflow)/)"
+    ]
+  },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/jest": "^29.5.5",
     "ajv": "^6.12.6",
+    "jest-environment-jsdom": "^29.7.0",
+    "msw": "^1.3.2",
     "react-scripts": "5.0.1"
   }
 }
