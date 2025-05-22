@@ -226,20 +226,6 @@ async def add_message_with_enhanced_ai(
             "conversation_id": conversation_id
         }
 
-@router.get("/{conversation_id}/context")
-async def get_conversation_context(
-    conversation_id: UUID,
-    include_messages: int = 10,
-    current_user_id: UUID = Depends(get_current_user_id)
-):
-    """Get enhanced conversation context with memory and strategic data."""
-    context = await conversation_service.get_conversation_context(
-        conversation_id, current_user_id, include_messages
-    )
-    if not context:
-        raise HTTPException(status_code=404, detail="Conversation not found")
-    
-    return context
 
 # Conversation management endpoints
 @router.post("/{conversation_id}/summarize")
