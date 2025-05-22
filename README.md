@@ -2,7 +2,7 @@
 
 StratOS is an AI-powered strategic copilot for CEOs and leadership teams, transforming how businesses develop, analyze, plan, execute, and refine their strategies for sustained success.
 
-[![Python Tests](https://github.com/eugene-goldberg/StratOS-2/actions/workflows/ci.yml/badge.svg)](https://github.com/eugene-goldberg/StratOS-2/actions/workflows/ci.yml)
+[![Test Suite](https://github.com/eugene-goldberg/StratOS-2/actions/workflows/test.yml/badge.svg)](https://github.com/eugene-goldberg/StratOS-2/actions/workflows/test.yml)
 
 ## Project Overview
 
