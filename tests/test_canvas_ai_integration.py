@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
 from httpx import AsyncClient
@@ -15,7 +16,7 @@ from backend.models.canvas_ai import (
 )
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def async_client():
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client

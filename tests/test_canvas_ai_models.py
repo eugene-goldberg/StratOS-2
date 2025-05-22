@@ -386,12 +386,12 @@ class TestRequestModels:
         request = TextStructureRequest(
             text="We need to improve our customer satisfaction through better service delivery",
             canvas_context={"existing_nodes": 5},
-            north_star_context={"purpose": "Customer excellence"}
+            preferences={"max_suggestions": 10, "confidence_threshold": 0.7}
         )
         
         assert "customer satisfaction" in request.text
         assert request.canvas_context["existing_nodes"] == 5
-        assert request.north_star_context["purpose"] == "Customer excellence"
+        assert request.preferences["max_suggestions"] == 10
     
     def test_connection_analysis_request_creation(self):
         """Test ConnectionAnalysisRequest model creation."""
@@ -405,13 +405,13 @@ class TestRequestModels:
         canvas_data = CanvasData(nodes=[node], edges=[])
         
         request = ConnectionAnalysisRequest(
-            canvas_data=canvas_data,
-            selected_nodes=["node_1"],
-            north_star_context={"vision": "Be the market leader"}
+            nodes=[{"id": "node_1", "type": "goal", "content": "Test goal"}],
+            canvas_context={"existing_connections": []},
+            analysis_depth="comprehensive"
         )
         
-        assert len(request.canvas_data.nodes) == 1
-        assert request.selected_nodes == ["node_1"]
+        assert len(request.nodes) == 1
+        assert request.analysis_depth == "comprehensive"
     
     def test_theme_analysis_request_creation(self):
         """Test ThemeAnalysisRequest model creation."""
@@ -425,12 +425,12 @@ class TestRequestModels:
         canvas_data = CanvasData(nodes=[node], edges=[])
         
         request = ThemeAnalysisRequest(
-            canvas_data=canvas_data,
+            canvas_elements={"nodes": [{"id": "node_1", "type": "goal", "content": "Innovation"}], "connections": []},
             analysis_scope="comprehensive",
-            north_star_context={"values": ["innovation", "excellence"]}
+            preferences={"include_patterns": True}
         )
         
-        assert len(request.canvas_data.nodes) == 1
+        assert len(request.canvas_elements["nodes"]) == 1
         assert request.analysis_scope == "comprehensive"
     
     def test_canvas_optimization_request_creation(self):
@@ -445,13 +445,13 @@ class TestRequestModels:
         canvas_data = CanvasData(nodes=[node], edges=[])
         
         request = CanvasOptimizationRequest(
-            canvas_data=canvas_data,
-            current_objectives=["Growth", "Innovation"],
-            north_star_context={"purpose": "Excellence"}
+            current_canvas={"nodes": [{"id": "node_1", "type": "goal", "content": "Excellence"}], "connections": []},
+            optimization_goals=["completeness", "strategic_alignment"],
+            strategic_context={"industry": "technology", "company_stage": "growth"}
         )
         
-        assert len(request.canvas_data.nodes) == 1
-        assert "Growth" in request.current_objectives
+        assert len(request.current_canvas["nodes"]) == 1
+        assert "completeness" in request.optimization_goals
 
 
 class TestResponseModels:
