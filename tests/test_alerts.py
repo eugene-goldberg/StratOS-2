@@ -183,17 +183,20 @@ class TestAlertService:
         user_id = sample_alert_data.user_id
         
         # Create multiple alerts
+        created_alerts = []
         for i in range(3):
-            alert_data = sample_alert_data.copy()
+            alert_data = sample_alert_data.model_copy()
             alert_data.title = f"Risk {i}"
-            await alert_service.create_alert(alert_data)
+            created_alert = await alert_service.create_alert(alert_data)
+            created_alerts.append(created_alert)
         
         stats = await alert_service.get_alert_stats(user_id)
         
-        assert stats["total_alerts"] >= 3
-        assert AlertType.RISK in stats["by_type"]
-        assert AlertSeverity.HIGH in stats["by_severity"]
-        assert stats["unread_count"] >= 3
+        # Since we're using in-memory cache, check exact counts
+        assert stats["total_alerts"] == 3
+        assert stats["by_type"][AlertType.RISK] == 3
+        assert stats["by_severity"][AlertSeverity.HIGH] == 3
+        assert stats["unread_count"] == 3
 
 
 class TestRiskOpportunityDetection:

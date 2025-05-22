@@ -13,6 +13,13 @@ from backend.models.user import UserResponse
 
 
 @pytest.fixture
+def client():
+    """Create test client"""
+    from fastapi.testclient import TestClient
+    return TestClient(app)
+
+
+@pytest.fixture
 def authenticated_client(client):
     """Client with mocked authentication"""
     # Mock the get_current_user dependency
