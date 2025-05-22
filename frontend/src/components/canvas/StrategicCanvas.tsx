@@ -16,7 +16,7 @@ import { CanvasNode, CanvasEdge, NodeType } from '../../types/canvas';
 import { nodeTypes } from './nodes';
 import CanvasToolbar from './CanvasToolbar';
 import AIAssistPanel from './AIAssistPanel';
-import useCanvasVoiceCommands from '../../hooks/useCanvasVoiceCommands';
+import { useCanvasVoiceCommands } from '../../hooks/useCanvasVoiceCommands';
 
 import { Box, useTheme, Snackbar, Alert } from '@mui/material';
 
@@ -111,8 +111,11 @@ const StrategicCanvas: React.FC = () => {
   } = useCanvasVoiceCommands({
     canvasId: 'main-canvas', // You might want to get this from props or store
     onCommandComplete: (result) => {
-      if (result.message) {
-        setVoiceCommandMessage(result.message);
+      if (result.success) {
+        setVoiceCommandMessage(`Command executed: ${result.action || 'Unknown action'}`);
+        setShowVoiceCommandAlert(true);
+      } else {
+        setVoiceCommandMessage('Command failed');
         setShowVoiceCommandAlert(true);
       }
     },

@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Divider,
   List,
   ListItem,
   ListItemText,
@@ -33,8 +32,6 @@ import {
 } from '@mui/material';
 import {
   Add as AddIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
   PlayArrow as PlayArrowIcon
 } from '@mui/icons-material';
 import useAnalysisStore from '../store/analysisStore';
