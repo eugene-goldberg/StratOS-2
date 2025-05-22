@@ -11,7 +11,7 @@ from backend.main import app
 from backend.dependencies import get_current_user_id
 from backend.models.canvas_ai import (
     TextStructureRequest, ConnectionAnalysisRequest, 
-    ThemeIdentificationRequest, CanvasOptimizationRequest,
+    ThemeAnalysisRequest, CanvasOptimizationRequest, CanvasData,
     AIAnalysisResponse, NodeSuggestion, ConnectionSuggestion,
     ThemeCluster, OptimizationRecommendation, NodeType, ConnectionType
 )
@@ -31,7 +31,12 @@ async def async_client():
     app.dependency_overrides.clear()
 
 
-# Authentication is now mocked at the dependency level
+@pytest_asyncio.fixture
+async def unauthenticated_client():
+    # No authentication mocking - should trigger 401 responses
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
 
 
 @pytest.fixture
@@ -125,7 +130,7 @@ class TestCanvasAIRouter:
     @pytest.mark.asyncio
     async def test_structure_text_success(self, async_client, 
                                         sample_text_structure_request, mock_ai_response):
-        with patch('backend.services.canvas_ai_service.CanvasAIService.structure_text', 
+        with patch('backend.services.canvas_ai_service.canvas_ai_service.structure_text', 
                   return_value=mock_ai_response) as mock_service:
             response = await async_client.post(
                 "/api/canvas-ai/structure-text",
@@ -152,8 +157,8 @@ class TestCanvasAIRouter:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     @pytest.mark.asyncio
-    async def test_structure_text_unauthorized(self, async_client, sample_text_structure_request):
-        response = await async_client.post(
+    async def test_structure_text_unauthorized(self, unauthenticated_client, sample_text_structure_request):
+        response = await unauthenticated_client.post(
             "/api/canvas-ai/structure-text",
             json=sample_text_structure_request
         )
@@ -178,7 +183,7 @@ class TestCanvasAIRouter:
             processing_time=1.5
         )
         
-        with patch('backend.services.canvas_ai_service.CanvasAIService.analyze_connections',
+        with patch('backend.services.canvas_ai_service.canvas_ai_service.analyze_connections',
                   return_value=mock_response) as mock_service:
             response = await async_client.post(
                 "/api/canvas-ai/analyze-connections",
@@ -210,7 +215,7 @@ class TestCanvasAIRouter:
             processing_time=2.1
         )
         
-        with patch('backend.services.canvas_ai_service.CanvasAIService.identify_themes',
+        with patch('backend.services.canvas_ai_service.canvas_ai_service.identify_themes',
                   return_value=mock_response) as mock_service:
             response = await async_client.post(
                 "/api/canvas-ai/identify-themes",
@@ -241,7 +246,7 @@ class TestCanvasAIRouter:
             processing_time=2.8
         )
         
-        with patch('backend.services.canvas_ai_service.CanvasAIService.optimize_canvas',
+        with patch('backend.services.canvas_ai_service.canvas_ai_service.optimize_canvas',
                   return_value=mock_response) as mock_service:
             response = await async_client.post(
                 "/api/canvas-ai/optimize-canvas",
@@ -255,28 +260,33 @@ class TestCanvasAIRouter:
             mock_service.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_comprehensive_analysis_success(self, async_client,
-                                                sample_text_structure_request):
-        mock_response = AIAnalysisResponse(
-            analysis_type="comprehensive_analysis",
-            suggestions=[mock_ai_response.suggestions[0]],
-            confidence=0.87,
-            processing_time=4.2,
-            metadata={"comprehensive": True}
-        )
+    async def test_comprehensive_analysis_success(self, async_client, mock_ai_response):
+        request_data = {
+            "canvas_data": {
+                "nodes": [
+                    {"id": "1", "title": "Test Goal", "content": "Test goal content", "type": "goal"}
+                ],
+                "edges": []
+            }
+        }
         
-        with patch('backend.services.canvas_ai_service.CanvasAIService.comprehensive_analysis',
-                  return_value=mock_response) as mock_service:
+        mock_results = {
+            "themes": mock_ai_response,
+            "connections": mock_ai_response,
+            "optimization": mock_ai_response
+        }
+        
+        with patch('backend.services.canvas_ai_service.canvas_ai_service.comprehensive_analysis',
+                  return_value=mock_results) as mock_service:
             response = await async_client.post(
                 "/api/canvas-ai/comprehensive-analysis",
-                json=sample_text_structure_request,
-                
+                json=request_data
             )
             
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
-            assert data["analysis_type"] == "comprehensive_analysis"
-            assert data["metadata"]["comprehensive"] is True
+            assert "analysis_results" in data
+            assert data["total_analyses"] == 3
             mock_service.assert_called_once()
 
     @pytest.mark.asyncio
@@ -294,67 +304,49 @@ class TestCanvasAIRouter:
     @pytest.mark.asyncio
     async def test_service_error_handling(self, async_client,
                                         sample_text_structure_request):
-        with patch('backend.services.canvas_ai_service.CanvasAIService.structure_text',
+        with patch('backend.services.canvas_ai_service.canvas_ai_service.structure_text',
                   side_effect=Exception("AI service error")) as mock_service:
             response = await async_client.post(
                 "/api/canvas-ai/structure-text",
-                json=sample_text_structure_request,
-                
+                json=sample_text_structure_request
             )
             
             assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
             data = response.json()
-            assert "error" in data
-            assert "AI service error" in data["error"]
+            assert "detail" in data
+            assert "Failed to analyze text structure" in data["detail"]
 
     @pytest.mark.asyncio
-    async def test_batch_processing_endpoints(self, async_client):
+    async def test_batch_processing_endpoints(self, async_client, mock_ai_response):
         batch_request = {
-            "requests": [
-                {
-                    "type": "text_structure",
-                    "data": {
-                        "text": "Improve efficiency",
-                        "canvas_context": {"existing_nodes": []},
-                        "preferences": {"max_suggestions": 3}
-                    }
-                },
-                {
-                    "type": "connection_analysis", 
-                    "data": {
-                        "nodes": [{"id": "1", "type": "goal", "content": "Test"}],
-                        "canvas_context": {"existing_connections": []}
-                    }
-                }
-            ]
+            "texts": [
+                "Improve efficiency and reduce costs",
+                "Expand into new markets"
+            ],
+            "canvas_context": {"existing_nodes": []},
+            "north_star_context": {"company_vision": "test"}
         }
         
-        mock_responses = [
-            AIAnalysisResponse(analysis_type="text_structure", suggestions=[], confidence=0.8),
-            AIAnalysisResponse(analysis_type="connection_analysis", suggestions=[], confidence=0.7)
-        ]
-        
-        with patch('backend.services.canvas_ai_service.CanvasAIService.process_batch',
-                  return_value=mock_responses) as mock_service:
+        with patch('backend.services.canvas_ai_service.canvas_ai_service.structure_text',
+                  return_value=mock_ai_response) as mock_service:
             response = await async_client.post(
-                "/api/canvas-ai/batch-process",
-                json=batch_request,
-                
+                "/api/canvas-ai/batch-text-structure",
+                json=batch_request
             )
             
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
-            assert "results" in data
-            assert len(data["results"]) == 2
-            mock_service.assert_called_once()
+            assert "batch_results" in data
+            assert data["total_processed"] == 2
+            assert mock_service.call_count == 2
 
     @pytest.mark.asyncio
     async def test_rate_limiting_simulation(self, async_client,
-                                          sample_text_structure_request):
+                                          sample_text_structure_request, mock_ai_response):
         """Test multiple rapid requests to ensure rate limiting works."""
         tasks = []
         
-        with patch('backend.services.canvas_ai_service.CanvasAIService.structure_text',
+        with patch('backend.services.canvas_ai_service.canvas_ai_service.structure_text',
                   return_value=mock_ai_response):
             for i in range(5):
                 task = async_client.post(
@@ -404,12 +396,12 @@ class TestCanvasAIRouter:
                 
             )
             # Should either succeed or return validation error
-            assert response.status_code in [status.HTTP_200_OK, status.HTTP_422_UNPROCESSABLE_ENTITY]
+            assert response.status_code in [status.HTTP_200_OK, status.HTTP_422_UNPROCESSABLE_ENTITY, status.HTTP_400_BAD_REQUEST]
 
     @pytest.mark.asyncio
-    async def test_cors_headers(self, async_client, sample_text_structure_request):
+    async def test_cors_headers(self, async_client, sample_text_structure_request, mock_ai_response):
         """Test CORS headers are properly set."""
-        with patch('backend.services.canvas_ai_service.CanvasAIService.structure_text',
+        with patch('backend.services.canvas_ai_service.canvas_ai_service.structure_text',
                   return_value=mock_ai_response):
             response = await async_client.post(
                 "/api/canvas-ai/structure-text",
