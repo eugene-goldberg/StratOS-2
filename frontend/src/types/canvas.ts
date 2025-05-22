@@ -60,7 +60,7 @@ export type NodeData =
   | ImageNodeData;
 
 // Custom node with additional properties
-export interface CanvasNode extends Node<NodeData> {
+export interface CanvasNode extends Node<NodeData, string | undefined> {
   type: NodeType;
   style?: React.CSSProperties;
 }
