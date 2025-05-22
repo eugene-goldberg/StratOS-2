@@ -104,7 +104,7 @@ export const useNorthStarStore = create<NorthStarState>((set, get) => ({
   createStrategicGoal: async (data: Partial<StrategicGoal>) => {
     set({ isLoading: true, error: null });
     try {
-      const newGoal = await northStarService.createStrategicGoal(data);
+      await northStarService.createStrategicGoal(data);
       
       // Reload to get updated hierarchy
       await get().loadNorthStar();

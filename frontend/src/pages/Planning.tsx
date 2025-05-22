@@ -116,7 +116,8 @@ const Planning: React.FC = () => {
     deleteAction
   } = usePlanningStore();
 
-  const { strategicGoals, loadStrategicGoals } = useNorthStarStore();
+  const { northStar, loadNorthStar } = useNorthStarStore();
+  const strategicGoals = northStar?.strategic_goals || [];
 
   const [initiativeData, setInitiativeData] = useState({
     title: '',
@@ -131,8 +132,8 @@ const Planning: React.FC = () => {
 
   useEffect(() => {
     loadPlans();
-    loadStrategicGoals();
-  }, [loadPlans, loadStrategicGoals]);
+    loadNorthStar();
+  }, [loadPlans, loadNorthStar]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);

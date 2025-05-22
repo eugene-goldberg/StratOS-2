@@ -1,7 +1,4 @@
-import axios from 'axios';
 import apiService from './apiService';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 export interface Purpose {
   id: string;

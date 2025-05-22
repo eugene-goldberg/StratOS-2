@@ -184,7 +184,8 @@ const ObjectiveData: React.FC = () => {
     uploadProgress,
     error
   } = useObjectiveDataStore();
-  const { strategicGoals, loadStrategicGoals } = useNorthStarStore();
+  const { northStar, loadNorthStar } = useNorthStarStore();
+  const strategicGoals = northStar?.strategic_goals || [];
 
   const [kpiName, setKpiName] = useState('');
   const [kpiCurrent, setKpiCurrent] = useState('');
@@ -199,8 +200,8 @@ const ObjectiveData: React.FC = () => {
   useEffect(() => {
     loadKPIs();
     loadDatasets();
-    loadStrategicGoals();
-  }, [loadKPIs, loadDatasets, loadStrategicGoals]);
+    loadNorthStar();
+  }, [loadKPIs, loadDatasets, loadNorthStar]);
 
   return (
     <Box sx={{ height: 'calc(100vh - 140px)', display: 'flex', flexDirection: 'column' }}>
