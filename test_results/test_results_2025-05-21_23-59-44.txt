@@ -1,0 +1,123 @@
+Test Results - 2025-05-21 23:59:44
+================================================================================
+
+Dependencies required for all tests to pass:
+- pytest
+- pytest-asyncio
+- pytest-mock
+- fastapi
+- httpx
+- semantic-kernel
+- azure-identity
+- azure-cosmos
+- azure-storage-blob
+- (see requirements.txt for complete list)
+
+
+
+Test: test_analysis.py
+--------------------------------------------------------------------------------
+
+Errors:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pytest'
+
+
+Test: test_analysis_service.py
+--------------------------------------------------------------------------------
+
+Errors:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pytest'
+
+
+Test: test_auth_service.py
+--------------------------------------------------------------------------------
+
+Errors:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pytest'
+
+
+Test: test_objective_data_service.py
+--------------------------------------------------------------------------------
+
+Errors:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pytest'
+
+
+Test: test_planning.py
+--------------------------------------------------------------------------------
+
+Errors:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pytest'
+
+
+Test: test_planning_service.py
+--------------------------------------------------------------------------------
+
+Errors:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pytest'
+
+
+Test: test_strategic_foundation_service.py
+--------------------------------------------------------------------------------
+
+Errors:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pytest'
+
+
+Test: test_subjective.py
+--------------------------------------------------------------------------------
+
+Errors:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pytest'
+
+
+Test: test_subjective_input_service.py
+--------------------------------------------------------------------------------
+
+Errors:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pytest'
+
+
+================================================================================
+Test Summary
+Total tests: 9
+Passed: 0
+Failed: 9
+Tests with missing dependencies: 0
+
+
+Failed tests:
+  ✗ test_analysis.py
+  ✗ test_analysis_service.py
+  ✗ test_auth_service.py
+  ✗ test_objective_data_service.py
+  ✗ test_planning.py
+  ✗ test_planning_service.py
+  ✗ test_strategic_foundation_service.py
+  ✗ test_subjective.py
+  ✗ test_subjective_input_service.py
+
+
+NOTE: Most tests are failing due to missing dependencies. To run the tests successfully, install all dependencies using:
+pip install -r requirements.txt
+
+Then run the tests using:
+python -m pytest -xvs tests/
