@@ -161,7 +161,9 @@ class TestDatabaseInitialization:
             # Strategic Foundation Service containers
             "NorthStarConfigurations",
             # Subjective Input Service containers
-            "log_entries", "strategic_canvases"
+            "log_entries", "strategic_canvases",
+            # Conversation Service containers
+            "conversations", "conversation_messages"
         }
         
         actual_containers = set(CONTAINER_CONFIGS.keys())
@@ -182,7 +184,9 @@ class TestDatabaseInitialization:
             "Initiatives": "/id",
             "NorthStarConfigurations": "/id",
             "log_entries": "/user_id",
-            "strategic_canvases": "/user_id"
+            "strategic_canvases": "/user_id",
+            "conversations": "/user_id",
+            "conversation_messages": "/conversation_id"
         }
         
         assert CONTAINER_CONFIGS == expected_partition_keys

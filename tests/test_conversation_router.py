@@ -21,15 +21,29 @@ from backend.models.conversation import (
 
 
 @pytest.fixture
-def client():
-    """Create test client."""
-    return TestClient(app)
+def client(mock_user_id):
+    """Create test client with dependency overrides."""
+    from backend.dependencies import get_current_user_id
+    
+    # Override the dependency
+    def override_get_current_user_id():
+        return mock_user_id
+    
+    app.dependency_overrides[get_current_user_id] = override_get_current_user_id
+    
+    test_client = TestClient(app)
+    
+    yield test_client
+    
+    # Clean up dependency overrides
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
 def mock_user_id():
     """Mock user ID for testing."""
-    return uuid4()
+    # Use a fixed UUID for consistent testing
+    return UUID('12345678-1234-5678-9abc-123456789abc')
 
 
 @pytest.fixture
@@ -63,12 +77,10 @@ def message_create_data():
 class TestConversationCRUDEndpoints:
     """Test conversation CRUD API endpoints."""
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_create_conversation(self, mock_service, mock_get_user, client, mock_user_id, conversation_create_data):
+    def test_create_conversation(self, mock_service, client, mock_user_id, conversation_create_data):
         """Test POST /api/conversations endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         mock_conversation = Conversation(
             id=uuid4(),
             user_id=mock_user_id,
@@ -95,12 +107,10 @@ class TestConversationCRUDEndpoints:
         call_args = mock_service.create_conversation.call_args
         assert call_args[0][1] == mock_user_id  # user_id parameter
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_list_conversations(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_list_conversations(self, mock_service, client, mock_user_id):
         """Test GET /api/conversations endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         mock_conversations = [
             Conversation(
                 id=uuid4(),
@@ -131,17 +141,21 @@ class TestConversationCRUDEndpoints:
         assert data["conversations"][0]["title"] == "Conversation 1"
         assert data["conversations"][1]["title"] == "Conversation 2"
         
-        # Verify service was called correctly
-        mock_service.list_conversations.assert_called_once_with(
+        # Verify service was called twice (once for data, once for count)
+        assert mock_service.list_conversations.call_count == 2
+        # First call with pagination parameters
+        mock_service.list_conversations.assert_any_call(
             mock_user_id, limit=10, offset=0, conversation_type=None
         )
+        # Second call for total count
+        mock_service.list_conversations.assert_any_call(
+            mock_user_id, limit=1000
+        )
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_list_conversations_with_type_filter(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_list_conversations_with_type_filter(self, mock_service, client, mock_user_id):
         """Test GET /api/conversations with conversation type filter."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         mock_conversations = [
             Conversation(
                 id=uuid4(),
@@ -161,17 +175,21 @@ class TestConversationCRUDEndpoints:
         assert len(data["conversations"]) == 1
         assert data["conversations"][0]["conversation_type"] == "strategic_planning"
         
-        # Verify service was called with filter
-        mock_service.list_conversations.assert_called_once_with(
+        # Verify service was called twice (once for data, once for count)
+        assert mock_service.list_conversations.call_count == 2
+        # First call with type filter and default pagination
+        mock_service.list_conversations.assert_any_call(
             mock_user_id, limit=20, offset=0, conversation_type=ConversationType.STRATEGIC_PLANNING
         )
+        # Second call for total count
+        mock_service.list_conversations.assert_any_call(
+            mock_user_id, limit=1000
+        )
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_get_conversation(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_get_conversation(self, mock_service, client, mock_user_id):
         """Test GET /api/conversations/{conversation_id} endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_conversation = Conversation(
             id=conversation_id,
@@ -206,12 +224,10 @@ class TestConversationCRUDEndpoints:
         mock_service.get_conversation.assert_called_once_with(conversation_id, mock_user_id)
         mock_service.get_messages.assert_called_once_with(conversation_id, mock_user_id, limit=5)
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_get_conversation_not_found(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_get_conversation_not_found(self, mock_service, client, mock_user_id):
         """Test GET /api/conversations/{conversation_id} when conversation doesn't exist."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_service.get_conversation = AsyncMock(return_value=None)
         
@@ -223,12 +239,10 @@ class TestConversationCRUDEndpoints:
         data = response.json()
         assert data["detail"] == "Conversation not found"
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_update_conversation(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_update_conversation(self, mock_service, client, mock_user_id):
         """Test PUT /api/conversations/{conversation_id} endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         updated_conversation = Conversation(
             id=conversation_id,
@@ -261,12 +275,10 @@ class TestConversationCRUDEndpoints:
         assert call_args[0][0] == conversation_id
         assert call_args[0][1] == mock_user_id
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_update_conversation_not_found(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_update_conversation_not_found(self, mock_service, client, mock_user_id):
         """Test PUT /api/conversations/{conversation_id} when conversation doesn't exist."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_service.update_conversation = AsyncMock(return_value=None)
         
@@ -280,12 +292,10 @@ class TestConversationCRUDEndpoints:
         data = response.json()
         assert data["detail"] == "Conversation not found"
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_delete_conversation(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_delete_conversation(self, mock_service, client, mock_user_id):
         """Test DELETE /api/conversations/{conversation_id} endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_service.delete_conversation = AsyncMock(return_value=True)
         
@@ -301,12 +311,10 @@ class TestConversationCRUDEndpoints:
         # Verify service was called correctly
         mock_service.delete_conversation.assert_called_once_with(conversation_id, mock_user_id)
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_delete_conversation_not_found(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_delete_conversation_not_found(self, mock_service, client, mock_user_id):
         """Test DELETE /api/conversations/{conversation_id} when conversation doesn't exist."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_service.delete_conversation = AsyncMock(return_value=False)
         
@@ -322,12 +330,10 @@ class TestConversationCRUDEndpoints:
 class TestMessageEndpoints:
     """Test message-related API endpoints."""
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_add_message(self, mock_service, mock_get_user, client, mock_user_id, message_create_data):
+    def test_add_message(self, mock_service, client, mock_user_id, message_create_data):
         """Test POST /api/conversations/{conversation_id}/messages endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_message = ConversationMessage(
             id=uuid4(),
@@ -355,12 +361,10 @@ class TestMessageEndpoints:
         assert call_args[0][0] == conversation_id
         assert call_args[0][2] == mock_user_id
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_get_messages(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_get_messages(self, mock_service, client, mock_user_id):
         """Test GET /api/conversations/{conversation_id}/messages endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_conversation = Conversation(
             id=conversation_id,
@@ -398,12 +402,10 @@ class TestMessageEndpoints:
         mock_service.get_conversation.assert_called_once_with(conversation_id, mock_user_id)
         mock_service.get_messages.assert_called_once_with(conversation_id, mock_user_id, limit=10, offset=0)
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_get_messages_conversation_not_found(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_get_messages_conversation_not_found(self, mock_service, client, mock_user_id):
         """Test GET /api/conversations/{conversation_id}/messages when conversation doesn't exist."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_service.get_conversation = AsyncMock(return_value=None)
         
@@ -419,12 +421,10 @@ class TestMessageEndpoints:
 class TestAIChatEndpoint:
     """Test AI chat functionality."""
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_chat_with_ai(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_chat_with_ai(self, mock_service, client, mock_user_id):
         """Test POST /api/conversations/{conversation_id}/chat endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         
         user_message = ConversationMessage(
@@ -467,12 +467,10 @@ class TestAIChatEndpoint:
             conversation_id, message_data["content"], mock_user_id
         )
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_chat_with_ai_invalid_role(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_chat_with_ai_invalid_role(self, mock_service, client, mock_user_id):
         """Test POST /api/conversations/{conversation_id}/chat with invalid role."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         
         message_data = {
@@ -488,12 +486,10 @@ class TestAIChatEndpoint:
         data = response.json()
         assert "Only user messages are allowed for chat endpoint" in data["detail"]
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_chat_ai_error_handling(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_chat_ai_error_handling(self, mock_service, client, mock_user_id):
         """Test chat endpoint when AI generation fails."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         
         user_message = ConversationMessage(
@@ -526,13 +522,11 @@ class TestAIChatEndpoint:
 class TestManagementEndpoints:
     """Test conversation management endpoints."""
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    @patch('backend.routers.conversation.kernel_service')
-    def test_summarize_conversation(self, mock_kernel_service, mock_service, mock_get_user, client, mock_user_id):
+    @patch('backend.ai.kernel_service.kernel_service')
+    def test_summarize_conversation(self, mock_kernel_service, mock_service, client, mock_user_id):
         """Test POST /api/conversations/{conversation_id}/summarize endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         
         mock_conversation = Conversation(
@@ -581,12 +575,10 @@ class TestManagementEndpoints:
         mock_service.update_conversation_summary.assert_called_once_with(conversation_id, mock_user_id, mock_summary)
         mock_kernel_service.invoke_semantic_function.assert_called_once()
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_summarize_conversation_not_found(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_summarize_conversation_not_found(self, mock_service, client, mock_user_id):
         """Test summarize endpoint when conversation doesn't exist."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_service.get_conversation = AsyncMock(return_value=None)
         
@@ -598,12 +590,10 @@ class TestManagementEndpoints:
         data = response.json()
         assert data["detail"] == "Conversation not found"
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_summarize_empty_conversation(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_summarize_empty_conversation(self, mock_service, client, mock_user_id):
         """Test summarize endpoint when conversation has no messages."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         
         mock_conversation = Conversation(
@@ -622,12 +612,10 @@ class TestManagementEndpoints:
         data = response.json()
         assert data["detail"] == "Cannot summarize empty conversation"
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_get_conversation_context(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_get_conversation_context(self, mock_service, client, mock_user_id):
         """Test GET /api/conversations/{conversation_id}/context endpoint."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         
         from backend.models.conversation import ConversationContext
@@ -656,12 +644,10 @@ class TestManagementEndpoints:
             conversation_id, mock_user_id, include_messages=5
         )
     
-    @patch('backend.routers.conversation.get_current_user_id')
     @patch('backend.routers.conversation.conversation_service')
-    def test_get_conversation_context_not_found(self, mock_service, mock_get_user, client, mock_user_id):
+    def test_get_conversation_context_not_found(self, mock_service, client, mock_user_id):
         """Test context endpoint when conversation doesn't exist."""
         # Setup mocks
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         mock_service.get_conversation_context = AsyncMock(return_value=None)
         
@@ -677,10 +663,8 @@ class TestManagementEndpoints:
 class TestValidationAndErrors:
     """Test validation and error handling."""
     
-    @patch('backend.routers.conversation.get_current_user_id')
-    def test_create_conversation_validation_error(self, mock_get_user, client, mock_user_id):
+    def test_create_conversation_validation_error(self, client, mock_user_id):
         """Test conversation creation with invalid data."""
-        mock_get_user.return_value = mock_user_id
         
         # Invalid data - empty title
         invalid_data = {
@@ -693,10 +677,8 @@ class TestValidationAndErrors:
         # Should return validation error
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     
-    @patch('backend.routers.conversation.get_current_user_id')
-    def test_add_message_validation_error(self, mock_get_user, client, mock_user_id):
+    def test_add_message_validation_error(self, client, mock_user_id):
         """Test message creation with invalid data."""
-        mock_get_user.return_value = mock_user_id
         conversation_id = uuid4()
         
         # Invalid data - empty content
