@@ -96,7 +96,7 @@ class SubjectiveInputService:
             self.log_entries_cache.setdefault(str(entry.user_id), {})[str(entry.id)] = entry
             return
 
-        entry_dict = entry.dict()
+        entry_dict = entry.model_dump()
         entry_dict["id"] = str(entry.id)
         entry_dict["user_id"] = str(entry.user_id) # Partition Key
         for i, tag_dict in enumerate(entry_dict.get("tags", [])):
@@ -120,7 +120,7 @@ class SubjectiveInputService:
             self.canvases_cache.setdefault(str(canvas.user_id), {})[str(canvas.id)] = canvas
             return
 
-        canvas_dict = canvas.dict()
+        canvas_dict = canvas.model_dump()
         canvas_dict["id"] = str(canvas.id)
         canvas_dict["user_id"] = str(canvas.user_id) # Partition Key
         for i, el_dict in enumerate(canvas_dict.get("elements", [])):

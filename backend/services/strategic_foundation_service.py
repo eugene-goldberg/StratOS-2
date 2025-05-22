@@ -63,7 +63,7 @@ class StrategicFoundationService:
             self.north_stars_cache[str(north_star.id)] = north_star
             return
 
-        north_star_dict = north_star.dict()
+        north_star_dict = north_star.model_dump()
         # Ensure all UUIDs are strings for Cosmos DB
         north_star_dict["id"] = str(north_star.id)
         if north_star.purpose: north_star_dict["purpose"]["id"] = str(north_star.purpose.id)
