@@ -56,6 +56,7 @@ import {
 import usePlanningStore from '../store/planningStore';
 import useNorthStarStore from '../store/northStarStore';
 import { Action, Initiative } from '../services/planningService';
+import ResourcesTab from '../components/planning/ResourcesTab';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -683,7 +684,7 @@ const Planning: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={3}>
-          <Typography>Resources will be displayed here</Typography>
+          <ResourcesTab />
         </TabPanel>
       </Box>
 
