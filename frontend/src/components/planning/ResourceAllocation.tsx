@@ -15,8 +15,6 @@ import {
   Typography,
   Alert,
   LinearProgress,
-  Stack,
-  Chip,
   Table,
   TableBody,
   TableCell,
@@ -28,11 +26,8 @@ import {
   Slider,
   InputAdornment
 } from '@mui/material';
-import { DateTimePicker } from '@mui/x-date-pickers';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { Delete as DeleteIcon, Info as InfoIcon } from '@mui/icons-material';
-import { Resource, ResourceAllocationCreate, Initiative, Action } from '../../services/planningService';
+import { Delete as DeleteIcon } from '@mui/icons-material';
+import { Resource, ResourceAllocationCreate, Initiative } from '../../services/planningService';
 import { format } from 'date-fns';
 
 interface ResourceAllocationProps {

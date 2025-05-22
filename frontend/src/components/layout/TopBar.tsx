@@ -29,7 +29,6 @@ import {
   Warning as WarningIcon,
   TrendingUp as OpportunityIcon,
   Lightbulb as InsightIcon,
-  CheckCircle as CheckIcon,
   CheckCircle
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
