@@ -6,6 +6,18 @@ This document provides guidance for running tests in the StratOS-2 project.
 
 All test files are located in the `tests/` directory. The project uses pytest as the testing framework.
 
+### New C1 Conversational Memory Tests
+
+The following test files have been added for the C1 Conversational Memory implementation:
+
+- `test_conversation_models.py` - Tests for Pydantic models (25 test methods)
+- `test_conversation_service.py` - Tests for conversation service layer (40+ test methods)  
+- `test_conversation_router.py` - Tests for API endpoints (25+ test methods)
+- `test_conversation_ai_skills.py` - Tests for AI skills functionality (25+ test methods)
+- `test_conversation_integration.py` - End-to-end integration tests (15+ test methods)
+
+**Total**: 130+ new test methods providing comprehensive coverage of conversational memory functionality.
+
 ## Running Tests
 
 There are several ways to run the tests:
@@ -16,6 +28,20 @@ To run all tests at once:
 
 ```bash
 python -m pytest -xvs tests/
+```
+
+### Option 2: Run Only Conversation Tests
+
+To run only the new conversation memory tests:
+
+```bash
+python run_conversation_tests.py
+```
+
+Or with pytest:
+
+```bash
+python -m pytest tests/test_conversation*.py -v
 ```
 
 ### Option 2: Run Tests with the Custom Runner Script

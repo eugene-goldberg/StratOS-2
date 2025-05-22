@@ -17,7 +17,7 @@ import {
   Connection,
   XYPosition
 } from 'reactflow';
-import { saveCanvas, loadCanvas, analyzeThemes } from '../services/strategicCanvasService';
+import { saveCanvas, loadCanvas, analyzeThemes, suggestConnections } from '../services/strategicCanvasService';
 
 interface StrategicCanvasStore extends CanvasState {
   // Node operations
@@ -46,6 +46,7 @@ interface StrategicCanvasStore extends CanvasState {
   
   // AI operations
   analyzeSelectedNodes: () => Promise<AIAnalysisResult | undefined>;
+  getConnectionSuggestions: () => Promise<string | undefined>;
   addAISuggestedEdges: (suggestedConnections: AIAnalysisResult['suggestedConnections']) => void;
 }
 
@@ -197,25 +198,35 @@ export const useStrategicCanvasStore = create<StrategicCanvasStore>((set, get) =
   
   // AI operations
   analyzeSelectedNodes: async () => {
-    const { selectedElements } = get();
-    const selectedTextNodes = selectedElements.nodes.filter(
-      node => node.data.content && typeof node.data.content === 'string'
-    );
+    const { selectedElements, canvasId } = get();
+    const selectedNodeIds = selectedElements.nodes.map(node => node.id);
     
-    if (selectedTextNodes.length === 0) {
+    if (!canvasId) {
+      console.error('No canvas ID available for theme analysis');
       return undefined;
     }
     
-    const nodeContents = selectedTextNodes.map(node => ({
-      id: node.id,
-      content: node.data.content,
-      title: node.data.title
-    }));
-    
     try {
-      return await analyzeThemes(nodeContents);
+      return await analyzeThemes(canvasId, selectedNodeIds.length > 0 ? selectedNodeIds : undefined);
     } catch (error) {
       console.error('Failed to analyze themes:', error);
+      return undefined;
+    }
+  },
+
+  getConnectionSuggestions: async () => {
+    const { selectedElements, canvasId } = get();
+    const selectedElementIds = selectedElements.nodes.map(node => node.id);
+    
+    if (!canvasId) {
+      console.error('No canvas ID available for connection suggestions');
+      return undefined;
+    }
+    
+    try {
+      return await suggestConnections(canvasId, selectedElementIds.length > 0 ? selectedElementIds : undefined);
+    } catch (error) {
+      console.error('Failed to get connection suggestions:', error);
       return undefined;
     }
   },

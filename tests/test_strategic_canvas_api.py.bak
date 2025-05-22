@@ -1,0 +1,649 @@
+"""
+Tests for Strategic Canvas API Endpoints (D1)
+Testing API validation, error handling, and endpoint robustness
+"""
+
+import pytest
+import pytest_asyncio
+import json
+from uuid import uuid4, UUID
+from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, patch
+from fastapi.testclient import TestClient
+from fastapi import status
+
+from backend.main import app
+from backend.models.subjective_input import StrategicCanvas, CanvasElement
+
+
+@pytest.fixture
+def test_client():
+    """Create test client for API testing"""
+    return TestClient(app)
+
+
+@pytest_asyncio.fixture
+def mock_user_token():
+    """Mock JWT token for authentication"""
+    # This would normally be a real JWT token
+    return "mock_jwt_token_for_testing"
+
+
+@pytest_asyncio.fixture 
+def auth_headers(mock_user_token):
+    """Headers with authentication"""
+    return {"Authorization": f"Bearer {mock_user_token}"}
+
+
+@pytest_asyncio.fixture
+def sample_canvas_create_data():
+    """Sample data for creating a canvas"""
+    return {
+        "title": "API Test Canvas",
+        "description": "Testing canvas creation via API"
+    }
+
+
+@pytest_asyncio.fixture
+def sample_element_create_data():
+    """Sample data for creating a canvas element"""
+    return {
+        "element_type": "strategy_node",
+        "content": {
+            "title": "Market Entry Strategy",
+            "description": "Enter European markets",
+            "priority": "high"
+        },
+        "position": {
+            "x": 300,
+            "y": 200
+        },
+        "style": {
+            "color": "#2ecc71",
+            "width": 250,
+            "height": 150
+        },
+        "connections": []
+    }
+
+
+class TestStrategicCanvasAPI:
+    """Test suite for Strategic Canvas API endpoints"""
+    
+    @patch('backend.dependencies.get_current_user_id')
+    def test_create_canvas_success(self, mock_get_user, test_client, sample_canvas_create_data):
+        """Test successful canvas creation"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        response = await test_client.post(
+            "/api/subjective/canvas",
+            json=sample_canvas_create_data
+        )
+        
+        assert response.status_code == status.HTTP_201_CREATED
+        
+        data = response.json()
+        assert data["title"] == sample_canvas_create_data["title"]
+        assert data["description"] == sample_canvas_create_data["description"]
+        assert "id" in data
+        assert data["user_id"] == str(mock_user_id)
+        assert "created_at" in data
+        assert "updated_at" in data
+        assert data["elements"] == []
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_create_canvas_missing_title(self, mock_get_user, test_client):
+        """Test canvas creation with missing title"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        invalid_data = {
+            "description": "Canvas without title"
+            # Missing required 'title' field
+        }
+        
+        response = await test_client.post(
+            "/api/subjective/canvas",
+            json=invalid_data
+        )
+        
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        error_detail = response.json()
+        assert "title" in str(error_detail)
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_create_canvas_empty_title(self, mock_get_user, test_client):
+        """Test canvas creation with empty title"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        data = {
+            "title": "",
+            "description": "Canvas with empty title"
+        }
+        
+        response = await test_client.post(
+            "/api/subjective/canvas",
+            json=data
+        )
+        
+        # Should succeed - empty string is valid
+        assert response.status_code == status.HTTP_201_CREATED
+        response_data = response.json()
+        assert response_data["title"] == ""
+    
+    @pytest.mark.asyncio
+    async def test_create_canvas_unauthorized(self, test_client, sample_canvas_create_data):
+        """Test canvas creation without authentication"""
+        response = await test_client.post(
+            "/api/subjective/canvas",
+            json=sample_canvas_create_data
+        )
+        
+        # Should fail due to missing authentication
+        assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_get_canvas_success(self, mock_get_user, test_client, sample_canvas_create_data):
+        """Test successful canvas retrieval"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # First create a canvas
+        create_response = await test_client.post(
+            "/api/subjective/canvas",
+            json=sample_canvas_create_data
+        )
+        assert create_response.status_code == status.HTTP_201_CREATED
+        canvas_data = create_response.json()
+        canvas_id = canvas_data["id"]
+        
+        # Then retrieve it
+        get_response = await test_client.get(f"/api/subjective/canvas/{canvas_id}")
+        
+        assert get_response.status_code == status.HTTP_200_OK
+        retrieved_data = get_response.json()
+        assert retrieved_data["id"] == canvas_id
+        assert retrieved_data["title"] == sample_canvas_create_data["title"]
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_get_canvas_not_found(self, mock_get_user, test_client):
+        """Test retrieving non-existent canvas"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        nonexistent_id = str(uuid4())
+        response = await test_client.get(f"/api/subjective/canvas/{nonexistent_id}")
+        
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        error_data = response.json()
+        assert "not found" in error_data["detail"].lower()
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_get_canvas_invalid_uuid(self, mock_get_user, test_client):
+        """Test retrieving canvas with invalid UUID"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        invalid_id = "not-a-valid-uuid"
+        response = await test_client.get(f"/api/subjective/canvas/{invalid_id}")
+        
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_list_canvases_empty(self, mock_get_user, test_client):
+        """Test listing canvases when none exist"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        response = await test_client.get("/api/subjective/canvas")
+        
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert isinstance(data, list)
+        assert len(data) == 0
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_list_canvases_with_data(self, mock_get_user, test_client):
+        """Test listing canvases with existing data"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create multiple canvases
+        canvas_titles = ["Canvas 1", "Canvas 2", "Canvas 3"]
+        created_canvases = []
+        
+        for title in canvas_titles:
+            canvas_data = {"title": title, "description": f"Description for {title}"}
+            response = await test_client.post("/api/subjective/canvas", json=canvas_data)
+            assert response.status_code == status.HTTP_201_CREATED
+            created_canvases.append(response.json())
+        
+        # List canvases
+        list_response = await test_client.get("/api/subjective/canvas")
+        
+        assert list_response.status_code == status.HTTP_200_OK
+        canvases = list_response.json()
+        assert len(canvases) == 3
+        
+        # Check that all created canvases are in the list
+        canvas_ids = {canvas["id"] for canvas in canvases}
+        created_ids = {canvas["id"] for canvas in created_canvases}
+        assert canvas_ids == created_ids
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_list_canvases_pagination(self, mock_get_user, test_client):
+        """Test canvas listing with pagination parameters"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create 5 canvases
+        for i in range(5):
+            canvas_data = {"title": f"Canvas {i}", "description": f"Description {i}"}
+            response = await test_client.post("/api/subjective/canvas", json=canvas_data)
+            assert response.status_code == status.HTTP_201_CREATED
+        
+        # Test pagination
+        response = await test_client.get("/api/subjective/canvas?limit=2&offset=0")
+        assert response.status_code == status.HTTP_200_OK
+        page1 = response.json()
+        assert len(page1) == 2
+        
+        response = await test_client.get("/api/subjective/canvas?limit=2&offset=2")
+        assert response.status_code == status.HTTP_200_OK
+        page2 = response.json()
+        assert len(page2) == 2
+        
+        response = await test_client.get("/api/subjective/canvas?limit=2&offset=4")
+        assert response.status_code == status.HTTP_200_OK
+        page3 = response.json()
+        assert len(page3) == 1
+
+
+class TestCanvasElementAPI:
+    """Test suite for Canvas Element API endpoints"""
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_add_element_success(self, mock_get_user, test_client, sample_canvas_create_data, sample_element_create_data):
+        """Test successful element addition"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create canvas first
+        canvas_response = await test_client.post("/api/subjective/canvas", json=sample_canvas_create_data)
+        assert canvas_response.status_code == status.HTTP_201_CREATED
+        canvas_id = canvas_response.json()["id"]
+        
+        # Add element
+        element_response = await test_client.post(
+            f"/api/subjective/canvas/{canvas_id}/elements",
+            json=sample_element_create_data
+        )
+        
+        assert element_response.status_code == status.HTTP_201_CREATED
+        element_data = element_response.json()
+        
+        assert element_data["element_type"] == sample_element_create_data["element_type"]
+        assert element_data["content"] == sample_element_create_data["content"]
+        assert element_data["position"] == sample_element_create_data["position"]
+        assert "id" in element_data
+        assert "created_at" in element_data
+        assert "updated_at" in element_data
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_add_element_to_nonexistent_canvas(self, mock_get_user, test_client, sample_element_create_data):
+        """Test adding element to canvas that doesn't exist"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        nonexistent_canvas_id = str(uuid4())
+        response = await test_client.post(
+            f"/api/subjective/canvas/{nonexistent_canvas_id}/elements",
+            json=sample_element_create_data
+        )
+        
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        error_data = response.json()
+        assert "not found" in error_data["detail"].lower()
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_add_element_invalid_data(self, mock_get_user, test_client, sample_canvas_create_data):
+        """Test adding element with invalid data"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create canvas first
+        canvas_response = await test_client.post("/api/subjective/canvas", json=sample_canvas_create_data)
+        canvas_id = canvas_response.json()["id"]
+        
+        # Try to add element with missing required fields
+        invalid_element_data = {
+            "content": {"text": "Missing required fields"},
+            # Missing element_type and position
+        }
+        
+        response = await test_client.post(
+            f"/api/subjective/canvas/{canvas_id}/elements",
+            json=invalid_element_data
+        )
+        
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_update_element_success(self, mock_get_user, test_client, sample_canvas_create_data, sample_element_create_data):
+        """Test successful element update"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create canvas and element
+        canvas_response = await test_client.post("/api/subjective/canvas", json=sample_canvas_create_data)
+        canvas_id = canvas_response.json()["id"]
+        
+        element_response = await test_client.post(
+            f"/api/subjective/canvas/{canvas_id}/elements",
+            json=sample_element_create_data
+        )
+        element_data = element_response.json()
+        element_id = element_data["id"]
+        
+        # Update element
+        update_data = {
+            "content": {"title": "Updated Strategy", "priority": "medium"},
+            "position": {"x": 500, "y": 400}
+        }
+        
+        update_response = await test_client.put(
+            f"/api/subjective/canvas/{canvas_id}/elements/{element_id}",
+            json=update_data
+        )
+        
+        assert update_response.status_code == status.HTTP_200_OK
+        updated_element = update_response.json()
+        
+        assert updated_element["content"]["title"] == "Updated Strategy"
+        assert updated_element["position"]["x"] == 500
+        assert updated_element["position"]["y"] == 400
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_update_nonexistent_element(self, mock_get_user, test_client, sample_canvas_create_data):
+        """Test updating element that doesn't exist"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create canvas
+        canvas_response = await test_client.post("/api/subjective/canvas", json=sample_canvas_create_data)
+        canvas_id = canvas_response.json()["id"]
+        
+        # Try to update non-existent element
+        nonexistent_element_id = str(uuid4())
+        update_data = {"content": {"test": "data"}}
+        
+        response = await test_client.put(
+            f"/api/subjective/canvas/{canvas_id}/elements/{nonexistent_element_id}",
+            json=update_data
+        )
+        
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_delete_element_success(self, mock_get_user, test_client, sample_canvas_create_data, sample_element_create_data):
+        """Test successful element deletion"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create canvas and element
+        canvas_response = await test_client.post("/api/subjective/canvas", json=sample_canvas_create_data)
+        canvas_id = canvas_response.json()["id"]
+        
+        element_response = await test_client.post(
+            f"/api/subjective/canvas/{canvas_id}/elements",
+            json=sample_element_create_data
+        )
+        element_id = element_response.json()["id"]
+        
+        # Delete element
+        delete_response = await test_client.delete(
+            f"/api/subjective/canvas/{canvas_id}/elements/{element_id}"
+        )
+        
+        assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+        
+        # Verify element is gone by checking canvas
+        canvas_check = await test_client.get(f"/api/subjective/canvas/{canvas_id}")
+        canvas_data = canvas_check.json()
+        assert len(canvas_data["elements"]) == 0
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_delete_nonexistent_element(self, mock_get_user, test_client, sample_canvas_create_data):
+        """Test deleting element that doesn't exist"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create canvas
+        canvas_response = await test_client.post("/api/subjective/canvas", json=sample_canvas_create_data)
+        canvas_id = canvas_response.json()["id"]
+        
+        # Try to delete non-existent element
+        nonexistent_element_id = str(uuid4())
+        response = await test_client.delete(
+            f"/api/subjective/canvas/{canvas_id}/elements/{nonexistent_element_id}"
+        )
+        
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+class TestCanvasAPIIntegration:
+    """Integration tests for complete canvas workflows"""
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_complete_canvas_workflow(self, mock_get_user, test_client):
+        """Test complete workflow: create canvas -> add elements -> update -> delete"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # 1. Create canvas
+        canvas_data = {
+            "title": "Integration Test Canvas",
+            "description": "Testing complete workflow"
+        }
+        canvas_response = await test_client.post("/api/subjective/canvas", json=canvas_data)
+        assert canvas_response.status_code == status.HTTP_201_CREATED
+        canvas_id = canvas_response.json()["id"]
+        
+        # 2. Add multiple elements
+        elements = []
+        for i in range(3):
+            element_data = {
+                "element_type": f"node_{i}",
+                "content": {"text": f"Element {i}"},
+                "position": {"x": i * 100, "y": i * 100}
+            }
+            element_response = await test_client.post(
+                f"/api/subjective/canvas/{canvas_id}/elements",
+                json=element_data
+            )
+            assert element_response.status_code == status.HTTP_201_CREATED
+            elements.append(element_response.json())
+        
+        # 3. Verify canvas has all elements
+        canvas_check = await test_client.get(f"/api/subjective/canvas/{canvas_id}")
+        canvas_full = canvas_check.json()
+        assert len(canvas_full["elements"]) == 3
+        
+        # 4. Update an element
+        element_to_update = elements[1]["id"]
+        update_data = {"content": {"text": "Updated Element 1", "status": "modified"}}
+        
+        update_response = await test_client.put(
+            f"/api/subjective/canvas/{canvas_id}/elements/{element_to_update}",
+            json=update_data
+        )
+        assert update_response.status_code == status.HTTP_200_OK
+        
+        # 5. Delete an element
+        element_to_delete = elements[2]["id"]
+        delete_response = await test_client.delete(
+            f"/api/subjective/canvas/{canvas_id}/elements/{element_to_delete}"
+        )
+        assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+        
+        # 6. Final verification
+        final_canvas = await test_client.get(f"/api/subjective/canvas/{canvas_id}")
+        final_data = final_canvas.json()
+        assert len(final_data["elements"]) == 2  # One deleted
+        
+        # Check updated element
+        updated_element = next(
+            el for el in final_data["elements"] 
+            if el["id"] == element_to_update
+        )
+        assert updated_element["content"]["text"] == "Updated Element 1"
+        assert updated_element["content"]["status"] == "modified"
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_user_isolation_via_api(self, mock_get_user, test_client):
+        """Test that users cannot access each other's canvases via API"""
+        # Create canvas for user 1
+        user1_id = uuid4()
+        mock_get_user.return_value = user1_id
+        
+        canvas_data = {"title": "User 1 Canvas", "description": "Private canvas"}
+        user1_canvas_response = await test_client.post("/api/subjective/canvas", json=canvas_data)
+        assert user1_canvas_response.status_code == status.HTTP_201_CREATED
+        user1_canvas_id = user1_canvas_response.json()["id"]
+        
+        # Switch to user 2
+        user2_id = uuid4()
+        mock_get_user.return_value = user2_id
+        
+        # User 2 should not be able to access User 1's canvas
+        access_response = await test_client.get(f"/api/subjective/canvas/{user1_canvas_id}")
+        assert access_response.status_code == status.HTTP_404_NOT_FOUND
+        
+        # User 2 should not see User 1's canvas in their list
+        list_response = await test_client.get("/api/subjective/canvas")
+        assert list_response.status_code == status.HTTP_200_OK
+        user2_canvases = list_response.json()
+        user2_canvas_ids = [canvas["id"] for canvas in user2_canvases]
+        assert user1_canvas_id not in user2_canvas_ids
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_element_connections_via_api(self, mock_get_user, test_client):
+        """Test creating connected elements via API"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create canvas
+        canvas_data = {"title": "Connected Elements Test"}
+        canvas_response = await test_client.post("/api/subjective/canvas", json=canvas_data)
+        canvas_id = canvas_response.json()["id"]
+        
+        # Create first element
+        element1_data = {
+            "element_type": "source_node",
+            "content": {"text": "Source Node"},
+            "position": {"x": 100, "y": 100}
+        }
+        element1_response = await test_client.post(
+            f"/api/subjective/canvas/{canvas_id}/elements",
+            json=element1_data
+        )
+        element1_id = element1_response.json()["id"]
+        
+        # Create second element connected to first
+        element2_data = {
+            "element_type": "target_node",
+            "content": {"text": "Target Node"},
+            "position": {"x": 300, "y": 100},
+            "connections": [element1_id]
+        }
+        element2_response = await test_client.post(
+            f"/api/subjective/canvas/{canvas_id}/elements",
+            json=element2_data
+        )
+        assert element2_response.status_code == status.HTTP_201_CREATED
+        
+        # Verify connection
+        canvas_check = await test_client.get(f"/api/subjective/canvas/{canvas_id}")
+        canvas_data = canvas_check.json()
+        
+        connected_element = next(
+            el for el in canvas_data["elements"] 
+            if el["element_type"] == "target_node"
+        )
+        assert element1_id in connected_element["connections"]
+
+
+class TestCanvasAPIErrorHandling:
+    """Test suite for API error handling and edge cases"""
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_invalid_json_payloads(self, mock_get_user, test_client):
+        """Test API handling of invalid JSON payloads"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Test with malformed JSON
+        response = await test_client.post(
+            "/api/subjective/canvas",
+            content="invalid json content",
+            headers={"Content-Type": "application/json"}
+        )
+        
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    
+    @pytest.mark.asyncio
+    @patch('backend.dependencies.get_current_user_id')
+    async def test_oversized_payloads(self, mock_get_user, test_client):
+        """Test API handling of very large payloads"""
+        mock_user_id = uuid4()
+        mock_get_user.return_value = mock_user_id
+        
+        # Create very large content
+        large_content = {"data": "x" * 100000}  # 100KB of data
+        
+        canvas_data = {
+            "title": "Large Content Test",
+            "description": "Testing large content handling"
+        }
+        canvas_response = await test_client.post("/api/subjective/canvas", json=canvas_data)
+        canvas_id = canvas_response.json()["id"]
+        
+        element_data = {
+            "element_type": "large_element",
+            "content": large_content,
+            "position": {"x": 0, "y": 0}
+        }
+        
+        # Should handle large content gracefully
+        response = await test_client.post(
+            f"/api/subjective/canvas/{canvas_id}/elements",
+            json=element_data
+        )
+        
+        # May succeed or fail with appropriate error, but shouldn't crash
+        assert response.status_code in [
+            status.HTTP_201_CREATED,
+            status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            status.HTTP_422_UNPROCESSABLE_ENTITY
+        ]

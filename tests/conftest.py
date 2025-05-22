@@ -13,7 +13,7 @@ def mock_kernel_service_initialization(session_mocker):
     """
     
     # Mock the method that performs full, Azure-dependent initialization
-    session_mocker.patch('backend.ai.kernel_service.KernelService.initialize_kernel_components', return_value=None)
+    # The new kernel service doesn't have initialize_kernel_components, so we skip this
     
     # Also, ensure that if _ensure_initialized is called, it doesn't try to re-init if the above mock fails
     # or if it needs to set self.kernel and self.memory to mocks.
@@ -39,7 +39,8 @@ def mock_kernel_service_initialization(session_mocker):
 
         self_ks._initialized_components = True # Pretend it's initialized
 
-    session_mocker.patch('backend.ai.kernel_service.KernelService._ensure_initialized', mock_ensure_initialized)
+    # The new kernel service doesn't have _ensure_initialized method
+    # session_mocker.patch('backend.ai.kernel_service.KernelService._ensure_initialized', mock_ensure_initialized)
 
 
 @pytest.fixture(scope="session") # Changed to session scope

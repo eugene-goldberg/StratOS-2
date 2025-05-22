@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "type": "completion",
+  "description": "Analyzes strategic canvas elements to provide AI assistance with theme analysis and connection suggestions",
+  "completion": {
+    "max_tokens": 1500,
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+  }
+}

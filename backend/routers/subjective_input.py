@@ -546,6 +546,24 @@ async def get_canvas_ai_assistance(canvas_id: UUID, prompt: str, current_user_id
     response = await input_service.get_canvas_ai_assistance(canvas_id, current_user_id, prompt)
     return {"response": response}
 
+@router.post("/canvas/{canvas_id}/analyze-themes")
+async def analyze_canvas_themes(canvas_id: UUID, request: dict, current_user_id: UUID = Depends(get_current_user_id)):
+    """
+    Analyze themes in canvas elements using AI
+    """
+    selected_nodes = request.get("selected_nodes", None)
+    response = await input_service.analyze_canvas_themes(canvas_id, current_user_id, selected_nodes)
+    return {"analysis": response}
+
+@router.post("/canvas/{canvas_id}/suggest-connections")
+async def suggest_canvas_connections(canvas_id: UUID, request: dict, current_user_id: UUID = Depends(get_current_user_id)):
+    """
+    Suggest strategic connections between canvas elements using AI
+    """
+    selected_elements = request.get("selected_elements", None)
+    response = await input_service.suggest_canvas_connections(canvas_id, current_user_id, selected_elements)
+    return {"suggestions": response}
+
 # Helper functions
 
 async def process_log_entry_with_ai(entry_id: UUID, user_id: UUID): # Added user_id

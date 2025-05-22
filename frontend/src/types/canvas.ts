@@ -75,6 +75,7 @@ export interface CanvasEdge {
   sourceHandle?: string | null;
   targetHandle?: string | null;
   label?: string;
+  type?: string;
   style?: React.CSSProperties;
   isAISuggested?: boolean;
 }

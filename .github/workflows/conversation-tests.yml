@@ -1,0 +1,89 @@
+name: Conversation Tests
+
+on:
+  push:
+    paths:
+      - 'backend/models/conversation.py'
+      - 'backend/services/conversation_service.py'
+      - 'backend/routers/conversation.py'
+      - 'backend/ai/skills/conversation/**'
+      - 'tests/test_conversation*.py'
+  pull_request:
+    paths:
+      - 'backend/models/conversation.py'
+      - 'backend/services/conversation_service.py'
+      - 'backend/routers/conversation.py'
+      - 'backend/ai/skills/conversation/**'
+      - 'tests/test_conversation*.py'
+  workflow_dispatch:
+
+jobs:
+  conversation-tests:
+    name: Test Conversation Features
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio pytest-mock httpx fastapi
+
+    - name: Set test environment variables
+      run: |
+        echo "AZURE_COSMOS_ENDPOINT=" >> $GITHUB_ENV
+        echo "AZURE_COSMOS_KEY=" >> $GITHUB_ENV
+        echo "JWT_SECRET_KEY=test-secret" >> $GITHUB_ENV
+
+    - name: Test conversation models
+      run: python -m pytest tests/test_conversation_models.py -v
+
+    - name: Test conversation service
+      run: python -m pytest tests/test_conversation_service.py -v
+
+    - name: Test conversation router
+      run: python -m pytest tests/test_conversation_router.py -v
+
+    - name: Test conversation AI skills
+      run: python -m pytest tests/test_conversation_ai_skills.py -v
+
+    - name: Test conversation integration
+      run: python -m pytest tests/test_conversation_integration.py -v
+
+    - name: Run all conversation tests
+      run: python -m pytest tests/test_conversation*.py -v --tb=short
+
+    - name: Verify conversation system functionality
+      run: |
+        python -c "
+        import asyncio
+        from backend.ai.kernel_service import kernel_service
+        print('✅ Kernel service loads conversation skills:', 'conversation' in kernel_service._skills_cache)
+        print('✅ Conversation skills available:', list(kernel_service._skills_cache.get('conversation', {}).keys()))
+        
+        async def test_ai():
+            try:
+                response = await kernel_service.invoke_semantic_function('conversation', 'GenerateResponse', '', {
+                    'conversation_history': '', 'user_message': 'Hello', 'conversation_type': 'general', 'summary': ''
+                })
+                print(f'✅ AI response test: {len(response)} characters generated')
+                return True
+            except Exception as e:
+                print(f'❌ AI response failed: {e}')
+                return False
+        
+        success = asyncio.run(test_ai())
+        if success:
+            print('🎉 All conversation components working correctly!')
+        else:
+            exit(1)
+        "

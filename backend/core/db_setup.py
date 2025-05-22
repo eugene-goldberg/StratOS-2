@@ -37,7 +37,11 @@ CONTAINER_CONFIGS = {
     
     # Subjective Input Service containers
     "log_entries": "/user_id",
-    "strategic_canvases": "/user_id"
+    "strategic_canvases": "/user_id",
+    
+    # Conversation Service containers
+    "conversations": "/user_id",
+    "conversation_messages": "/conversation_id"
 }
 
 async def initialize_database() -> bool:

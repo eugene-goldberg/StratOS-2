@@ -426,11 +426,59 @@ class SubjectiveInputService:
         
         context_vars = {"canvas": json.dumps(canvas_data_for_ai), "prompt": prompt, "user_id": str(user_id)}
         try:
-            response = await kernel_service.invoke_semantic_function(skill_name="CanvasAssistant", function_name="ProvideAssistance", input_text="", variables=context_vars)
+            response = await kernel_service.invoke_semantic_function(skill_name="canvas", function_name="ProvideAssistance", input_text="", variables=context_vars)
             return str(response.result if hasattr(response, 'result') else response)
         except Exception as e:
             self.logger.error(f"Error getting canvas AI assistance for user {user_id}, canvas {canvas_id}: {str(e)}")
             return f"AI assistance unavailable. Error: {str(e)}"
+
+    async def analyze_canvas_themes(self, canvas_id: UUID, user_id: UUID, selected_nodes: List[str] = None) -> str:
+        """Analyze themes in canvas elements using AI."""
+        canvas = await self.get_canvas(canvas_id, user_id)
+        if not canvas: raise HTTPException(status_code=404, detail="Canvas not found for user.")
+            
+        # Filter elements if specific nodes are selected
+        elements_to_analyze = canvas.elements
+        if selected_nodes:
+            elements_to_analyze = [el for el in canvas.elements if str(el.id) in selected_nodes]
+        
+        canvas_data_for_ai = {"title": canvas.title, "description": canvas.description, "elements": []}
+        for el in elements_to_analyze:
+            canvas_data_for_ai["elements"].append({"id": str(el.id), "type": el.element_type, "content": el.content, "connections": [str(c) for c in el.connections]})
+        
+        context_vars = {"canvas": json.dumps(canvas_data_for_ai), "prompt": "Analyze the themes and patterns in this strategic canvas", "user_id": str(user_id)}
+        try:
+            response = await kernel_service.invoke_semantic_function(skill_name="canvas", function_name="AnalyzeThemes", input_text="", variables=context_vars)
+            return str(response.result if hasattr(response, 'result') else response)
+        except Exception as e:
+            self.logger.error(f"Error analyzing canvas themes for user {user_id}, canvas {canvas_id}: {str(e)}")
+            return f"Theme analysis unavailable. Error: {str(e)}"
+
+    async def suggest_canvas_connections(self, canvas_id: UUID, user_id: UUID, selected_elements: List[str] = None) -> str:
+        """Suggest strategic connections between canvas elements using AI."""
+        canvas = await self.get_canvas(canvas_id, user_id)
+        if not canvas: raise HTTPException(status_code=404, detail="Canvas not found for user.")
+            
+        canvas_data_for_ai = {"title": canvas.title, "description": canvas.description, "elements": []}
+        for el in canvas.elements:
+            canvas_data_for_ai["elements"].append({"id": str(el.id), "type": el.element_type, "content": el.content, "connections": [str(c) for c in el.connections]})
+        
+        selected_elements_data = []
+        if selected_elements:
+            selected_elements_data = [el for el in canvas.elements if str(el.id) in selected_elements]
+        
+        context_vars = {
+            "canvas": json.dumps(canvas_data_for_ai), 
+            "prompt": "Suggest strategic connections between canvas elements", 
+            "selected_elements": json.dumps([{"id": str(el.id), "type": el.element_type, "content": el.content} for el in selected_elements_data]),
+            "user_id": str(user_id)
+        }
+        try:
+            response = await kernel_service.invoke_semantic_function(skill_name="canvas", function_name="SuggestConnections", input_text="", variables=context_vars)
+            return str(response.result if hasattr(response, 'result') else response)
+        except Exception as e:
+            self.logger.error(f"Error suggesting canvas connections for user {user_id}, canvas {canvas_id}: {str(e)}")
+            return f"Connection suggestions unavailable. Error: {str(e)}"
 
     # Strategic Element Validation Methods
     async def validate_strategic_element_link(self, user_id: UUID, reference_type: StrategyReferenceType, reference_id: UUID) -> Optional[Dict[str, Any]]:

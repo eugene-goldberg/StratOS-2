@@ -1,0 +1,57 @@
+Your task is to analyze a strategic canvas and suggest meaningful connections between elements.
+
+CANVAS DATA:
+{{$canvas}}
+
+USER PROMPT:
+{{$prompt}}
+
+SELECTED ELEMENTS (if any):
+{{$selected_elements}}
+
+CONNECTION ANALYSIS INSTRUCTIONS:
+1. Examine all canvas elements and their current connections
+2. Identify potential strategic relationships between unconnected elements
+3. Consider cause-and-effect relationships, dependencies, and strategic alignment
+4. Suggest specific connections that would add strategic value
+5. Explain the rationale behind each suggested connection
+
+RELATIONSHIP TYPES TO CONSIDER:
+- Causal relationships (A leads to B)
+- Supporting relationships (A supports B)
+- Conflicting relationships (A conflicts with B)
+- Dependency relationships (A depends on B)
+- Strategic alignment (A aligns with B)
+- Risk mitigation (A mitigates risk in B)
+- Opportunity enablement (A enables opportunity B)
+
+Provide your suggestions in the following format:
+
+## Suggested Connections
+
+### High Priority Connections
+- **[Element A] → [Element B]**
+  - Relationship Type: [Type]
+  - Rationale: [Why this connection adds strategic value]
+  - Strategic Impact: [How this improves the canvas]
+
+- **[Element C] → [Element D]**
+  - Relationship Type: [Type]
+  - Rationale: [Why this connection adds strategic value]
+  - Strategic Impact: [How this improves the canvas]
+
+### Medium Priority Connections
+- **[Element E] → [Element F]**
+  - Relationship Type: [Type]
+  - Rationale: [Why this connection adds strategic value]
+  - Strategic Impact: [How this improves the canvas]
+
+## Missing Elements
+Based on the current canvas, consider adding these elements to strengthen connections:
+- [Suggested Element 1: Type and purpose]
+- [Suggested Element 2: Type and purpose]
+
+## Connection Patterns
+- [Pattern 1: Overall connectivity insight]
+- [Pattern 2: Strategic flow observation]
+- [Pattern 3: Gap or cluster analysis]

@@ -1,0 +1,56 @@
+Your task is to provide strategic assistance for a strategic canvas based on the user's specific request.
+
+CANVAS DATA:
+{{$canvas}}
+
+USER REQUEST:
+{{$prompt}}
+
+USER ID:
+{{$user_id}}
+
+ASSISTANCE INSTRUCTIONS:
+1. Analyze the current canvas structure and content
+2. Understand the specific user request or question
+3. Provide relevant, actionable strategic guidance
+4. Consider the strategic context and business implications
+5. Offer specific recommendations tailored to the canvas
+
+TYPES OF ASSISTANCE YOU CAN PROVIDE:
+- Strategic analysis and insights
+- Element suggestions and improvements
+- Connection recommendations
+- Theme identification and pattern analysis
+- Strategic alignment assessment
+- Risk and opportunity identification
+- Canvas organization and structure advice
+- Content enhancement suggestions
+
+CANVAS ELEMENTS AVAILABLE:
+- Basic nodes: General strategic concepts and ideas
+- CEO Log entries: Leadership insights and strategic decisions
+- Data Snippets: Objective data points and performance metrics
+- SWOT Strengths: Internal positive attributes
+- SWOT Weaknesses: Internal areas for improvement
+- SWOT Opportunities: External positive factors
+- SWOT Threats: External risk factors
+- Risk nodes: Specific risks and mitigation strategies
+- Opportunity nodes: Strategic opportunities and initiatives
+- Image nodes: Visual elements and diagrams
+
+Provide your assistance in a clear, actionable format appropriate to the user's request. Structure your response to be immediately useful for strategic decision-making.
+
+If the request is general, provide:
+## Strategic Overview
+[High-level analysis of the canvas]
+
+## Key Insights
+[Important observations and patterns]
+
+## Recommendations
+[Specific actions or improvements]
+
+## Next Steps
+[Concrete steps to enhance the strategic canvas]
+
+If the request is specific, focus your response directly on addressing that particular need with detailed, actionable guidance.
