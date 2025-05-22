@@ -29,14 +29,18 @@ def test_client():
         created_at=datetime.now()
     )
     
+    # Store original overrides to restore later
+    original_overrides = app.dependency_overrides.copy()
+    
     # Override dependencies for testing
     app.dependency_overrides[get_current_active_user] = lambda: user
     app.dependency_overrides[get_current_user_id] = lambda: user.id
     
     yield TestClient(app)
     
-    # Clean up overrides after test
+    # Restore original overrides instead of clearing all
     app.dependency_overrides.clear()
+    app.dependency_overrides.update(original_overrides)
 
 
 @pytest.fixture
@@ -130,16 +134,23 @@ class TestStrategicCanvasAPI:
     
     def test_create_canvas_unauthorized(self, sample_canvas_data):
         """Test canvas creation without authentication"""
-        # Create a client without auth override
-        client_no_auth = TestClient(app)
+        # Temporarily clear all dependency overrides to test unauthorized access
+        original_overrides = app.dependency_overrides.copy()
+        app.dependency_overrides.clear()
         
-        response = client_no_auth.post(
-            "/api/subjective/canvas",
-            json=sample_canvas_data
-        )
-        
-        # Should fail due to missing authentication
-        assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN, status.HTTP_422_UNPROCESSABLE_ENTITY]
+        try:
+            client_no_auth = TestClient(app)
+            response = client_no_auth.post(
+                "/api/subjective/canvas",
+                json=sample_canvas_data
+            )
+            
+            # Should fail due to missing authentication
+            assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN, status.HTTP_422_UNPROCESSABLE_ENTITY]
+        finally:
+            # Restore original overrides
+            app.dependency_overrides.clear()
+            app.dependency_overrides.update(original_overrides)
     
     def test_get_canvas_success(self, test_client, sample_canvas_data):
         """Test successful canvas retrieval"""
