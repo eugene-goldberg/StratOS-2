@@ -30,7 +30,7 @@ jobs:
       run: |
         # Set PYTHONPATH to include backend directory for proper imports
         export PYTHONPATH=backend:$PYTHONPATH
-        python -m pytest tests/test_*_service.py tests/test_*_enhancements.py tests/test_guided_analysis.py -v
+        python -m pytest tests/ -v
 
   frontend-tests:
     runs-on: ubuntu-latest
