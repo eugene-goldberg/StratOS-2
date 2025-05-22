@@ -6,7 +6,7 @@ from semantic_kernel import Kernel
 from semantic_kernel.functions import KernelArguments
 
 # from backend.ai.skills.analysis_skills.swot_analysis_skill import SwotAnalysisSkill
-from backend.ai.kernel_service import AIKernelService
+from backend.ai.kernel_service import KernelService
 from backend.models.canvas_ai import (
     TextStructureRequest, ConnectionAnalysisRequest,
     AIAnalysisResponse, NodeSuggestion, ConnectionSuggestion,
@@ -22,9 +22,9 @@ def mock_kernel():
 
 
 @pytest.fixture
-def mock_ai_kernel_service(mock_kernel):
-    """Mock AI Kernel Service with mocked kernel."""
-    service = MagicMock(spec=AIKernelService)
+def mock_kernel_service(mock_kernel):
+    """Mock Kernel Service with mocked kernel."""
+    service = MagicMock(spec=KernelService)
     service.kernel = mock_kernel
     return service
 
@@ -108,14 +108,14 @@ class TestCanvasAISkills:
     """Test suite for AI skills used in canvas intelligence."""
 
     @pytest.mark.asyncio
-    async def test_structure_text_skill_invocation(self, mock_ai_kernel_service, sample_ai_skill_response):
+    async def test_structure_text_skill_invocation(self, mock_kernel_service, sample_ai_skill_response):
         """Test text structuring AI skill invocation."""
         
         # Mock skill response
         mock_function_result = MagicMock()
         mock_function_result.value = json.dumps(sample_ai_skill_response)
         
-        mock_ai_kernel_service.kernel.invoke.return_value = mock_function_result
+        mock_kernel_service.kernel.invoke.return_value = mock_function_result
         
         # Create request
         request = TextStructureRequest(
@@ -132,7 +132,7 @@ class TestCanvasAISkills:
         
         # Test skill invocation
         with patch('backend.services.canvas_ai_service.CanvasAIService._get_kernel_service',
-                  return_value=mock_ai_kernel_service):
+                  return_value=mock_kernel_service):
             
             # Import service here to avoid circular imports in test setup
             from backend.services.canvas_ai_service import CanvasAIService
@@ -157,12 +157,12 @@ class TestCanvasAISkills:
                 assert result.suggestions[0].title == "Market Leadership Goal"
 
     @pytest.mark.asyncio
-    async def test_analyze_connections_skill_invocation(self, mock_ai_kernel_service, sample_connection_response):
+    async def test_analyze_connections_skill_invocation(self, mock_kernel_service, sample_connection_response):
         """Test connection analysis AI skill invocation."""
         
         mock_function_result = MagicMock()
         mock_function_result.value = json.dumps(sample_connection_response)
-        mock_ai_kernel_service.kernel.invoke.return_value = mock_function_result
+        mock_kernel_service.kernel.invoke.return_value = mock_function_result
         
         request = ConnectionAnalysisRequest(
             nodes=[
@@ -178,7 +178,7 @@ class TestCanvasAISkills:
         )
         
         with patch('backend.services.canvas_ai_service.CanvasAIService._get_kernel_service',
-                  return_value=mock_ai_kernel_service):
+                  return_value=mock_kernel_service):
             
             from backend.services.canvas_ai_service import CanvasAIService
             service = CanvasAIService()
@@ -202,7 +202,7 @@ class TestCanvasAISkills:
                 assert hasattr(connection_suggestion, 'connection_type')
 
     @pytest.mark.asyncio
-    async def test_identify_themes_skill_invocation(self, mock_ai_kernel_service):
+    async def test_identify_themes_skill_invocation(self, mock_kernel_service):
         """Test theme identification AI skill invocation."""
         
         theme_response = {
@@ -239,7 +239,7 @@ class TestCanvasAISkills:
         
         mock_function_result = MagicMock()
         mock_function_result.value = json.dumps(theme_response)
-        mock_ai_kernel_service.kernel.invoke.return_value = mock_function_result
+        mock_kernel_service.kernel.invoke.return_value = mock_function_result
         
         from backend.models.canvas_ai import ThemeIdentificationRequest
         request = ThemeIdentificationRequest(
@@ -259,7 +259,7 @@ class TestCanvasAISkills:
         )
         
         with patch('backend.services.canvas_ai_service.CanvasAIService._get_kernel_service',
-                  return_value=mock_ai_kernel_service):
+                  return_value=mock_kernel_service):
             
             from backend.services.canvas_ai_service import CanvasAIService
             service = CanvasAIService()
@@ -282,7 +282,7 @@ class TestCanvasAISkills:
                 assert hasattr(theme_suggestion, 'related_nodes')
 
     @pytest.mark.asyncio
-    async def test_optimize_canvas_skill_invocation(self, mock_ai_kernel_service):
+    async def test_optimize_canvas_skill_invocation(self, mock_kernel_service):
         """Test canvas optimization AI skill invocation."""
         
         optimization_response = {
@@ -326,7 +326,7 @@ class TestCanvasAISkills:
         
         mock_function_result = MagicMock()
         mock_function_result.value = json.dumps(optimization_response)
-        mock_ai_kernel_service.kernel.invoke.return_value = mock_function_result
+        mock_kernel_service.kernel.invoke.return_value = mock_function_result
         
         from backend.models.canvas_ai import CanvasOptimizationRequest
         request = CanvasOptimizationRequest(
@@ -348,7 +348,7 @@ class TestCanvasAISkills:
         )
         
         with patch('backend.services.canvas_ai_service.CanvasAIService._get_kernel_service',
-                  return_value=mock_ai_kernel_service):
+                  return_value=mock_kernel_service):
             
             from backend.services.canvas_ai_service import CanvasAIService
             service = CanvasAIService()
@@ -372,11 +372,11 @@ class TestCanvasAISkills:
                 assert hasattr(opt_suggestion, 'priority')
 
     @pytest.mark.asyncio
-    async def test_skill_error_handling(self, mock_ai_kernel_service):
+    async def test_skill_error_handling(self, mock_kernel_service):
         """Test error handling in AI skill invocations."""
         
         with patch('backend.services.canvas_ai_service.CanvasAIService._get_kernel_service',
-                  return_value=mock_ai_kernel_service):
+                  return_value=mock_kernel_service):
             
             from backend.services.canvas_ai_service import CanvasAIService
             service = CanvasAIService()
@@ -384,7 +384,7 @@ class TestCanvasAISkills:
             # Test JSON parsing error
             mock_function_result = MagicMock()
             mock_function_result.value = "Invalid JSON response"
-            mock_ai_kernel_service.kernel.invoke.return_value = mock_function_result
+            mock_kernel_service.kernel.invoke.return_value = mock_function_result
             
             request = TextStructureRequest(
                 text="Test text",
@@ -396,13 +396,13 @@ class TestCanvasAISkills:
                 await service.structure_text(request, uuid4())
             
             # Test kernel invocation error
-            mock_ai_kernel_service.kernel.invoke.side_effect = Exception("Kernel error")
+            mock_kernel_service.kernel.invoke.side_effect = Exception("Kernel error")
             
             with pytest.raises(Exception):
                 await service.structure_text(request, uuid4())
 
     @pytest.mark.asyncio
-    async def test_skill_response_validation(self, mock_ai_kernel_service):
+    async def test_skill_response_validation(self, mock_kernel_service):
         """Test validation of AI skill responses."""
         
         # Test with missing required fields
@@ -417,10 +417,10 @@ class TestCanvasAISkills:
         
         mock_function_result = MagicMock()
         mock_function_result.value = json.dumps(invalid_response)
-        mock_ai_kernel_service.kernel.invoke.return_value = mock_function_result
+        mock_kernel_service.kernel.invoke.return_value = mock_function_result
         
         with patch('backend.services.canvas_ai_service.CanvasAIService._get_kernel_service',
-                  return_value=mock_ai_kernel_service):
+                  return_value=mock_kernel_service):
             
             from backend.services.canvas_ai_service import CanvasAIService
             service = CanvasAIService()
@@ -436,7 +436,7 @@ class TestCanvasAISkills:
                 await service.structure_text(request, uuid4())
 
     @pytest.mark.asyncio
-    async def test_skill_confidence_filtering(self, mock_ai_kernel_service):
+    async def test_skill_confidence_filtering(self, mock_kernel_service):
         """Test filtering of suggestions based on confidence thresholds."""
         
         mixed_confidence_response = {
@@ -467,10 +467,10 @@ class TestCanvasAISkills:
         
         mock_function_result = MagicMock()
         mock_function_result.value = json.dumps(mixed_confidence_response)
-        mock_ai_kernel_service.kernel.invoke.return_value = mock_function_result
+        mock_kernel_service.kernel.invoke.return_value = mock_function_result
         
         with patch('backend.services.canvas_ai_service.CanvasAIService._get_kernel_service',
-                  return_value=mock_ai_kernel_service):
+                  return_value=mock_kernel_service):
             
             from backend.services.canvas_ai_service import CanvasAIService
             service = CanvasAIService()
@@ -501,7 +501,7 @@ class TestCanvasAISkills:
                 assert len(high_confidence_suggestions) >= 0
 
     @pytest.mark.asyncio
-    async def test_skill_metadata_handling(self, mock_ai_kernel_service):
+    async def test_skill_metadata_handling(self, mock_kernel_service):
         """Test handling of metadata in AI skill responses."""
         
         metadata_rich_response = {
@@ -531,10 +531,10 @@ class TestCanvasAISkills:
         
         mock_function_result = MagicMock()
         mock_function_result.value = json.dumps(metadata_rich_response)
-        mock_ai_kernel_service.kernel.invoke.return_value = mock_function_result
+        mock_kernel_service.kernel.invoke.return_value = mock_function_result
         
         with patch('backend.services.canvas_ai_service.CanvasAIService._get_kernel_service',
-                  return_value=mock_ai_kernel_service):
+                  return_value=mock_kernel_service):
             
             from backend.services.canvas_ai_service import CanvasAIService
             service = CanvasAIService()
