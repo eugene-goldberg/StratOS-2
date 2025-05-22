@@ -8,8 +8,6 @@ import {
   AIAnalysisResult
 } from '../types';
 import { 
-  Node, 
-  Edge, 
   NodeChange, 
   EdgeChange, 
   applyNodeChanges, 

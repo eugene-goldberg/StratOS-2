@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { Box, Paper, Typography, IconButton, Divider, Tooltip } from '@mui/material';
+import React, { useCallback } from 'react';
+import { Box, Paper, IconButton, Divider, Tooltip } from '@mui/material';
 import {
   AddCircleOutline,
   TextFields,
@@ -12,7 +12,6 @@ import {
   Redo,
   Psychology,
   Save,
-  ColorLens,
   Image as ImageIcon,
   DataUsage,
   Assessment,
@@ -32,9 +31,8 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onAIAnalysisClick,
   hasSelection,
 }) => {
-  const { addNode, selectedElements } = useStrategicCanvasStore();
+  const { addNode } = useStrategicCanvasStore();
   const { zoomIn, zoomOut, fitView } = useReactFlow();
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
   // Add a new node to the canvas
   const handleAddNode = useCallback(
