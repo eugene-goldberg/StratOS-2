@@ -2,6 +2,7 @@ import os
 import sys
 import uuid
 from datetime import datetime
+import pytest
 from fastapi.testclient import TestClient
 
 # Add the project root to the Python path
@@ -14,8 +15,6 @@ from backend.models.subjective_input import LogEntry, LogEntryCreate, LogEntryTy
 from backend.models.user import UserResponse
 from backend.dependencies import get_current_active_user, get_current_user_id
 
-client = TestClient(app)
-
 test_user = UserResponse(
     id=uuid.uuid4(),
     email="user@example.com",
@@ -26,11 +25,22 @@ test_user = UserResponse(
     created_at=datetime.now()
 )
 
-app.dependency_overrides[get_current_active_user] = lambda: test_user
-app.dependency_overrides[get_current_user_id] = lambda: test_user.id
+@pytest.fixture
+def client():
+    """Create test client with dependency overrides."""
+    # Override authentication dependencies
+    app.dependency_overrides[get_current_active_user] = lambda: test_user
+    app.dependency_overrides[get_current_user_id] = lambda: test_user.id
+    
+    test_client = TestClient(app)
+    
+    yield test_client
+    
+    # Clean up dependency overrides
+    app.dependency_overrides.clear()
 
 
-def test_create_log_entry(monkeypatch):
+def test_create_log_entry(client, monkeypatch):
     async def mock_create(entry_data: LogEntryCreate, user_id: uuid.UUID):
         assert user_id == test_user.id
         return LogEntry(content=entry_data.content, user_id=user_id)
