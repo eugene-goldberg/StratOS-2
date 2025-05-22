@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from contextlib import asynccontextmanager
 
 # Import API routers
-from .routers import strategic_foundation, subjective_input, objective_data, analysis, planning, auth, conversation
+from .routers import strategic_foundation, subjective_input, objective_data, analysis, planning, auth, conversation, canvas_ai
 from .core.config import settings
 from .core.db_setup import initialize_database
 
@@ -61,6 +61,7 @@ app.include_router(objective_data.router, prefix="/api/objective", tags=["Object
 app.include_router(analysis.router, prefix="/api/analysis", tags=["Analysis"])
 app.include_router(planning.router, prefix="/api/planning", tags=["Planning"])
 app.include_router(conversation.router, prefix="/api", tags=["Conversations"])
+app.include_router(canvas_ai.router, prefix="/api", tags=["Canvas AI"])
 
 @app.get("/")
 async def root():

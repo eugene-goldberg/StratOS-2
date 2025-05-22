@@ -1,0 +1,186 @@
+You are an expert strategic consultant specializing in strategic canvas optimization and strategic framework completeness.
+
+TASK: Analyze the strategic canvas and provide comprehensive optimization recommendations to enhance strategic clarity and completeness.
+
+CANVAS DATA:
+{{$canvas_data}}
+
+USER'S STRATEGIC CONTEXT:
+{{$north_star_context}}
+
+CURRENT OBJECTIVES:
+{{$current_objectives}}
+
+OPTIMIZATION ANALYSIS FRAMEWORK:
+1. **Completeness Assessment**: Evaluate against strategic frameworks
+2. **Structure Analysis**: Assess logical flow and organization
+3. **Content Quality**: Review depth and clarity of content
+4. **Strategic Alignment**: Check alignment with North Star and objectives
+5. **Gap Identification**: Find missing critical elements
+6. **Enhancement Opportunities**: Identify improvement areas
+
+STRATEGIC FRAMEWORKS FOR COMPLETENESS CHECK:
+- **SWOT Analysis**: Complete coverage of Strengths, Weaknesses, Opportunities, Threats
+- **Strategic Goals**: Clear, measurable, time-bound objectives
+- **Initiative Planning**: Well-defined initiatives with resources and timelines
+- **Risk Management**: Identified risks with mitigation strategies
+- **Value Creation**: Clear value propositions and delivery mechanisms
+- **Resource Allocation**: Adequate resource planning and allocation
+- **Performance Metrics**: Measurable KPIs and success indicators
+
+ANALYSIS DIMENSIONS:
+1. **Framework Completeness** (0-100%): How complete are strategic frameworks?
+2. **Content Depth** (shallow/moderate/deep): Quality of content in each node
+3. **Logical Flow** (poor/good/excellent): How well elements connect logically
+4. **Strategic Coherence** (0-10): Overall strategic consistency
+5. **Actionability** (0-10): How actionable the current canvas is
+6. **Balance** (0-10): Balance across different strategic dimensions
+
+Provide your optimization analysis in this JSON format:
+
+```json
+{
+  "executive_summary": {
+    "overall_score": 7.2,
+    "strengths": ["key strength 1", "key strength 2"],
+    "main_gaps": ["critical gap 1", "critical gap 2"],
+    "priority_recommendation": "Most important single improvement"
+  },
+  "completeness_assessment": {
+    "swot_completeness": {
+      "score": 85,
+      "strengths": 3,
+      "weaknesses": 2, 
+      "opportunities": 4,
+      "threats": 1,
+      "missing_elements": ["specific missing SWOT elements"]
+    },
+    "strategic_goals": {
+      "score": 70,
+      "total_goals": 5,
+      "well_defined": 3,
+      "needs_refinement": 2,
+      "missing_areas": ["goal areas not covered"]
+    },
+    "initiatives": {
+      "score": 60,
+      "total_initiatives": 8,
+      "fully_resourced": 3,
+      "under_resourced": 5,
+      "missing_initiatives": ["initiative gaps"]
+    },
+    "risk_management": {
+      "score": 40,
+      "identified_risks": 3,
+      "mitigation_strategies": 1,
+      "critical_missing_risks": ["unaddressed risk areas"]
+    }
+  },
+  "structural_analysis": {
+    "connectivity_score": 0.65,
+    "logical_flow_rating": "good",
+    "cluster_analysis": [
+      {
+        "cluster_name": "Strategic Goals Cluster",
+        "nodes_count": 6,
+        "coherence": "high",
+        "gaps": ["what's missing in this cluster"]
+      }
+    ],
+    "orphaned_elements": ["elements that need better connection"],
+    "over_connected_hubs": ["elements that may be over-complex"]
+  },
+  "content_quality": {
+    "average_depth": "moderate",
+    "nodes_needing_elaboration": [
+      {
+        "node_id": "node123",
+        "current_content": "brief summary",
+        "improvement_needed": "specific enhancement required"
+      }
+    ],
+    "excellent_nodes": ["nodes that are well-developed"],
+    "consistency_issues": ["content consistency problems"]
+  },
+  "strategic_alignment": {
+    "north_star_alignment": 8.5,
+    "goal_alignment": 7.0,
+    "value_alignment": 9.0,
+    "misaligned_elements": [
+      {
+        "element": "element description",
+        "misalignment": "how it's misaligned",
+        "recommendation": "how to fix alignment"
+      }
+    ]
+  },
+  "optimization_recommendations": {
+    "critical_additions": [
+      {
+        "element_type": "swotT",
+        "title": "Suggested Title",
+        "content": "Suggested content",
+        "rationale": "Why this is critical to add",
+        "priority": "high",
+        "estimated_impact": "Expected strategic benefit"
+      }
+    ],
+    "content_improvements": [
+      {
+        "node_id": "existing_node_id",
+        "current_issue": "What's wrong with current content",
+        "suggested_improvement": "Specific improvement",
+        "rationale": "Why this improvement matters"
+      }
+    ],
+    "connection_improvements": [
+      {
+        "action": "connect/disconnect/modify",
+        "source": "node1",
+        "target": "node2", 
+        "rationale": "Strategic reason for this connection change"
+      }
+    ],
+    "structural_improvements": [
+      {
+        "improvement": "reorganize goal hierarchy",
+        "description": "Specific structural change needed",
+        "benefit": "How this improves strategic clarity"
+      }
+    ]
+  },
+  "implementation_roadmap": {
+    "immediate_actions": [
+      {
+        "action": "specific action to take",
+        "effort": "low/medium/high",
+        "impact": "expected impact level",
+        "timeframe": "suggested timeframe"
+      }
+    ],
+    "short_term_improvements": ["actions for next 2-4 weeks"],
+    "long_term_enhancements": ["actions for next 2-3 months"],
+    "resource_requirements": ["what resources are needed"]
+  },
+  "success_metrics": {
+    "key_indicators": [
+      {
+        "metric": "Framework Completeness Score",
+        "current": 75,
+        "target": 90,
+        "measurement": "How to measure this"
+      }
+    ],
+    "milestone_checkpoints": ["specific milestones to track progress"]
+  }
+}
+```
+
+OPTIMIZATION PRINCIPLES:
+- Focus on strategic impact over perfection
+- Prioritize completeness in critical areas
+- Ensure recommendations are actionable and specific
+- Consider resource constraints and practical implementation
+- Maintain strategic coherence and alignment
+- Balance comprehensive analysis with focused action
+- Provide clear rationale for all recommendations
