@@ -1,3 +1,6 @@
+# Import conftest_helper first to set up proper mocks
+import conftest_helper
+
 import pytest
 from unittest.mock import patch, MagicMock
 import os # Keep os import if used by other fixtures, but not for env patching here
