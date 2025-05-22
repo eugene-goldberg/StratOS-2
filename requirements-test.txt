@@ -1,0 +1,14 @@
+# Test dependencies for StratOS-2
+# Base requirements
+-r requirements.txt
+
+# Additional test-specific requirements
+pytest>=7.4.2
+pytest-asyncio>=0.21.0
+pytest-mock>=3.10.0
+anyio>=4.0.0  # pytest-anyio is built into anyio
+
+# Make sure these are explicitly installed for tests
+fastapi>=0.103.1
+httpx>=0.25.0
+azure-cognitiveservices-speech>=1.30.0
