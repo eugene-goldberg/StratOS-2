@@ -31,6 +31,24 @@ class SWOTCategory(str, Enum):
     OPPORTUNITY = "opportunity"
     THREAT = "threat"
 
+class AnalysisSessionStatus(str, Enum):
+    ACTIVE = "active"
+    PAUSED = "paused"
+    COMPLETED = "completed"
+    ABANDONED = "abandoned"
+
+class AnalysisSessionType(str, Enum):
+    SWOT = "swot"
+    TOWS = "tows"
+    GUIDED_SWOT = "guided_swot"
+    GUIDED_TOWS = "guided_tows"
+
+class TOWSCellType(str, Enum):
+    SO = "SO"  # Strengths-Opportunities
+    WO = "WO"  # Weaknesses-Opportunities  
+    ST = "ST"  # Strengths-Threats
+    WT = "WT"  # Weaknesses-Threats
+
 class SWOTItem(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     category: SWOTCategory
@@ -123,3 +141,79 @@ class InsightCreate(BaseModel):
     linked_strategic_goals: List[str] = []
     supporting_data: Optional[Dict[str, Any]] = None
     visualization_data: Optional[Dict[str, Any]] = None
+
+# Analysis Session Models for Interactive SWOT/TOWS
+
+class SessionStepState(BaseModel):
+    """State of a specific step in guided analysis"""
+    step_id: str  # e.g., "swot_strengths", "tows_so_cell"
+    is_completed: bool = False
+    items_count: int = 0
+    ai_guidance_requested: bool = False
+    last_guidance_at: Optional[datetime] = None
+    completion_percentage: float = 0.0
+
+class AnalysisSession(BaseModel):
+    """Interactive analysis session for guided SWOT/TOWS"""
+    id: UUID = Field(default_factory=uuid4)
+    user_id: UUID
+    session_type: AnalysisSessionType
+    status: AnalysisSessionStatus = AnalysisSessionStatus.ACTIVE
+    title: str
+    description: Optional[str] = None
+    
+    # Strategic Context
+    topic: str
+    company_name: Optional[str] = None
+    strategic_context: Optional[Dict[str, Any]] = None  # North Star elements, etc.
+    
+    # Session Progress
+    current_step: str  # Current step identifier
+    completed_steps: List[str] = []
+    step_states: Dict[str, SessionStepState] = {}
+    
+    # Analysis Data
+    swot_items: List[SWOTItem] = []
+    tows_strategies: List[Dict[str, Any]] = []
+    generated_insights: List[str] = []
+    
+    # Session Metadata
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+    last_interaction_at: datetime = Field(default_factory=datetime.now)
+    estimated_completion_time: Optional[int] = None  # minutes
+    
+    # AI Guidance History
+    guidance_history: List[Dict[str, Any]] = []
+
+class AnalysisSessionCreate(BaseModel):
+    """Request model for creating new analysis session"""
+    session_type: AnalysisSessionType
+    title: str
+    description: Optional[str] = None
+    topic: str
+    company_name: Optional[str] = None
+
+class AnalysisSessionUpdate(BaseModel):
+    """Request model for updating analysis session"""
+    status: Optional[AnalysisSessionStatus] = None
+    current_step: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+
+class GuidanceRequest(BaseModel):
+    """Request for AI guidance during analysis session"""
+    session_id: UUID
+    step_id: str  # Which step needs guidance
+    context: Optional[Dict[str, Any]] = None  # Additional context
+    
+class GuidanceResponse(BaseModel):
+    """AI guidance response for analysis session"""
+    session_id: UUID
+    step_id: str
+    guiding_questions: List[str] = []
+    suggestions: List[str] = []
+    examples: List[str] = []
+    next_steps: List[str] = []
+    completion_guidance: Optional[str] = None
+    estimated_time_remaining: Optional[int] = None  # minutes

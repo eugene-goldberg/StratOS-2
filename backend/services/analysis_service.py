@@ -22,7 +22,15 @@ from ..models.analysis import (
     SOLinkage, 
     SOLinkageCreate,
     LinkageType,
-    InsightSource # For generate_ai_guided_swot_items
+    InsightSource, # For generate_ai_guided_swot_items
+    AnalysisSession,
+    AnalysisSessionCreate,
+    AnalysisSessionUpdate,
+    AnalysisSessionStatus,
+    AnalysisSessionType,
+    GuidanceRequest,
+    GuidanceResponse,
+    SessionStepState
 )
 from ..ai.kernel_service import kernel_service
 
@@ -1014,5 +1022,258 @@ class AnalysisService:
                 self.logger.error(f"Error deleting S+O linkage {linkage_id} for user {user_id}: {str(e)}")
                 return False
         return not self.cosmos_db_available # If only cache was affected
+
+    # ============ SESSION MANAGEMENT METHODS ============
     
-    # ... [existing SWOT/insight methods remain unchanged] ...
+    async def create_analysis_session(self, session_data: AnalysisSessionCreate, user_id: UUID) -> AnalysisSession:
+        """Create a new guided analysis session"""
+        try:
+            session_id = uuid.uuid4()
+            
+            # Initialize step states based on session type
+            step_states = self._initialize_step_states(session_data.session_type)
+            
+            # Determine starting step
+            current_step = self._get_initial_step(session_data.session_type)
+            
+            session = AnalysisSession(
+                id=session_id,
+                user_id=user_id,
+                session_type=session_data.session_type,
+                title=session_data.title,
+                description=session_data.description,
+                topic=session_data.topic,
+                company_name=session_data.company_name,
+                current_step=current_step,
+                step_states=step_states,
+                estimated_completion_time=self._estimate_session_time(session_data.session_type)
+            )
+            
+            # Save to database
+            await self._save_session_to_db(session)
+            
+            self.logger.info(f"Created analysis session {session_id} for user {user_id}")
+            return session
+            
+        except Exception as e:
+            self.logger.error(f"Error creating analysis session for user {user_id}: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to create analysis session: {str(e)}")
+    
+    async def get_analysis_session(self, session_id: UUID, user_id: UUID) -> Optional[AnalysisSession]:
+        """Get an analysis session by ID"""
+        try:
+            # Try cache first
+            cache_key = f"{user_id}_{session_id}"
+            if cache_key in self.active_sessions:
+                return self.active_sessions[cache_key]
+            
+            # Try database
+            if self.cosmos_db_available and self.sessions_container:
+                try:
+                    session_data = await self.sessions_container.read_item(
+                        item=str(session_id), 
+                        partition_key=str(user_id)
+                    )
+                    session = self._parse_session_from_db(session_data)
+                    self.active_sessions[cache_key] = session
+                    return session
+                except CosmosExceptions.CosmosResourceNotFoundError:
+                    return None
+                except Exception as e:
+                    self.logger.error(f"Error reading session {session_id}: {str(e)}")
+                    return None
+            
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"Error getting analysis session {session_id} for user {user_id}: {str(e)}")
+            return None
+    
+    async def get_session_guidance(self, guidance_request: GuidanceRequest, user_id: UUID) -> Optional[GuidanceResponse]:
+        """Get AI guidance for a specific session step"""
+        try:
+            session = await self.get_analysis_session(guidance_request.session_id, user_id)
+            if not session:
+                raise HTTPException(status_code=404, detail="Analysis session not found")
+            
+            # Get strategic context
+            strategic_context = await self._get_strategic_context(user_id)
+            
+            # Get relevant subjective and objective data
+            subjective_data = await self._get_relevant_subjective_data(user_id, session.topic)
+            objective_data = await self._get_relevant_objective_data(user_id, session.topic)
+            
+            # Get current items for the step
+            current_items = self._get_current_items_for_step(session, guidance_request.step_id)
+            
+            # Use the enhanced contextual prompt generation skill
+            from ..ai.skills.analysis_skills.contextual_prompt_generation_skill import ContextualPromptGenerationSkill
+            
+            skill = ContextualPromptGenerationSkill()
+            guidance_json = await skill.generate_session_guidance(
+                session_id=str(guidance_request.session_id),
+                user_id=str(user_id),
+                step_id=guidance_request.step_id,
+                topic=session.topic,
+                company_name=session.company_name or "",
+                session_type=session.session_type.value,
+                current_items=json.dumps([item.content if hasattr(item, 'content') else str(item) for item in current_items]),
+                strategic_context=json.dumps(strategic_context),
+                subjective_data=subjective_data,
+                objective_data=objective_data
+            )
+            
+            guidance_data = json.loads(guidance_json)
+            
+            if "error" in guidance_data:
+                raise HTTPException(status_code=500, detail=guidance_data["error"])
+            
+            # Create response
+            response = GuidanceResponse(
+                session_id=guidance_request.session_id,
+                step_id=guidance_request.step_id,
+                guiding_questions=guidance_data.get("guiding_questions", []),
+                suggestions=guidance_data.get("suggestions", []),
+                examples=guidance_data.get("examples", []),
+                next_steps=guidance_data.get("next_steps", []),
+                completion_guidance=guidance_data.get("completion_guidance"),
+                estimated_time_remaining=guidance_data.get("estimated_time_remaining")
+            )
+            
+            return response
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            self.logger.error(f"Error getting session guidance for {guidance_request.session_id}: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to get guidance: {str(e)}")
+    
+    # ============ SESSION HELPER METHODS ============
+    
+    async def _save_session_to_db(self, session: AnalysisSession):
+        """Save session to database and cache"""
+        try:
+            cache_key = f"{session.user_id}_{session.id}"
+            self.active_sessions[cache_key] = session
+            
+            if self.cosmos_db_available and self.sessions_container:
+                session_dict = session.model_dump()
+                session_dict["id"] = str(session.id)
+                session_dict["user_id"] = str(session.user_id)
+                
+                # Convert UUIDs to strings
+                for item in session_dict.get("swot_items", []):
+                    item["id"] = str(item["id"])
+                
+                await self.sessions_container.upsert_item(body=session_dict)
+                
+        except Exception as e:
+            self.logger.error(f"Error saving session {session.id}: {str(e)}")
+    
+    def _initialize_step_states(self, session_type: AnalysisSessionType) -> Dict[str, SessionStepState]:
+        """Initialize step states based on session type"""
+        step_states = {}
+        
+        if session_type in [AnalysisSessionType.SWOT, AnalysisSessionType.GUIDED_SWOT]:
+            for category in ["strength", "weakness", "opportunity", "threat"]:
+                step_states[f"swot_{category}"] = SessionStepState(step_id=f"swot_{category}")
+        
+        if session_type in [AnalysisSessionType.TOWS, AnalysisSessionType.GUIDED_TOWS]:
+            for cell in ["so", "wo", "st", "wt"]:
+                step_states[f"tows_{cell}"] = SessionStepState(step_id=f"tows_{cell}")
+        
+        return step_states
+    
+    def _get_initial_step(self, session_type: AnalysisSessionType) -> str:
+        """Determine the initial step for a session type"""
+        if session_type in [AnalysisSessionType.SWOT, AnalysisSessionType.GUIDED_SWOT]:
+            return "swot_strength"
+        elif session_type in [AnalysisSessionType.TOWS, AnalysisSessionType.GUIDED_TOWS]:
+            return "tows_so"
+        else:
+            return "start"
+    
+    def _estimate_session_time(self, session_type: AnalysisSessionType) -> int:
+        """Estimate completion time in minutes"""
+        if session_type in [AnalysisSessionType.SWOT, AnalysisSessionType.GUIDED_SWOT]:
+            return 30  # 30 minutes for SWOT
+        elif session_type in [AnalysisSessionType.TOWS, AnalysisSessionType.GUIDED_TOWS]:
+            return 45  # 45 minutes for TOWS
+        else:
+            return 20
+    
+    async def _get_strategic_context(self, user_id: UUID) -> Dict[str, Any]:
+        """Get user's strategic context (North Star)"""
+        try:
+            from ..services.strategic_foundation_service import StrategicFoundationService
+            foundation_service = StrategicFoundationService()
+            north_star = await foundation_service.get_north_star(user_id)
+            
+            if north_star:
+                return {
+                    "purpose": {"statement": north_star.purpose.statement} if north_star.purpose else {},
+                    "vision": {"statement": north_star.vision.statement} if north_star.vision else {},
+                    "values": [{"name": v.name} for v in north_star.values],
+                    "strategic_goals": [{"title": g.title} for g in north_star.strategic_goals]
+                }
+            return {}
+            
+        except Exception as e:
+            self.logger.error(f"Error getting strategic context for user {user_id}: {str(e)}")
+            return {}
+    
+    async def _get_relevant_subjective_data(self, user_id: UUID, topic: str) -> str:
+        """Get relevant subjective data for the topic"""
+        try:
+            from ..services.subjective_input_service import SubjectiveInputService
+            subjective_service = SubjectiveInputService()
+            
+            # Get recent log entries
+            entries = await subjective_service.list_log_entries(user_id, limit=10)
+            
+            # Filter for entries related to the topic (simple keyword matching)
+            relevant_entries = []
+            topic_keywords = topic.lower().split()
+            
+            for entry in entries:
+                entry_content = entry.content.lower()
+                if any(keyword in entry_content for keyword in topic_keywords):
+                    relevant_entries.append(f"- {entry.content[:200]}...")
+            
+            return "\n".join(relevant_entries[:5]) if relevant_entries else ""
+            
+        except Exception as e:
+            self.logger.error(f"Error getting subjective data for user {user_id}: {str(e)}")
+            return ""
+    
+    async def _get_relevant_objective_data(self, user_id: UUID, topic: str) -> str:
+        """Get relevant objective data for the topic"""
+        try:
+            from ..services.objective_data_service import ObjectiveDataService
+            objective_service = ObjectiveDataService()
+            
+            # Get recent datasets
+            datasets = await objective_service.list_datasets(limit=5)
+            
+            # Create summary of relevant data
+            data_summaries = []
+            for dataset in datasets:
+                if dataset.description:
+                    data_summaries.append(f"- {dataset.name}: {dataset.description[:150]}...")
+            
+            return "\n".join(data_summaries) if data_summaries else ""
+            
+        except Exception as e:
+            self.logger.error(f"Error getting objective data for user {user_id}: {str(e)}")
+            return ""
+    
+    def _get_current_items_for_step(self, session: AnalysisSession, step_id: str) -> List[Any]:
+        """Get current items for a specific step"""
+        if step_id.startswith("swot_"):
+            category = step_id.replace("swot_", "")
+            return [item for item in session.swot_items if item.category.value == category]
+        elif step_id.startswith("tows_"):
+            cell_type = step_id.replace("tows_", "").upper()
+            return [strategy for strategy in session.tows_strategies if strategy.get("cell_type") == cell_type]
+        else:
+            return []
