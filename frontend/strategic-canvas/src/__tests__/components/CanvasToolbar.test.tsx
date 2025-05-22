@@ -23,6 +23,39 @@ describe('CanvasToolbar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
+    // Mock DOM getBoundingClientRect for React Flow and TouchRipple
+    const mockGetBoundingClientRect = jest.fn(() => ({
+      x: 0,
+      y: 0,
+      width: 800,
+      height: 600,
+      top: 0,
+      left: 0,
+      bottom: 600,
+      right: 800,
+      toJSON: jest.fn(),
+    }));
+    
+    // Mock HTMLElement.getBoundingClientRect
+    HTMLElement.prototype.getBoundingClientRect = mockGetBoundingClientRect;
+    
+    // Mock querySelector for React Flow bounds
+    const mockQuerySelector = jest.fn(() => ({
+      getBoundingClientRect: mockGetBoundingClientRect,
+    }));
+    
+    Object.defineProperty(document, 'querySelector', {
+      value: mockQuerySelector,
+      configurable: true,
+    });
+    
+    // Mock ResizeObserver for Material-UI
+    global.ResizeObserver = class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+    
     mockUseStrategicCanvasStore.mockReturnValue({
       addNode: mockAddNode,
       selectedElements: { nodes: [], edges: [] },

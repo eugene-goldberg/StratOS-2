@@ -96,43 +96,71 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
       {/* Node Creation Tools */}
       <Tooltip title="Add Basic Text Node" placement="right">
-        <IconButton onClick={() => handleAddNode(NodeType.BASIC)} color="primary">
+        <IconButton 
+          onClick={() => handleAddNode(NodeType.BASIC)} 
+          color="primary"
+          aria-label="Add Basic Text Node"
+        >
           <TextFields />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Add CEO Log Node" placement="right">
-        <IconButton onClick={() => handleAddNode(NodeType.CEO_LOG)} color="primary">
+        <IconButton 
+          onClick={() => handleAddNode(NodeType.CEO_LOG)} 
+          color="primary"
+          aria-label="Add CEO Log Node"
+        >
           <Assessment />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Add Data Snippet Node" placement="right">
-        <IconButton onClick={() => handleAddNode(NodeType.DATA_SNIPPET)} color="primary">
+        <IconButton 
+          onClick={() => handleAddNode(NodeType.DATA_SNIPPET)} 
+          color="primary"
+          aria-label="Add Data Snippet Node"
+        >
           <DataUsage />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Add SWOT Strength Node" placement="right">
-        <IconButton onClick={() => handleAddNode(NodeType.SWOT_S)} color="success">
+        <IconButton 
+          onClick={() => handleAddNode(NodeType.SWOT_S)} 
+          color="success"
+          aria-label="Add SWOT Strength Node"
+        >
           <AddCircleOutline />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Add SWOT Weakness Node" placement="right">
-        <IconButton onClick={() => handleAddNode(NodeType.SWOT_W)} color="error">
+        <IconButton 
+          onClick={() => handleAddNode(NodeType.SWOT_W)} 
+          color="error"
+          aria-label="Add SWOT Weakness Node"
+        >
           <BugReport />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Add SWOT Opportunity Node" placement="right">
-        <IconButton onClick={() => handleAddNode(NodeType.SWOT_O)} color="info">
+        <IconButton 
+          onClick={() => handleAddNode(NodeType.SWOT_O)} 
+          color="info"
+          aria-label="Add SWOT Opportunity Node"
+        >
           <Lightbulb />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Add Image Node" placement="right">
-        <IconButton onClick={() => handleAddNode(NodeType.IMAGE)} color="primary">
+        <IconButton 
+          onClick={() => handleAddNode(NodeType.IMAGE)} 
+          color="primary"
+          aria-label="Add Image Node"
+        >
           <ImageIcon />
         </IconButton>
       </Tooltip>
@@ -150,19 +178,31 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
       {/* Canvas Operations */}
       <Tooltip title="Zoom In" placement="right">
-        <IconButton onClick={() => zoomIn()} color="primary">
+        <IconButton 
+          onClick={() => zoomIn()} 
+          color="primary"
+          aria-label="Zoom In"
+        >
           <ZoomIn />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Zoom Out" placement="right">
-        <IconButton onClick={() => zoomOut()} color="primary">
+        <IconButton 
+          onClick={() => zoomOut()} 
+          color="primary"
+          aria-label="Zoom Out"
+        >
           <ZoomOut />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Fit View" placement="right">
-        <IconButton onClick={() => fitView()} color="primary">
+        <IconButton 
+          onClick={() => fitView()} 
+          color="primary"
+          aria-label="Fit View"
+        >
           <FitScreen />
         </IconButton>
       </Tooltip>
@@ -171,19 +211,29 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
       {/* Edit Operations */}
       <Tooltip title="Undo" placement="right">
-        <IconButton color="primary">
+        <IconButton 
+          color="primary"
+          aria-label="Undo"
+        >
           <Undo />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Redo" placement="right">
-        <IconButton color="primary">
+        <IconButton 
+          color="primary"
+          aria-label="Redo"
+        >
           <Redo />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Delete Selected" placement="right">
-        <IconButton color="error" disabled={!hasSelection}>
+        <IconButton 
+          color="error" 
+          disabled={!hasSelection}
+          aria-label="Delete Selected"
+        >
           <Delete />
         </IconButton>
       </Tooltip>
@@ -196,6 +246,7 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           onClick={onAIAnalysisClick}
           color="primary"
           disabled={!hasSelection}
+          aria-label="AI Assist"
         >
           <Psychology />
         </IconButton>
@@ -205,7 +256,10 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
       {/* Save Operation */}
       <Tooltip title="Save Canvas" placement="right">
-        <IconButton color="primary">
+        <IconButton 
+          color="primary"
+          aria-label="Save Canvas"
+        >
           <Save />
         </IconButton>
       </Tooltip>

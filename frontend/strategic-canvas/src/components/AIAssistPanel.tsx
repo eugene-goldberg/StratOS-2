@@ -33,7 +33,12 @@ const AIAssistPanel: React.FC<AIAssistPanelProps> = ({ result, onClose }) => {
         <Typography variant="subtitle1" fontWeight="bold">
           AI Analysis Results
         </Typography>
-        <IconButton size="small" onClick={onClose} color="inherit">
+        <IconButton 
+          size="small" 
+          onClick={onClose} 
+          color="inherit"
+          aria-label="Close"
+        >
           <Close fontSize="small" />
         </IconButton>
       </Box>
