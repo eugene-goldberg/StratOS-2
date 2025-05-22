@@ -14,7 +14,7 @@ from ....models.alerts import (
     AlertType, AlertSeverity, RiskCategory, OpportunityCategory,
     RiskOpportunityDetectionConfig
 )
-from ....models.subjective_input import SubjectiveEntry
+from ....models.subjective_input import LogEntry
 from ....models.objective_data import DataEntry
 from ....models.analysis import Insight, InsightType, SWOTItem
 

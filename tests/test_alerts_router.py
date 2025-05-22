@@ -33,8 +33,14 @@ def authenticated_client(client):
         created_at=datetime.now()
     )
     
-    with patch('backend.dependencies.get_current_user', return_value=mock_user):
-        yield client, mock_user
+    # Override the dependency in the app
+    from backend.dependencies import get_current_active_user
+    app.dependency_overrides[get_current_active_user] = lambda: mock_user
+    
+    yield client, mock_user
+    
+    # Clean up
+    app.dependency_overrides.clear()
 
 
 class TestAlertEndpoints:

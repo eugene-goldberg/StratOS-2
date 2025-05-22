@@ -341,6 +341,34 @@ class AlertService:
                     
                 except Exception as e:
                     logger.error(f"Error getting alert stats from Cosmos DB: {e}")
+            else:
+                # Fallback to cache when no container
+                for alert in self.alerts_cache.values():
+                    if alert.user_id == user_id:
+                        stats["total_alerts"] += 1
+                        
+                        # By type
+                        if alert.alert_type not in stats["by_type"]:
+                            stats["by_type"][alert.alert_type] = 0
+                        stats["by_type"][alert.alert_type] += 1
+                        
+                        # By severity
+                        if alert.severity not in stats["by_severity"]:
+                            stats["by_severity"][alert.severity] = 0
+                        stats["by_severity"][alert.severity] += 1
+                        
+                        # By status
+                        if alert.status not in stats["by_status"]:
+                            stats["by_status"][alert.status] = 0
+                        stats["by_status"][alert.status] += 1
+                        
+                        # Unread count
+                        if alert.status == AlertStatus.NEW:
+                            stats["unread_count"] += 1
+                        
+                        # Critical count
+                        if alert.severity == AlertSeverity.CRITICAL:
+                            stats["critical_count"] += 1
             
             return stats
             
