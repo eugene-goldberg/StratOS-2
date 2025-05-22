@@ -5,18 +5,10 @@ import ReactFlow, {
   MiniMap,
   Panel,
   ReactFlowProvider,
-  NodeTypes,
-  EdgeTypes,
   OnConnect,
-  Connection,
-  useReactFlow,
   NodeDragHandler,
   NodeMouseHandler,
   EdgeMouseHandler,
-  SelectionDragHandler,
-  PanelPosition,
-  useNodesState,
-  useEdgesState,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -26,7 +18,7 @@ import { nodeTypes } from './nodes';
 import CanvasToolbar from './CanvasToolbar';
 import AIAssistPanel from './AIAssistPanel';
 
-import { Box, Paper, useTheme } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 
 const StrategicCanvas: React.FC = () => {
   const theme = useTheme();
@@ -43,7 +35,6 @@ const StrategicCanvas: React.FC = () => {
     onEdgesChange,
     addEdge,
     setSelectedElements,
-    clearSelection,
     updateViewport,
     analyzeSelectedNodes,
     addAISuggestedEdges,
