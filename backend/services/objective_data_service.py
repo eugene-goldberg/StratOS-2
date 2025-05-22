@@ -1048,12 +1048,13 @@ class ObjectiveDataService:
                 }
             )
     
-    async def create_dataset(self, dataset_data: DataSetCreate) -> DataSet:
+    async def create_dataset(self, dataset_data: DataSetCreate, user_id: UUID) -> DataSet:
         """
         Create a new dataset record (without file upload)
         
         Args:
             dataset_data: Dataset creation data
+            user_id: ID of the user creating the dataset
             
         Returns:
             The created dataset
@@ -1071,6 +1072,7 @@ class ObjectiveDataService:
         # DataSetCreate now includes tags and linked_strategic_elements
         dataset = DataSet(
             id=dataset_id,
+            user_id=user_id,  # Add user_id for data isolation
             name=dataset_data.name,
             description=dataset_data.description,
             category=dataset_data.category,
@@ -1086,6 +1088,7 @@ class ObjectiveDataService:
         
         dataset_db_dict = dataset.model_dump() # Changed to model_dump()
         dataset_db_dict["id"] = str(dataset.id)
+        dataset_db_dict["user_id"] = str(dataset.user_id)  # Convert user_id to string
 
         # Save to Cosmos DB
         await self.datasets_container.create_item(body=dataset_db_dict)

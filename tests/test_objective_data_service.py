@@ -87,6 +87,7 @@ async def objective_service(monkeypatch: pytest.MonkeyPatch): # Added monkeypatc
 # --- DataSet Tests ---
 @pytest.mark.asyncio
 async def test_create_dataset_manual(objective_service: ObjectiveDataService):
+    user_id = uuid4()
     dataset_data = DataSetCreate(
         name="Manual Dataset",
         category=DataCategory.FINANCIAL,
@@ -96,17 +97,19 @@ async def test_create_dataset_manual(objective_service: ObjectiveDataService):
     
     objective_service.datasets_container.create_item = AsyncMock()
     
-    created_dataset = await objective_service.create_dataset(dataset_data)
+    created_dataset = await objective_service.create_dataset(dataset_data, user_id)
     
     assert created_dataset is not None
     assert created_dataset.name == dataset_data.name
+    assert created_dataset.user_id == user_id
     objective_service.datasets_container.create_item.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_get_dataset_found(objective_service: ObjectiveDataService):
     dataset_id = uuid4()
+    user_id = uuid4()
     mock_item_dict = { # Ensure this is a plain dict
-        "id": str(dataset_id), "name": "Found Dataset", "category": "sales", 
+        "id": str(dataset_id), "user_id": str(user_id), "name": "Found Dataset", "category": "sales", 
         "source_type": "upload", "created_at": datetime.now().isoformat(), 
         "updated_at": datetime.now().isoformat(), "tags": [], "linked_strategic_elements": []
     }
@@ -117,15 +120,17 @@ async def test_get_dataset_found(objective_service: ObjectiveDataService):
     
     assert dataset is not None
     assert dataset.id == dataset_id
+    assert dataset.user_id == user_id
     objective_service.datasets_container.read_item.assert_called_with(item=str(dataset_id), partition_key=str(dataset_id))
 
 @pytest.mark.asyncio
 async def test_list_datasets(objective_service: ObjectiveDataService):
     dataset_id1 = uuid4()
     dataset_id2 = uuid4()
+    user_id = uuid4()
     mock_items_list = [ # List of plain dicts
-        {"id": str(dataset_id1), "name": "Dataset 1", "category": "marketing", "source_type": "api", "created_at": datetime.now().isoformat(), "updated_at": datetime.now().isoformat(), "tags": [], "linked_strategic_elements": []},
-        {"id": str(dataset_id2), "name": "Dataset 2", "category": "operations", "source_type": "manual", "created_at": datetime.now().isoformat(), "updated_at": datetime.now().isoformat(), "tags": [], "linked_strategic_elements": []}
+        {"id": str(dataset_id1), "user_id": str(user_id), "name": "Dataset 1", "category": "marketing", "source_type": "api", "created_at": datetime.now().isoformat(), "updated_at": datetime.now().isoformat(), "tags": [], "linked_strategic_elements": []},
+        {"id": str(dataset_id2), "user_id": str(user_id), "name": "Dataset 2", "category": "operations", "source_type": "manual", "created_at": datetime.now().isoformat(), "updated_at": datetime.now().isoformat(), "tags": [], "linked_strategic_elements": []}
     ]
     
     class MockAsyncIterator:
@@ -181,7 +186,8 @@ async def test_get_kpi_found(objective_service: ObjectiveDataService):
 @pytest.mark.asyncio
 async def test_create_datapoint(objective_service: ObjectiveDataService):
     dataset_id = uuid4()
-    objective_service.get_dataset = AsyncMock(return_value=DataSet(id=dataset_id, name="Test DS", category=DataCategory.OTHER, source_type=DataSourceType.MANUAL))
+    user_id = uuid4()
+    objective_service.get_dataset = AsyncMock(return_value=DataSet(id=dataset_id, user_id=user_id, name="Test DS", category=DataCategory.OTHER, source_type=DataSourceType.MANUAL))
     datapoint_data = DataPointCreate(
         dataset_id=str(dataset_id), timestamp=datetime.now(),
         dimension={"region": "North"}, metrics={"sales": 1000}
