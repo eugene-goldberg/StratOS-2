@@ -8,7 +8,7 @@ from uuid import uuid4
 from unittest.mock import patch, AsyncMock
 
 from backend.main import app
-from backend.models.alerts import AlertType, AlertSeverity, AlertStatus
+from backend.models.alerts import Alert, AlertType, AlertSeverity, AlertStatus
 from backend.models.user import UserResponse
 
 
@@ -72,8 +72,8 @@ class TestAlertEndpoints:
             response = client.get(
                 "/api/alerts",
                 params={
-                    "alert_type": AlertType.RISK,
-                    "severity": [AlertSeverity.HIGH, AlertSeverity.CRITICAL],
+                    "alert_type": AlertType.RISK.value,
+                    "severity": [AlertSeverity.HIGH.value, AlertSeverity.CRITICAL.value],
                     "limit": 10
                 }
             )
@@ -91,20 +91,22 @@ class TestAlertEndpoints:
         client, user = authenticated_client
         alert_id = uuid4()
         
-        mock_alert = {
-            "id": str(alert_id),
-            "user_id": str(user.id),
-            "alert_type": AlertType.RISK,
-            "severity": AlertSeverity.HIGH,
-            "status": AlertStatus.NEW,
-            "title": "Test Alert",
-            "description": "Test Description",
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
-        }
+        mock_alert = Alert(
+            id=alert_id,
+            user_id=user.id,
+            alert_type=AlertType.RISK,
+            severity=AlertSeverity.HIGH,
+            status=AlertStatus.NEW,
+            title="Test Alert",
+            description="Test Description",
+            source_type="manual",
+            detection_method="manual",
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
         
         with patch('backend.routers.alerts.alert_service.get_alert', new_callable=AsyncMock) as mock_get:
-            mock_get.return_value = type('Alert', (), mock_alert)()
+            mock_get.return_value = mock_alert
             
             response = client.get(f"/api/alerts/{alert_id}")
             
@@ -117,10 +119,19 @@ class TestAlertEndpoints:
         alert_id = uuid4()
         
         with patch('backend.routers.alerts.alert_service.update_alert', new_callable=AsyncMock) as mock_update:
-            mock_update.return_value = type('Alert', (), {
-                "id": str(alert_id),
-                "status": AlertStatus.ACKNOWLEDGED
-            })()
+            mock_update.return_value = Alert(
+                id=alert_id,
+                user_id=user.id,
+                alert_type=AlertType.RISK,
+                severity=AlertSeverity.HIGH,
+                status=AlertStatus.ACKNOWLEDGED,
+                title="Test Alert",
+                description="Test Description",
+                source_type="manual",
+                detection_method="manual",
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
             
             response = client.post(f"/api/alerts/{alert_id}/acknowledge")
             
@@ -136,10 +147,19 @@ class TestAlertEndpoints:
         alert_id = uuid4()
         
         with patch('backend.routers.alerts.alert_service.update_alert', new_callable=AsyncMock) as mock_update:
-            mock_update.return_value = type('Alert', (), {
-                "id": str(alert_id),
-                "status": AlertStatus.RESOLVED
-            })()
+            mock_update.return_value = Alert(
+                id=alert_id,
+                user_id=user.id,
+                alert_type=AlertType.RISK,
+                severity=AlertSeverity.HIGH,
+                status=AlertStatus.RESOLVED,
+                title="Test Alert",
+                description="Test Description",
+                source_type="manual",
+                detection_method="manual",
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
             
             response = client.post(
                 f"/api/alerts/{alert_id}/resolve",
@@ -158,10 +178,19 @@ class TestAlertEndpoints:
         alert_id = uuid4()
         
         with patch('backend.routers.alerts.alert_service.update_alert', new_callable=AsyncMock) as mock_update:
-            mock_update.return_value = type('Alert', (), {
-                "id": str(alert_id),
-                "status": AlertStatus.DISMISSED
-            })()
+            mock_update.return_value = Alert(
+                id=alert_id,
+                user_id=user.id,
+                alert_type=AlertType.RISK,
+                severity=AlertSeverity.HIGH,
+                status=AlertStatus.DISMISSED,
+                title="Test Alert",
+                description="Test Description",
+                source_type="manual",
+                detection_method="manual",
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
             
             response = client.post(
                 f"/api/alerts/{alert_id}/dismiss",
