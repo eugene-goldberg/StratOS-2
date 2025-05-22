@@ -1,5 +1,7 @@
 // Types for the Strategic Canvas UI component
 
+import { Node } from 'reactflow';
+
 // Node types
 export enum NodeType {
   BASIC = 'basic',

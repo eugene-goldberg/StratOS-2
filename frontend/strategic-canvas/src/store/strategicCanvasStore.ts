@@ -95,7 +95,7 @@ export const useStrategicCanvasStore = create<StrategicCanvasStore>((set, get) =
   
   onNodesChange: (changes) => {
     set((state) => ({
-      nodes: applyNodeChanges(changes, state.nodes) as CanvasNode[],
+      nodes: applyNodeChanges(changes, state.nodes as any) as CanvasNode[],
     }));
   },
   
