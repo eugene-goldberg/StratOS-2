@@ -21,6 +21,12 @@ class NodeType(str, Enum):
     RISK = "risk"
     OPPORTUNITY = "opportunity"
     IMAGE = "image"
+    # B2 AI Algorithm node types
+    GOAL = "goal"
+    INITIATIVE = "initiative"
+    CHALLENGE = "challenge"
+    CAPABILITY = "capability"
+    METRIC = "metric"
 
 
 class ConfidenceLevel(str, Enum):
@@ -50,6 +56,34 @@ class RelationshipType(str, Enum):
     OPPORTUNITY_ENABLEMENT = "opportunity_enablement"
 
 
+class ConnectionType(str, Enum):
+    """Connection types for B2 AI algorithms."""
+    SUPPORTS = "supports"
+    ENABLES = "enables"
+    BLOCKS = "blocks"
+    DEPENDS_ON = "depends_on"
+    MEASURES = "measures"
+    ADDRESSES = "addresses"
+    CONFLICTS_WITH = "conflicts_with"
+    INFORMS = "informs"
+
+
+class ThemeImportance(str, Enum):
+    """Theme importance levels."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class OptimizationPriority(str, Enum):
+    """Optimization recommendation priorities."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    URGENT = "urgent"
+
+
 # Text Structuring Models
 class NodeSuggestion(BaseModel):
     """Suggestion for structuring text into a canvas node."""
@@ -63,10 +97,12 @@ class NodeSuggestion(BaseModel):
 
 class ConnectionSuggestion(BaseModel):
     """Suggestion for connecting two nodes."""
-    node1_title: str
-    node2_title: str
-    relationship: str
+    from_node_id: str
+    to_node_id: str
+    connection_type: ConnectionType
     rationale: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class TextStructureAnalysis(BaseModel):
@@ -307,33 +343,69 @@ class CanvasOptimizationResponse(BaseModel):
     success_metrics: Dict[str, List[SuccessMetric]]
 
 
-# Request Models
+
+
+
+
+# B2 AI Algorithm Models
+class ThemeCluster(BaseModel):
+    """Theme cluster for theme identification."""
+    theme_name: str
+    description: str
+    related_nodes: List[str]
+    confidence: float = Field(ge=0.0, le=1.0)
+    strategic_importance: ThemeImportance
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class OptimizationRecommendation(BaseModel):
+    """Optimization recommendation."""
+    category: str
+    recommendation: str
+    rationale: str
+    priority: OptimizationPriority
+    confidence: float = Field(ge=0.0, le=1.0)
+    implementation_steps: List[str] = Field(default_factory=list)
+    estimated_effort: str = "medium"
+    expected_impact: str = "medium"
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+# B2 Request Models
+class ThemeIdentificationRequest(BaseModel):
+    """Request for theme identification analysis."""
+    canvas_elements: Dict[str, Any]
+    analysis_scope: str = "comprehensive"
+    preferences: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ThemeAnalysisRequest(BaseModel):
+    """Request for theme analysis (alias for compatibility)."""
+    canvas_elements: Dict[str, Any]
+    analysis_scope: str = "comprehensive"
+    preferences: Dict[str, Any] = Field(default_factory=dict)
+
+
+# Updated request models for B2
 class TextStructureRequest(BaseModel):
     """Request for text structuring analysis."""
     text: str
-    canvas_context: Optional[Dict[str, Any]] = None
-    north_star_context: Optional[Dict[str, Any]] = None
+    canvas_context: Dict[str, Any] = Field(default_factory=dict)
+    preferences: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ConnectionAnalysisRequest(BaseModel):
     """Request for connection analysis."""
-    canvas_data: CanvasData
-    selected_nodes: Optional[List[str]] = None
-    north_star_context: Optional[Dict[str, Any]] = None
-
-
-class ThemeAnalysisRequest(BaseModel):
-    """Request for theme analysis."""
-    canvas_data: CanvasData
-    analysis_scope: Optional[str] = None
-    north_star_context: Optional[Dict[str, Any]] = None
+    nodes: List[Dict[str, Any]]
+    canvas_context: Dict[str, Any] = Field(default_factory=dict)
+    analysis_depth: str = "standard"
 
 
 class CanvasOptimizationRequest(BaseModel):
     """Request for canvas optimization."""
-    canvas_data: CanvasData
-    current_objectives: Optional[List[str]] = None
-    north_star_context: Optional[Dict[str, Any]] = None
+    current_canvas: Dict[str, Any]
+    optimization_goals: List[str] = Field(default_factory=list)
+    strategic_context: Dict[str, Any] = Field(default_factory=dict)
 
 
 # Response wrapper
@@ -342,7 +414,11 @@ class AIAnalysisResponse(BaseModel):
     analysis_id: UUID = Field(default_factory=uuid4)
     analysis_type: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    user_id: UUID
+    suggestions: List[Union[NodeSuggestion, ConnectionSuggestion, ThemeCluster, OptimizationRecommendation]] = Field(default_factory=list)
+    confidence: float = Field(ge=0.0, le=1.0, default=0.0)
+    processing_time: float = 0.0
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    user_id: Optional[UUID] = None
     canvas_id: Optional[str] = None
     success: bool = True
     message: Optional[str] = None

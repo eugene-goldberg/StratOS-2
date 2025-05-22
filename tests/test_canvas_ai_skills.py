@@ -5,7 +5,7 @@ from uuid import uuid4
 from semantic_kernel import Kernel
 from semantic_kernel.functions import KernelArguments
 
-from backend.ai.skills.analysis_skills.swot_analysis_skill import SwotAnalysisSkill
+# from backend.ai.skills.analysis_skills.swot_analysis_skill import SwotAnalysisSkill
 from backend.ai.kernel_service import AIKernelService
 from backend.models.canvas_ai import (
     TextStructureRequest, ConnectionAnalysisRequest,

@@ -39,7 +39,7 @@ class TestEnums:
         assert NodeType.BASIC == "basic"
         assert NodeType.CEO_LOG == "ceoLog"
         assert NodeType.SWOT_S == "swotS"
-        assert len(NodeType) == 10  # Ensure all types are defined
+        assert len(NodeType) == 15  # Ensure all types are defined (original 10 + B2 5)
     
     def test_confidence_level_enum(self):
         """Test ConfidenceLevel enum values."""
@@ -102,15 +102,17 @@ class TestTextStructuringModels:
     
     def test_connection_suggestion_creation(self):
         """Test ConnectionSuggestion model creation."""
+        from backend.models.canvas_ai import ConnectionType
         connection = ConnectionSuggestion(
-            node1_title="Node 1",
-            node2_title="Node 2",
-            relationship="supports",
-            rationale="Node 1 supports Node 2"
+            from_node_id="node_1",
+            to_node_id="node_2",
+            connection_type=ConnectionType.SUPPORTS,
+            rationale="Node 1 supports Node 2",
+            confidence=0.85
         )
         
-        assert connection.node1_title == "Node 1"
-        assert connection.relationship == "supports"
+        assert connection.from_node_id == "node_1"
+        assert connection.connection_type == ConnectionType.SUPPORTS
     
     def test_text_structure_analysis_creation(self):
         """Test TextStructureAnalysis model creation."""
