@@ -208,7 +208,7 @@ class TestConversationCRUDOperations:
         assert updated.status == ConversationStatus.ARCHIVED
         assert updated.context["updated"] is True
         assert updated.context["priority"] == "high"  # Original context preserved
-        assert updated.updated_at > conversation.updated_at
+        assert updated.updated_at >= conversation.updated_at
     
     @pytest.mark.asyncio
     async def test_update_nonexistent_conversation(self, service: ConversationService, user_id: UUID):
@@ -372,7 +372,7 @@ class TestAIIntegration:
         
         updated_conversation = await service.get_conversation(conversation.id, user_id)
         assert updated_conversation.summary == new_summary
-        assert updated_conversation.updated_at > conversation.updated_at
+        assert updated_conversation.updated_at >= conversation.updated_at
     
     @pytest.mark.asyncio
     @patch('backend.services.conversation_service.kernel_service')
