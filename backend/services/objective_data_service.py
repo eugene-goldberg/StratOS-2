@@ -859,13 +859,14 @@ class ObjectiveDataService:
     # Public API Methods - Dataset Operations
     ############################################################
     
-    async def process_uploaded_file(self, file: UploadFile, dataset_data: DataSetCreate) -> DataSet:
+    async def process_uploaded_file(self, file: UploadFile, dataset_data: DataSetCreate, user_id: UUID) -> DataSet:
         """
         Process an uploaded file: save to blob storage and create dataset record
         
         Args:
             file: The uploaded file
-            dataset_data: Dataset creation data
+            dataset_data: Dataset creation data with tags and linked elements
+            user_id: ID of the user uploading the dataset
             
         Returns:
             The created dataset
@@ -890,6 +891,7 @@ class ObjectiveDataService:
             
             dataset = DataSet(
                 id=UUID(dataset_id),
+                user_id=user_id,  # Add user_id for data isolation
                 name=dataset_data.name,
                 description=dataset_data.description,
                 category=dataset_data.category,
@@ -913,6 +915,7 @@ class ObjectiveDataService:
             # Convert to dict for DB, ensuring UUIDs are strings if model stores them as UUID
             dataset_db_dict = dataset.model_dump() # Changed to model_dump()
             dataset_db_dict["id"] = str(dataset.id) # id is already UUID from default_factory
+            dataset_db_dict["user_id"] = str(dataset.user_id) # Convert user_id to string
             # tags and linked_strategic_elements are already in correct format from model
             
             # Save to Cosmos DB

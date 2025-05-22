@@ -1,0 +1,75 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12, 3.13]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r backend/requirements.txt
+    
+    - name: Run tests with pytest
+      run: |
+        python -m pytest tests/ -v --tb=short
+      env:
+        # Set environment variables for testing
+        PYTHONPATH: ".:backend"
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-python-${{ matrix.python-version }}
+        path: test-results/
+
+  test-coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.13
+    
+    - name: Install dependencies with coverage
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r backend/requirements.txt
+        pip install pytest-cov
+    
+    - name: Run tests with coverage
+      run: |
+        python -m pytest tests/ --cov=backend --cov-report=xml --cov-report=html -v
+      env:
+        PYTHONPATH: ".:backend"
+    
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-reports
+        path: |
+          coverage.xml
+          htmlcov/

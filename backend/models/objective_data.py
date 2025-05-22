@@ -49,6 +49,7 @@ class KPICreate(BaseModel):
 
 class DataSet(BaseModel):
     id: UUID = Field(default_factory=uuid4)
+    user_id: UUID  # Add user_id for data isolation
     name: str
     description: Optional[str] = None
     category: DataCategory

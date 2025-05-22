@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from typing import List, Optional, Dict, Any
 from uuid import UUID
+import json
 
 from ..models.user import UserResponse
 from ..dependencies import get_current_active_user
@@ -124,18 +125,45 @@ async def delete_dataset(dataset_id: UUID):
 @router.post("/datasets/upload", response_model=DataSet)
 async def upload_dataset(
     file: UploadFile = File(...),
-    name: str = None,
-    description: Optional[str] = None,
-    category: DataCategory = None
+    name: str = Form(...),
+    description: Optional[str] = Form(None),
+    category: DataCategory = Form(...),
+    tags: Optional[str] = Form(None),  # JSON string of List[str]
+    linked_strategic_elements: Optional[str] = Form(None),  # JSON string of List[Dict[str, str]]
+    current_user: UserResponse = Depends(get_current_active_user)
 ):
     """
-    Upload a file and create a new dataset
+    Upload a file and create a new dataset with optional tags and strategic element links
     """
-    if not name or not category:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Name and category are required"
-        )
+    # Parse tags from JSON string
+    parsed_tags = []
+    if tags:
+        try:
+            parsed_tags = json.loads(tags)
+            if not isinstance(parsed_tags, list):
+                raise ValueError("Tags must be a list")
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid tags format: {str(e)}"
+            )
+    
+    # Parse linked strategic elements from JSON string
+    parsed_linked_elements = []
+    if linked_strategic_elements:
+        try:
+            parsed_linked_elements = json.loads(linked_strategic_elements)
+            if not isinstance(parsed_linked_elements, list):
+                raise ValueError("Linked strategic elements must be a list")
+            # Validate each element has required fields
+            for element in parsed_linked_elements:
+                if not isinstance(element, dict) or "type" not in element or "id" not in element:
+                    raise ValueError("Each linked element must be a dict with 'type' and 'id' fields")
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid linked strategic elements format: {str(e)}"
+            )
         
     # Determine file format
     file_format = None
@@ -152,17 +180,19 @@ async def upload_dataset(
             detail="Unsupported file format. Supported formats: CSV, Excel, JSON"
         )
     
-    # Create dataset record
+    # Create dataset record with user context
     dataset_data = DataSetCreate(
         name=name,
         description=description,
         category=category,
         source_type=DataSourceType.UPLOAD,
-        data_format=file_format
+        data_format=file_format,
+        tags=parsed_tags,
+        linked_strategic_elements=parsed_linked_elements
     )
     
-    # Process and save the file
-    return await data_service.process_uploaded_file(file, dataset_data)
+    # Process and save the file with user context
+    return await data_service.process_uploaded_file(file, dataset_data, current_user.id)
 
 @router.post("/datasets/{dataset_id}/analysis", response_model=Dict[str, Any])
 async def analyze_dataset(dataset_id: UUID):

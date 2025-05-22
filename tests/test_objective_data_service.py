@@ -3,6 +3,8 @@ import pytest_asyncio
 from uuid import uuid4, UUID
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
+import io
+import json
 
 from fastapi import HTTPException, UploadFile
 from azure.cosmos.aio import DatabaseProxy, ContainerProxy # Added imports
@@ -215,23 +217,149 @@ async def test_list_datapoints(objective_service: ObjectiveDataService):
     assert len(datapoints) == 1
     assert datapoints[0].id == dp_id1
 
-# Mocking file processing and AI indexing for a basic test of process_uploaded_file
+# Enhanced tests for the new dataset upload functionality with tags and strategic links
+
+class TestEnhancedDatasetUpload:
+    """Test enhanced dataset upload functionality with tags and strategic element links"""
+    
+    @pytest.mark.asyncio
+    @patch('backend.services.objective_data_service.ObjectiveDataService._upload_to_blob_storage', new_callable=AsyncMock)
+    @patch('backend.services.objective_data_service.asyncio.create_task')
+    async def test_process_uploaded_file_with_tags_and_links(
+        self, mock_create_task: MagicMock, mock_upload_blob: AsyncMock, objective_service: ObjectiveDataService
+    ):
+        """Test file upload with tags and strategic element links"""
+        mock_upload_blob.return_value = "http://fakeblob.com/financial_report.csv"
+        objective_service.datasets_container.create_item = AsyncMock()
+        
+        # Create mock file
+        mock_file = AsyncMock(spec=UploadFile)
+        mock_file.filename = "financial_report.csv"
+        mock_file.size = 2048
+        
+        # Create dataset with tags and strategic links
+        user_id = uuid4()
+        dataset_create_data = DataSetCreate(
+            name="Q4 Financial Report",
+            description="Quarterly financial performance data",
+            category=DataCategory.FINANCIAL,
+            source_type=DataSourceType.UPLOAD,
+            data_format="csv",
+            tags=["quarterly", "finance", "revenue"],
+            linked_strategic_elements=[
+                {"type": "goal", "id": str(uuid4())},
+                {"type": "value", "id": str(uuid4())}
+            ]
+        )
+        
+        created_dataset = await objective_service.process_uploaded_file(mock_file, dataset_create_data, user_id)
+        
+        # Verify dataset creation
+        assert created_dataset is not None
+        assert created_dataset.name == "Q4 Financial Report"
+        assert created_dataset.user_id == user_id
+        assert created_dataset.tags == ["quarterly", "finance", "revenue"]
+        assert len(created_dataset.linked_strategic_elements) == 2
+        assert created_dataset.linked_strategic_elements[0]["type"] == "goal"
+        assert created_dataset.linked_strategic_elements[1]["type"] == "value"
+        
+        # Verify Azure operations were called
+        mock_upload_blob.assert_called_once()
+        objective_service.datasets_container.create_item.assert_called_once()
+        mock_create_task.assert_called_once()
+        
+        # Verify database payload includes user_id
+        create_call_args = objective_service.datasets_container.create_item.call_args[1]['body']
+        assert create_call_args['user_id'] == str(user_id)
+        assert create_call_args['tags'] == ["quarterly", "finance", "revenue"]
+        assert len(create_call_args['linked_strategic_elements']) == 2
+    
+    @pytest.mark.asyncio
+    @patch('backend.services.objective_data_service.ObjectiveDataService._upload_to_blob_storage', new_callable=AsyncMock)
+    @patch('backend.services.objective_data_service.asyncio.create_task')
+    async def test_process_uploaded_file_without_optional_metadata(
+        self, mock_create_task: MagicMock, mock_upload_blob: AsyncMock, objective_service: ObjectiveDataService
+    ):
+        """Test file upload without optional tags and strategic links"""
+        mock_upload_blob.return_value = "http://fakeblob.com/simple_data.xlsx"
+        objective_service.datasets_container.create_item = AsyncMock()
+        
+        mock_file = AsyncMock(spec=UploadFile)
+        mock_file.filename = "simple_data.xlsx"
+        mock_file.size = 1024
+        
+        user_id = uuid4()
+        dataset_create_data = DataSetCreate(
+            name="Simple Dataset",
+            description="Basic data without metadata",
+            category=DataCategory.OPERATIONS,
+            source_type=DataSourceType.UPLOAD,
+            data_format="excel"
+            # No tags or linked_strategic_elements provided (should default to empty lists)
+        )
+        
+        created_dataset = await objective_service.process_uploaded_file(mock_file, dataset_create_data, user_id)
+        
+        # Verify defaults are applied
+        assert created_dataset.tags == []
+        assert created_dataset.linked_strategic_elements == []
+        assert created_dataset.user_id == user_id
+        
+        # Verify database payload
+        create_call_args = objective_service.datasets_container.create_item.call_args[1]['body']
+        assert create_call_args['tags'] == []
+        assert create_call_args['linked_strategic_elements'] == []
+        assert create_call_args['user_id'] == str(user_id)
+
+    @pytest.mark.asyncio
+    async def test_dataset_model_user_id_requirement(self):
+        """Test that DataSet model requires user_id"""
+        user_id = uuid4()
+        
+        # Test successful creation with user_id
+        dataset = DataSet(
+            user_id=user_id,
+            name="Test Dataset",
+            category=DataCategory.SALES,
+            source_type=DataSourceType.MANUAL
+        )
+        assert dataset.user_id == user_id
+        
+        # Test that user_id is required (should raise validation error without it)
+        from pydantic import ValidationError
+        with pytest.raises(ValidationError):
+            DataSet(
+                name="Test Dataset",
+                category=DataCategory.SALES,
+                source_type=DataSourceType.MANUAL
+                # Missing user_id should cause validation error
+            )
+
+# Original test for basic file processing flow
 @pytest.mark.asyncio
 @patch('backend.services.objective_data_service.ObjectiveDataService._upload_to_blob_storage', new_callable=AsyncMock)
 @patch('backend.services.objective_data_service.asyncio.create_task') # Mock asyncio.create_task
-async def test_process_uploaded_file_flow(mock_create_task: MagicMock, mock_upload_blob: AsyncMock, objective_service: ObjectiveDataService):
+async def test_process_uploaded_file_basic_flow(mock_create_task: MagicMock, mock_upload_blob: AsyncMock, objective_service: ObjectiveDataService):
+    """Test basic file upload flow (legacy test updated for new signature)"""
     mock_upload_blob.return_value = "http://fakeblob.com/file.pdf"
     objective_service.datasets_container.create_item = AsyncMock()
     mock_file = AsyncMock(spec=UploadFile)
     mock_file.filename = "test.pdf"
     mock_file.size = 1024
+    
+    user_id = uuid4()
     dataset_create_data = DataSetCreate(
-        name="Uploaded PDF", description="Test PDF upload", category=DataCategory.OTHER,
-        source_type=DataSourceType.UPLOAD, data_format="pdf"
+        name="Uploaded PDF", 
+        description="Test PDF upload", 
+        category=DataCategory.OTHER,
+        source_type=DataSourceType.UPLOAD, 
+        data_format="pdf"
     )
-    created_dataset = await objective_service.process_uploaded_file(mock_file, dataset_create_data)
+    
+    created_dataset = await objective_service.process_uploaded_file(mock_file, dataset_create_data, user_id)
     assert created_dataset is not None
     assert created_dataset.name == "Uploaded PDF"
+    assert created_dataset.user_id == user_id
     mock_upload_blob.assert_called_once()
     objective_service.datasets_container.create_item.assert_called_once()
     mock_create_task.assert_called_once()

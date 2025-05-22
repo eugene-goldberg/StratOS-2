@@ -3,17 +3,43 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 import os
 import json
+import logging
 from datetime import datetime
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 
 # Import API routers
-from routers import strategic_foundation, subjective_input, objective_data, analysis, planning, auth
-from core.config import settings
+from .routers import strategic_foundation, subjective_input, objective_data, analysis, planning, auth
+from .core.config import settings
+from .core.db_setup import initialize_database
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan manager for startup and shutdown events"""
+    # Startup
+    logger.info("Starting StratOS API...")
+    try:
+        await initialize_database()
+        logger.info("Database initialization completed successfully")
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+        # Continue startup even if database initialization fails
+        # Services will use in-memory fallbacks
+    
+    yield
+    
+    # Shutdown
+    logger.info("Shutting down StratOS API...")
 
 app = FastAPI(
     title="StratOS API",
     description="API for StratOS - An AI-Powered Strategic Copilot",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan
 )
 
 # CORS middleware
