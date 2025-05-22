@@ -148,7 +148,7 @@ const StrategicCanvas: React.FC = () => {
       <ReactFlowProvider>
         <Box ref={reactFlowWrapper} sx={{ width: '100%', height: '100%' }}>
           <ReactFlow
-            nodes={nodes}
+            nodes={nodes as any /* Type assertion to satisfy ReactFlow's Node[] requirement */}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}

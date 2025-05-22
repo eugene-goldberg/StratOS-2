@@ -1,5 +1,7 @@
 // Types for the Strategic Canvas UI component
 
+import { Node } from 'reactflow';
+
 // Node types
 export enum NodeType {
   BASIC = 'basic',
@@ -60,7 +62,7 @@ export type NodeData =
   | ImageNodeData;
 
 // Custom node with additional properties
-export interface CanvasNode extends Node<NodeData> {
+export interface CanvasNode extends Node<NodeData, string | undefined> {
   type: NodeType;
   style?: React.CSSProperties;
 }

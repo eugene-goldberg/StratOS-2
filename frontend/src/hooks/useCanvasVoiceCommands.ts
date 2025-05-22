@@ -109,18 +109,16 @@ export const useCanvasVoiceCommands = ({
     try {
       // Prepare current nodes data for context
       const currentNodes = nodes.map(node => ({
-        id: node.id,
+        id: (node as any).id,
         data: {
-          label: node.data.label || node.data.title || ''
+          label: (node as any).data.title || '' // Use title instead of non-existent label
         },
-        position: node.position,
-        type: node.type
+        position: (node as any).position,
+        type: (node as any).type
       }));
       
       // Get selected node IDs
-      const selectedNodeIds = selectedElements
-        .filter(el => 'data' in el)
-        .map(node => node.id);
+      const selectedNodeIds = selectedElements.nodes.map((node: any) => node.id);
       
       // Send to API
       const response = await axios.post(
@@ -163,41 +161,43 @@ export const useCanvasVoiceCommands = ({
     switch (result.action) {
       case 'add_node':
         if (result.node) {
-          const newNode: Node = {
-            id: `node-${Date.now()}`,
-            type: result.node.type || 'concept',
-            position: result.node.position || { x: 0, y: 0 },
-            data: {
-              label: result.node.title,
+          // Use proper node type structure
+          addNode(
+            result.node.type || 'basic',
+            result.node.position || { x: 0, y: 0 },
+            {
+              title: result.node.title,
               content: result.node.content || ''
             }
-          };
-          addNode(newNode);
+          );
         }
         break;
       
       case 'connect_nodes':
         if (result.edge) {
-          const newEdge: Edge = {
-            id: `edge-${Date.now()}`,
-            source: result.edge.source,
-            target: result.edge.target,
-            type: result.edge.type || 'default'
-          };
-          addEdge(newEdge);
+          // Use the connection object format required by addEdge
+          addEdge(
+            {
+              source: result.edge.source,
+              target: result.edge.target,
+              sourceHandle: null,
+              targetHandle: null
+            },
+            result.edge.label
+          );
         }
         break;
       
       case 'delete_node':
-        if (result.node_ids) {
+        if (result.node_ids && deleteNode) {
           result.node_ids.forEach(id => deleteNode(id));
         } else if (result.node_title) {
           // Find node by title and delete
           const nodeToDelete = nodes.find(n => 
-            n.data.label?.toLowerCase() === result.node_title?.toLowerCase()
+            (n as any).data.title?.toLowerCase() === result.node_title?.toLowerCase()
           );
-          if (nodeToDelete) {
-            deleteNode(nodeToDelete.id);
+          if (nodeToDelete && deleteNode) {
+            deleteNode((nodeToDelete as any).id);
           }
         }
         break;
@@ -205,11 +205,11 @@ export const useCanvasVoiceCommands = ({
       case 'move_node':
         if (result.node_title && result.position) {
           const nodeToMove = nodes.find(n => 
-            n.data.label?.toLowerCase() === result.node_title?.toLowerCase()
+            (n as any).data.title?.toLowerCase() === result.node_title?.toLowerCase()
           );
-          if (nodeToMove) {
+          if (nodeToMove && setNodes) {
             const updatedNodes = nodes.map(n => {
-              if (n.id === nodeToMove.id) {
+              if ((n as any).id === (nodeToMove as any).id) {
                 return {
                   ...n,
                   position: result.position!
@@ -225,14 +225,13 @@ export const useCanvasVoiceCommands = ({
       case 'update_node':
         if (result.old_title && result.new_title) {
           const nodeToUpdate = nodes.find(n => 
-            n.data.label?.toLowerCase() === result.old_title?.toLowerCase()
+            (n as any).data.title?.toLowerCase() === result.old_title?.toLowerCase()
           );
           if (nodeToUpdate) {
-            updateNode(nodeToUpdate.id, {
-              data: {
-                ...nodeToUpdate.data,
-                label: result.new_title
-              }
+            updateNode((nodeToUpdate as any).id, {
+              // Use proper structure based on NodeData type
+              title: result.new_title,
+              content: (nodeToUpdate as any).data.content || ''
             });
           }
         }
