@@ -15,7 +15,7 @@ from ....models.alerts import (
     RiskOpportunityDetectionConfig
 )
 from ....models.subjective_input import LogEntry
-from ....models.objective_data import DataEntry
+from ....models.objective_data import KPI
 from ....models.analysis import Insight, InsightType, SWOTItem
 
 
