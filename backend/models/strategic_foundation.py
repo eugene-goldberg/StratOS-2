@@ -34,6 +34,8 @@ class StrategicGoal(BaseModel):
     metrics: Optional[List[str]] = None
     target_value: Optional[float] = None
     current_value: Optional[float] = None
+    parent_goal_id: Optional[UUID] = None  # For hierarchical goal organization
+    sub_goals: List['StrategicGoal'] = []  # Child goals
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
@@ -61,3 +63,6 @@ class NorthStarUpdate(BaseModel):
     vision: Optional[str] = None
     vision_description: Optional[str] = None
     vision_time_horizon: Optional[str] = None
+
+# Enable forward references for self-referential model
+StrategicGoal.model_rebuild()

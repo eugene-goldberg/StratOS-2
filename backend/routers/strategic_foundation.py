@@ -100,12 +100,17 @@ async def create_strategic_goal(
 
 @router.get("/north-star/strategic-goals", response_model=List[StrategicGoal])
 async def list_strategic_goals(
+    hierarchical: bool = Query(False, description="Return goals in hierarchical structure"),
     current_user: UserResponse = Depends(get_current_active_user)
 ):
     """
-    List all strategic goals for the current user's North Star
+    List all strategic goals for the current user's North Star.
+    
+    Args:
+        hierarchical: If True, returns only top-level goals with sub-goals nested.
+                     If False, returns flat list of all goals.
     """
-    return await foundation_service.list_strategic_goals(current_user.id)
+    return await foundation_service.list_strategic_goals(current_user.id, hierarchical)
 
 @router.get("/north-star/strategic-goals/{goal_id}", response_model=StrategicGoal)
 async def get_strategic_goal(
@@ -119,6 +124,16 @@ async def get_strategic_goal(
     if not goal:
         raise HTTPException(status_code=404, detail="Strategic goal not found")
     return goal
+
+@router.get("/north-star/strategic-goals/{goal_id}/sub-goals", response_model=List[StrategicGoal])
+async def get_sub_goals(
+    goal_id: UUID,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    Get all direct sub-goals of a specific strategic goal
+    """
+    return await foundation_service.get_sub_goals(current_user.id, goal_id)
 
 @router.put("/north-star/strategic-goals/{goal_id}", response_model=StrategicGoal)
 async def update_strategic_goal(

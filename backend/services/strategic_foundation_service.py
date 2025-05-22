@@ -36,6 +36,57 @@ class StrategicFoundationService:
 
         self._initialize_cosmos_db_sync()
 
+    def _convert_goal_ids_to_str(self, goals: List[Dict]):
+        """Recursively convert goal IDs to strings for Cosmos DB storage."""
+        for goal in goals:
+            goal["id"] = str(goal["id"])
+            if goal.get("parent_goal_id"):
+                goal["parent_goal_id"] = str(goal["parent_goal_id"])
+            if goal.get("sub_goals"):
+                self._convert_goal_ids_to_str(goal["sub_goals"])
+    
+    async def _find_goal_recursive(self, goals: List[StrategicGoal], goal_id: UUID) -> Optional[StrategicGoal]:
+        """Recursively find a goal by ID in the goal hierarchy."""
+        for goal in goals:
+            if goal.id == goal_id:
+                return goal
+            # Search in sub-goals
+            found = await self._find_goal_recursive(goal.sub_goals, goal_id)
+            if found:
+                return found
+        return None
+    
+    def _build_goal_hierarchy(self, goals: List[StrategicGoal]) -> List[StrategicGoal]:
+        """Build hierarchical structure from flat list of goals."""
+        # Create a map of all goals by ID
+        goal_map = {goal.id: goal for goal in goals}
+        
+        # Separate top-level goals (no parent)
+        top_level_goals = []
+        
+        for goal in goals:
+            if goal.parent_goal_id and goal.parent_goal_id in goal_map:
+                # Add to parent's sub_goals
+                parent = goal_map[goal.parent_goal_id]
+                if goal not in parent.sub_goals:
+                    parent.sub_goals.append(goal)
+            else:
+                # No parent or parent not found, add to top level
+                if goal.parent_goal_id:
+                    self.logger.warning(f"Parent goal {goal.parent_goal_id} not found for goal {goal.id}")
+                top_level_goals.append(goal)
+        
+        return top_level_goals
+
+    def _convert_goal_ids_to_uuid(self, goals: List[Dict]):
+        """Recursively convert goal IDs from strings to UUIDs when retrieving from Cosmos DB."""
+        for goal in goals:
+            goal["id"] = UUID(goal["id"])
+            if goal.get("parent_goal_id"):
+                goal["parent_goal_id"] = UUID(goal["parent_goal_id"])
+            if goal.get("sub_goals"):
+                self._convert_goal_ids_to_uuid(goal["sub_goals"])
+
     def _initialize_cosmos_db_sync(self):
         if not self.cosmos_endpoint or not self.cosmos_key:
             self.logger.warning("Cosmos DB credentials not found. Using in-memory storage.")
@@ -69,7 +120,12 @@ class StrategicFoundationService:
         if north_star.purpose: north_star_dict["purpose"]["id"] = str(north_star.purpose.id)
         if north_star.vision: north_star_dict["vision"]["id"] = str(north_star.vision.id)
         for v_dict in north_star_dict.get("values", []): v_dict["id"] = str(v_dict["id"])
-        for g_dict in north_star_dict.get("strategic_goals", []): g_dict["id"] = str(g_dict["id"])
+        for g_dict in north_star_dict.get("strategic_goals", []): 
+            g_dict["id"] = str(g_dict["id"])
+            if g_dict.get("parent_goal_id"):
+                g_dict["parent_goal_id"] = str(g_dict["parent_goal_id"])
+            # Convert sub_goals recursively
+            self._convert_goal_ids_to_str(g_dict.get("sub_goals", []))
         
         try:
             await self.north_star_container.upsert_item(body=north_star_dict) # Upsert is safer for create/update
@@ -98,7 +154,7 @@ class StrategicFoundationService:
                 if "values" in item_data:
                     for value_dict in item_data["values"]: value_dict["id"] = UUID(value_dict["id"])
                 if "strategic_goals" in item_data:
-                    for goal_dict in item_data["strategic_goals"]: goal_dict["id"] = UUID(goal_dict["id"])
+                    self._convert_goal_ids_to_uuid(item_data["strategic_goals"])
                 
                 north_star = NorthStar(**item_data)
                 self.north_stars_cache[str(user_id)] = north_star
@@ -119,7 +175,22 @@ class StrategicFoundationService:
         purpose = Purpose(statement=north_star_data.purpose, description=north_star_data.purpose_description, created_at=current_time, updated_at=current_time)
         vision = Vision(statement=north_star_data.vision, description=north_star_data.vision_description, time_horizon=north_star_data.vision_time_horizon, created_at=current_time, updated_at=current_time)
         values = [Value(name=v.get("name",""), description=v.get("description",""), examples=v.get("examples"), created_at=current_time, updated_at=current_time) for v in north_star_data.values]
-        strategic_goals = [StrategicGoal(title=g.get("title",""), description=g.get("description",""), time_frame=g.get("time_frame"), metrics=g.get("metrics"), target_value=g.get("target_value"), current_value=g.get("current_value"), created_at=current_time, updated_at=current_time) for g in north_star_data.strategic_goals]
+        strategic_goals = []
+        for g in north_star_data.strategic_goals:
+            parent_id = g.get("parent_goal_id")
+            if parent_id and isinstance(parent_id, str):
+                parent_id = UUID(parent_id)
+            strategic_goals.append(StrategicGoal(
+                title=g.get("title", ""),
+                description=g.get("description", ""),
+                time_frame=g.get("time_frame"),
+                metrics=g.get("metrics"),
+                target_value=g.get("target_value"),
+                current_value=g.get("current_value"),
+                parent_goal_id=parent_id,
+                created_at=current_time,
+                updated_at=current_time
+            ))
         
         north_star = NorthStar(
             id=user_id, purpose=purpose, vision=vision, values=values, strategic_goals=strategic_goals,
@@ -218,6 +289,12 @@ class StrategicFoundationService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="North Star not found to add goal")
 
         current_time = datetime.now()
+        parent_goal_id = goal_data.get("parent_goal_id")
+        
+        # Convert string UUID to UUID object if provided
+        if parent_goal_id and isinstance(parent_goal_id, str):
+            parent_goal_id = UUID(parent_goal_id)
+        
         new_goal = StrategicGoal(
             title=goal_data.get("title", "Unnamed Goal"),
             description=goal_data.get("description"),
@@ -225,9 +302,23 @@ class StrategicFoundationService:
             metrics=goal_data.get("metrics"),
             target_value=goal_data.get("target_value"),
             current_value=goal_data.get("current_value"),
+            parent_goal_id=parent_goal_id,
             created_at=current_time, updated_at=current_time
         )
-        north_star.strategic_goals.append(new_goal)
+        
+        # If there's a parent goal, add this as a sub-goal to the parent
+        if parent_goal_id:
+            parent_goal = await self._find_goal_recursive(north_star.strategic_goals, parent_goal_id)
+            if parent_goal:
+                parent_goal.sub_goals.append(new_goal)
+            else:
+                # If parent not found, still add to top level but log warning
+                self.logger.warning(f"Parent goal {parent_goal_id} not found, adding goal to top level")
+                north_star.strategic_goals.append(new_goal)
+        else:
+            # No parent, add to top level
+            north_star.strategic_goals.append(new_goal)
+        
         north_star.updated_at = current_time
         await self._save_north_star_to_db(north_star)
         return new_goal
@@ -236,8 +327,32 @@ class StrategicFoundationService:
         north_star = await self.get_north_star(user_id)
         if not north_star: return None
 
-        goal_to_update = next((g for g in north_star.strategic_goals if g.id == goal_id), None)
+        # Find goal recursively in the hierarchy
+        goal_to_update = await self._find_goal_recursive(north_star.strategic_goals, goal_id)
         if not goal_to_update: return None
+
+        # Handle parent_goal_id changes
+        if "parent_goal_id" in goal_data:
+            new_parent_id = goal_data["parent_goal_id"]
+            if new_parent_id and isinstance(new_parent_id, str):
+                new_parent_id = UUID(new_parent_id)
+            
+            # If parent is changing, we need to reorganize the hierarchy
+            if new_parent_id != goal_to_update.parent_goal_id:
+                # Remove from current parent's sub_goals if it has a parent
+                if goal_to_update.parent_goal_id:
+                    current_parent = await self._find_goal_recursive(north_star.strategic_goals, goal_to_update.parent_goal_id)
+                    if current_parent:
+                        current_parent.sub_goals = [g for g in current_parent.sub_goals if g.id != goal_id]
+                
+                # Update parent_goal_id
+                goal_to_update.parent_goal_id = new_parent_id
+                
+                # Add to new parent's sub_goals if new parent exists
+                if new_parent_id:
+                    new_parent = await self._find_goal_recursive(north_star.strategic_goals, new_parent_id)
+                    if new_parent:
+                        new_parent.sub_goals.append(goal_to_update)
 
         if "title" in goal_data: goal_to_update.title = goal_data["title"]
         if "description" in goal_data: goal_to_update.description = goal_data["description"]
@@ -267,11 +382,39 @@ class StrategicFoundationService:
     async def get_strategic_goal(self, user_id: UUID, goal_id: UUID) -> Optional[StrategicGoal]:
         north_star = await self.get_north_star(user_id)
         if not north_star: return None
-        return next((goal for goal in north_star.strategic_goals if goal.id == goal_id), None)
+        return await self._find_goal_recursive(north_star.strategic_goals, goal_id)
     
-    async def list_strategic_goals(self, user_id: UUID) -> List[StrategicGoal]:
+    async def list_strategic_goals(self, user_id: UUID, hierarchical: bool = False) -> List[StrategicGoal]:
         north_star = await self.get_north_star(user_id)
-        return north_star.strategic_goals if north_star else []
+        if not north_star:
+            return []
+        
+        if hierarchical:
+            # Return only top-level goals with their sub-goals nested
+            return [goal for goal in north_star.strategic_goals if not goal.parent_goal_id]
+        else:
+            # Return flat list of all goals - need to collect from hierarchy
+            all_goals = []
+            
+            def collect_goals(goals: List[StrategicGoal]):
+                for goal in goals:
+                    all_goals.append(goal)
+                    collect_goals(goal.sub_goals)
+            
+            collect_goals(north_star.strategic_goals)
+            return all_goals
+    
+    async def get_sub_goals(self, user_id: UUID, parent_goal_id: UUID) -> List[StrategicGoal]:
+        """Get all direct sub-goals of a specific goal."""
+        north_star = await self.get_north_star(user_id)
+        if not north_star:
+            return []
+        
+        parent_goal = await self._find_goal_recursive(north_star.strategic_goals, parent_goal_id)
+        if not parent_goal:
+            return []
+        
+        return parent_goal.sub_goals
     
     async def get_value(self, user_id: UUID, value_id: UUID) -> Optional[Value]:
         north_star = await self.get_north_star(user_id)
