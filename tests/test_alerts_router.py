@@ -9,19 +9,21 @@ from unittest.mock import patch, AsyncMock
 
 from backend.main import app
 from backend.models.alerts import AlertType, AlertSeverity, AlertStatus
-from backend.models.user import User
+from backend.models.user import UserResponse
 
 
 @pytest.fixture
 def authenticated_client(client):
     """Client with mocked authentication"""
     # Mock the get_current_user dependency
-    mock_user = User(
+    mock_user = UserResponse(
         id=uuid4(),
-        username="testuser",
         email="test@example.com",
-        hashed_password="xxx",
-        is_active=True
+        full_name="Test User",
+        company_name="Test Company",
+        job_title="Developer",
+        is_active=True,
+        created_at=datetime.now()
     )
     
     with patch('backend.dependencies.get_current_user', return_value=mock_user):
