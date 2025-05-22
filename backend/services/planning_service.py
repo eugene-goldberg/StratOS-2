@@ -12,8 +12,9 @@ from fastapi import HTTPException, Depends # Added Depends
 
 from ..models.planning import (
     StrategicPlan, StrategicPlanCreate, Initiative, InitiativeCreate,
-    Action, ActionCreate, Resource, ResourceCreate, Risk, RiskCreate,
-    PlanStatus, InitiativeType, ActionStatus
+    Action, ActionCreate, Resource, ResourceCreate, ResourceUpdate,
+    ResourceAllocation, ResourceAllocationCreate, ResourceAllocationRelease,
+    Risk, RiskCreate, PlanStatus, InitiativeType, ActionStatus, ResourceStatus
 )
 from ..ai.kernel_service import kernel_service
 from ..services.strategic_foundation_service import StrategicFoundationService
@@ -266,7 +267,14 @@ class PlanningService:
         return await self._add_nested_item(initiative_id, user_id, action_data, "action")
 
     async def create_resource(self, initiative_id: UUID, user_id: UUID, resource_data: ResourceCreate) -> Resource:
-        return await self._add_nested_item(initiative_id, user_id, resource_data, "resource")
+        # Enhanced resource creation with advanced tracking fields
+        resource = await self._add_nested_item(initiative_id, user_id, resource_data, "resource")
+        # Set initial values for advanced tracking
+        if resource_data.total_quantity is not None:
+            resource.total_quantity = resource_data.total_quantity
+        else:
+            resource.total_quantity = resource.quantity  # Default to quantity if not specified
+        return resource
 
     async def create_risk(self, initiative_id: UUID, user_id: UUID, risk_data: RiskCreate) -> Risk:
         return await self._add_nested_item(initiative_id, user_id, risk_data, "risk")
@@ -325,6 +333,225 @@ class PlanningService:
 
     async def delete_action(self, initiative_id: UUID, user_id: UUID, action_id: UUID) -> bool:
         return await self._delete_nested_item(initiative_id, user_id, action_id, "action")
+
+    # Enhanced Resource Management Methods
+    async def update_resource(self, initiative_id: UUID, user_id: UUID, resource_id: UUID, resource_data: ResourceUpdate) -> Resource:
+        return await self._update_nested_item(initiative_id, user_id, resource_id, resource_data.model_dump(exclude_unset=True), "resource")
+
+    async def delete_resource(self, initiative_id: UUID, user_id: UUID, resource_id: UUID) -> bool:
+        return await self._delete_nested_item(initiative_id, user_id, resource_id, "resource")
+
+    async def allocate_resource(self, user_id: UUID, allocation_data: ResourceAllocationCreate) -> ResourceAllocation:
+        # Find the resource across all initiatives
+        resource = None
+        initiative = None
+        
+        # Search for the resource in all user's initiatives
+        plans = await self.list_strategic_plans(user_id)
+        for plan in plans:
+            initiatives = await self.list_initiatives(plan_id=plan.id, user_id=user_id)
+            for init in initiatives:
+                for res in init.resources:
+                    if res.id == allocation_data.resource_id:
+                        resource = res
+                        initiative = init
+                        break
+                if resource:
+                    break
+            if resource:
+                break
+        
+        if not resource:
+            raise HTTPException(status_code=404, detail=f"Resource {allocation_data.resource_id} not found")
+        
+        # Check if enough quantity is available
+        available_quantity = (resource.total_quantity or resource.quantity or 0) - resource.allocated_quantity
+        if allocation_data.allocated_quantity > available_quantity:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Insufficient resource quantity. Available: {available_quantity}, Requested: {allocation_data.allocated_quantity}"
+            )
+        
+        # Create allocation record
+        allocation = ResourceAllocation(
+            id=uuid.uuid4(),
+            initiative_id=allocation_data.initiative_id,
+            action_id=allocation_data.action_id,
+            allocated_quantity=allocation_data.allocated_quantity,
+            allocation_date=datetime.now(),
+            notes=allocation_data.notes
+        )
+        
+        # Update resource tracking
+        resource.allocations.append(allocation)
+        resource.allocated_quantity += allocation_data.allocated_quantity
+        
+        # Update resource status
+        if resource.allocated_quantity >= (resource.total_quantity or resource.quantity or 0):
+            resource.status = ResourceStatus.ALLOCATED
+        elif resource.allocated_quantity > 0:
+            resource.status = ResourceStatus.PARTIALLY_ALLOCATED
+        
+        # Calculate utilization rate
+        if resource.total_quantity and resource.total_quantity > 0:
+            resource.utilization_rate = (resource.allocated_quantity / resource.total_quantity) * 100
+        
+        resource.updated_at = datetime.now()
+        
+        # Save the updated initiative
+        await self._save_initiative_to_db(initiative)
+        
+        return allocation
+
+    async def release_resource_allocation(self, user_id: UUID, release_data: ResourceAllocationRelease) -> bool:
+        # Find the allocation
+        resource = None
+        initiative = None
+        allocation = None
+        
+        plans = await self.list_strategic_plans(user_id)
+        for plan in plans:
+            initiatives = await self.list_initiatives(plan_id=plan.id, user_id=user_id)
+            for init in initiatives:
+                for res in init.resources:
+                    for alloc in res.allocations:
+                        if alloc.id == release_data.allocation_id:
+                            resource = res
+                            initiative = init
+                            allocation = alloc
+                            break
+                    if allocation:
+                        break
+                if allocation:
+                    break
+            if allocation:
+                break
+        
+        if not allocation:
+            raise HTTPException(status_code=404, detail=f"Allocation {release_data.allocation_id} not found")
+        
+        # Update allocation
+        allocation.release_date = release_data.release_date or datetime.now()
+        if release_data.notes:
+            allocation.notes = (allocation.notes or "") + f"\nRelease: {release_data.notes}"
+        
+        # Update resource tracking
+        resource.allocated_quantity -= allocation.allocated_quantity
+        
+        # Update resource status
+        if resource.allocated_quantity == 0:
+            resource.status = ResourceStatus.AVAILABLE
+        elif resource.allocated_quantity < (resource.total_quantity or resource.quantity or 0):
+            resource.status = ResourceStatus.PARTIALLY_ALLOCATED
+        
+        # Update utilization rate
+        if resource.total_quantity and resource.total_quantity > 0:
+            resource.utilization_rate = (resource.allocated_quantity / resource.total_quantity) * 100
+        
+        resource.updated_at = datetime.now()
+        
+        # Save the updated initiative
+        await self._save_initiative_to_db(initiative)
+        
+        return True
+
+    async def get_resource_utilization(self, user_id: UUID, resource_type: Optional[ResourceType] = None) -> Dict[str, Any]:
+        """Get resource utilization metrics across all initiatives"""
+        utilization_data = {
+            "total_resources": 0,
+            "allocated_resources": 0,
+            "over_allocated_resources": 0,
+            "utilization_by_type": {},
+            "resources": []
+        }
+        
+        plans = await self.list_strategic_plans(user_id)
+        for plan in plans:
+            initiatives = await self.list_initiatives(plan_id=plan.id, user_id=user_id)
+            for initiative in initiatives:
+                for resource in initiative.resources:
+                    if resource_type and resource.type != resource_type:
+                        continue
+                    
+                    utilization_data["total_resources"] += 1
+                    
+                    if resource.allocated_quantity > 0:
+                        utilization_data["allocated_resources"] += 1
+                    
+                    if resource.allocated_quantity > (resource.total_quantity or resource.quantity or 0):
+                        utilization_data["over_allocated_resources"] += 1
+                    
+                    # Track by type
+                    if resource.type.value not in utilization_data["utilization_by_type"]:
+                        utilization_data["utilization_by_type"][resource.type.value] = {
+                            "total": 0,
+                            "allocated": 0,
+                            "total_quantity": 0,
+                            "allocated_quantity": 0
+                        }
+                    
+                    type_data = utilization_data["utilization_by_type"][resource.type.value]
+                    type_data["total"] += 1
+                    if resource.allocated_quantity > 0:
+                        type_data["allocated"] += 1
+                    type_data["total_quantity"] += resource.total_quantity or resource.quantity or 0
+                    type_data["allocated_quantity"] += resource.allocated_quantity
+                    
+                    # Add resource details
+                    utilization_data["resources"].append({
+                        "id": str(resource.id),
+                        "name": resource.name,
+                        "type": resource.type.value,
+                        "initiative_id": str(initiative.id),
+                        "initiative_title": initiative.title,
+                        "total_quantity": resource.total_quantity or resource.quantity,
+                        "allocated_quantity": resource.allocated_quantity,
+                        "utilization_rate": resource.utilization_rate,
+                        "status": resource.status.value
+                    })
+        
+        return utilization_data
+
+    async def check_resource_conflicts(self, user_id: UUID, initiative_id: UUID) -> List[Dict[str, Any]]:
+        """Check for resource conflicts or over-allocations"""
+        conflicts = []
+        
+        initiative = await self.get_initiative(initiative_id)
+        if not (hasattr(initiative, 'user_id') and initiative.user_id == user_id):
+            raise HTTPException(status_code=403, detail="User not authorized for this initiative.")
+        
+        for resource in initiative.resources:
+            if resource.status == ResourceStatus.OVER_ALLOCATED:
+                conflicts.append({
+                    "resource_id": str(resource.id),
+                    "resource_name": resource.name,
+                    "conflict_type": "over_allocation",
+                    "total_quantity": resource.total_quantity or resource.quantity,
+                    "allocated_quantity": resource.allocated_quantity,
+                    "over_allocated_by": resource.allocated_quantity - (resource.total_quantity or resource.quantity or 0)
+                })
+            
+            # Check for time-based conflicts
+            if resource.availability_start or resource.availability_end:
+                for allocation in resource.allocations:
+                    if resource.availability_start and allocation.allocation_date < resource.availability_start:
+                        conflicts.append({
+                            "resource_id": str(resource.id),
+                            "resource_name": resource.name,
+                            "conflict_type": "early_allocation",
+                            "allocation_date": allocation.allocation_date.isoformat(),
+                            "availability_start": resource.availability_start.isoformat()
+                        })
+                    if resource.availability_end and (not allocation.release_date or allocation.release_date > resource.availability_end):
+                        conflicts.append({
+                            "resource_id": str(resource.id),
+                            "resource_name": resource.name,
+                            "conflict_type": "late_allocation",
+                            "expected_release": allocation.release_date.isoformat() if allocation.release_date else "Not set",
+                            "availability_end": resource.availability_end.isoformat()
+                        })
+        
+        return conflicts
 
     # StrategicPlan CRUD Operations (assuming user_id is part of StrategicPlan model for ownership)
     async def create_strategic_plan(self, user_id: UUID, plan_data: StrategicPlanCreate) -> StrategicPlan:

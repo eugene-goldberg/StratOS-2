@@ -17,6 +17,8 @@ import {
   Assessment,
   BugReport,
   Lightbulb,
+  Mic,
+  MicOff,
 } from '@mui/icons-material';
 import { useStrategicCanvasStore } from '../../store/strategicCanvasStore';
 import { NodeType, BaseNodeData } from '../../types/canvas';
@@ -25,11 +27,15 @@ import { useReactFlow } from 'reactflow';
 interface CanvasToolbarProps {
   onAIAnalysisClick: () => void;
   hasSelection: boolean;
+  isVoiceRecording?: boolean;
+  onVoiceCommandToggle?: () => void;
 }
 
 const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onAIAnalysisClick,
   hasSelection,
+  isVoiceRecording = false,
+  onVoiceCommandToggle,
 }) => {
   const { addNode } = useStrategicCanvasStore();
   const { zoomIn, zoomOut, fitView } = useReactFlow();
@@ -202,6 +208,32 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
       </Tooltip>
 
       <Divider />
+
+      {/* Voice Commands */}
+      {onVoiceCommandToggle && (
+        <>
+          <Tooltip 
+            title={isVoiceRecording ? "Stop Voice Command" : "Start Voice Command"} 
+            placement="right"
+          >
+            <IconButton 
+              onClick={onVoiceCommandToggle}
+              color={isVoiceRecording ? "error" : "primary"}
+              sx={{
+                animation: isVoiceRecording ? 'pulse 1.5s infinite' : 'none',
+                '@keyframes pulse': {
+                  '0%': { opacity: 1 },
+                  '50%': { opacity: 0.6 },
+                  '100%': { opacity: 1 },
+                }
+              }}
+            >
+              {isVoiceRecording ? <MicOff /> : <Mic />}
+            </IconButton>
+          </Tooltip>
+          <Divider />
+        </>
+      )}
 
       {/* Save Operation */}
       <Tooltip title="Save Canvas" placement="right">

@@ -2,6 +2,115 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
+export interface ResourceAllocation {
+  id: string;
+  initiative_id: string;
+  action_id?: string;
+  allocated_quantity: number;
+  allocation_date: string;
+  release_date?: string;
+  notes?: string;
+}
+
+export interface Resource {
+  id: string;
+  name: string;
+  type: 'financial' | 'human' | 'technology' | 'physical' | 'time' | 'other';
+  quantity?: number;
+  unit?: string;
+  cost?: number;
+  total_quantity?: number;
+  allocated_quantity: number;
+  status: 'available' | 'allocated' | 'partially_allocated' | 'over_allocated' | 'unavailable';
+  allocations: ResourceAllocation[];
+  availability_start?: string;
+  availability_end?: string;
+  cost_per_unit?: number;
+  utilization_rate?: number;
+  tags: string[];
+  constraints?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ResourceCreate {
+  name: string;
+  type: 'financial' | 'human' | 'technology' | 'physical' | 'time' | 'other';
+  quantity?: number;
+  unit?: string;
+  cost?: number;
+  total_quantity?: number;
+  availability_start?: string;
+  availability_end?: string;
+  cost_per_unit?: number;
+  tags?: string[];
+  constraints?: string;
+}
+
+export interface ResourceUpdate {
+  name?: string;
+  type?: 'financial' | 'human' | 'technology' | 'physical' | 'time' | 'other';
+  quantity?: number;
+  unit?: string;
+  cost?: number;
+  total_quantity?: number;
+  availability_start?: string;
+  availability_end?: string;
+  cost_per_unit?: number;
+  tags?: string[];
+  constraints?: string;
+}
+
+export interface ResourceAllocationCreate {
+  resource_id: string;
+  initiative_id: string;
+  action_id?: string;
+  allocated_quantity: number;
+  notes?: string;
+}
+
+export interface ResourceAllocationRelease {
+  allocation_id: string;
+  release_date?: string;
+  notes?: string;
+}
+
+export interface ResourceUtilization {
+  total_resources: number;
+  allocated_resources: number;
+  over_allocated_resources: number;
+  utilization_by_type: Record<string, {
+    total: number;
+    allocated: number;
+    total_quantity: number;
+    allocated_quantity: number;
+  }>;
+  resources: Array<{
+    id: string;
+    name: string;
+    type: string;
+    initiative_id: string;
+    initiative_title: string;
+    total_quantity: number;
+    allocated_quantity: number;
+    utilization_rate?: number;
+    status: string;
+  }>;
+}
+
+export interface ResourceConflict {
+  resource_id: string;
+  resource_name: string;
+  conflict_type: 'over_allocation' | 'early_allocation' | 'late_allocation';
+  total_quantity?: number;
+  allocated_quantity?: number;
+  over_allocated_by?: number;
+  allocation_date?: string;
+  availability_start?: string;
+  expected_release?: string;
+  availability_end?: string;
+}
+
 export interface Action {
   id: string;
   title: string;
@@ -33,6 +142,7 @@ export interface Initiative {
   alignmentScore?: number;
   progress?: number;
   actions: Action[];
+  resources: Resource[];
   risks?: number;
 }
 
@@ -93,6 +203,43 @@ const planningService = {
 
   deleteAction: async (actionId: string): Promise<void> => {
     await axios.delete(`${API_BASE_URL}/api/planning/actions/${actionId}`);
+  },
+
+  // Resource management methods
+  createResource: async (initiativeId: string, data: ResourceCreate): Promise<Resource> => {
+    const res = await axios.post(`${API_BASE_URL}/api/planning/initiatives/${initiativeId}/resources`, data);
+    return res.data;
+  },
+
+  updateResource: async (initiativeId: string, resourceId: string, data: ResourceUpdate): Promise<Resource> => {
+    const res = await axios.put(`${API_BASE_URL}/api/planning/initiatives/${initiativeId}/resources/${resourceId}`, data);
+    return res.data;
+  },
+
+  deleteResource: async (initiativeId: string, resourceId: string): Promise<void> => {
+    await axios.delete(`${API_BASE_URL}/api/planning/initiatives/${initiativeId}/resources/${resourceId}`);
+  },
+
+  // Resource allocation methods
+  allocateResource: async (data: ResourceAllocationCreate): Promise<ResourceAllocation> => {
+    const res = await axios.post(`${API_BASE_URL}/api/planning/resources/allocate`, data);
+    return res.data;
+  },
+
+  releaseResourceAllocation: async (data: ResourceAllocationRelease): Promise<void> => {
+    await axios.post(`${API_BASE_URL}/api/planning/resources/release`, data);
+  },
+
+  // Resource analysis methods
+  getResourceUtilization: async (resourceType?: string): Promise<ResourceUtilization> => {
+    const params = resourceType ? { resource_type: resourceType } : {};
+    const res = await axios.get(`${API_BASE_URL}/api/planning/resources/utilization`, { params });
+    return res.data;
+  },
+
+  checkResourceConflicts: async (initiativeId: string): Promise<ResourceConflict[]> => {
+    const res = await axios.get(`${API_BASE_URL}/api/planning/initiatives/${initiativeId}/resource-conflicts`);
+    return res.data;
   }
 };
 

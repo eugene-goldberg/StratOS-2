@@ -8,9 +8,10 @@ from ..models.planning import (
     StrategicPlan, StrategicPlanCreate,
     Initiative, InitiativeCreate,
     Action, ActionCreate,
-    Resource, ResourceCreate,
+    Resource, ResourceCreate, ResourceUpdate,
+    ResourceAllocation, ResourceAllocationCreate, ResourceAllocationRelease,
     Risk, RiskCreate,
-    PlanStatus, InitiativeType
+    PlanStatus, InitiativeType, ResourceType
 )
 from ..services.planning_service import PlanningService
 
@@ -113,6 +114,20 @@ async def delete_action_from_initiative(initiative_id: UUID, action_id: UUID, cu
 async def create_resource_for_initiative(initiative_id: UUID, resource_data: ResourceCreate, current_user: UserResponse = Depends(get_current_active_user)):
     return await planning_service.create_resource(initiative_id, current_user.id, resource_data)
 
+@router.put("/initiatives/{initiative_id}/resources/{resource_id}", response_model=Resource)
+async def update_resource_in_initiative(initiative_id: UUID, resource_id: UUID, resource_data: ResourceUpdate, current_user: UserResponse = Depends(get_current_active_user)):
+    updated = await planning_service.update_resource(initiative_id, current_user.id, resource_id, resource_data)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Resource not found or not accessible")
+    return updated
+
+@router.delete("/initiatives/{initiative_id}/resources/{resource_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_resource_from_initiative(initiative_id: UUID, resource_id: UUID, current_user: UserResponse = Depends(get_current_active_user)):
+    deleted = await planning_service.delete_resource(initiative_id, current_user.id, resource_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Resource not found or not accessible")
+    return {"status": "success"}
+
 # Risk Endpoints (Nested under Initiatives)
 @router.post("/initiatives/{initiative_id}/risks", response_model=Risk, status_code=status.HTTP_201_CREATED)
 async def create_risk_for_initiative(initiative_id: UUID, risk_data: RiskCreate, current_user: UserResponse = Depends(get_current_active_user)):
@@ -145,3 +160,26 @@ async def compare_plans(
 @router.post("/initiatives/{initiative_id}/generate-actions", response_model=List[Action])
 async def generate_actions_for_initiative(initiative_id: UUID, current_user: UserResponse = Depends(get_current_active_user)):
     return await planning_service.generate_actions(initiative_id, current_user.id)
+
+# Advanced Resource Tracking Endpoints
+@router.post("/resources/allocate", response_model=ResourceAllocation, status_code=status.HTTP_201_CREATED)
+async def allocate_resource(allocation_data: ResourceAllocationCreate, current_user: UserResponse = Depends(get_current_active_user)):
+    return await planning_service.allocate_resource(current_user.id, allocation_data)
+
+@router.post("/resources/release", status_code=status.HTTP_204_NO_CONTENT)
+async def release_resource_allocation(release_data: ResourceAllocationRelease, current_user: UserResponse = Depends(get_current_active_user)):
+    released = await planning_service.release_resource_allocation(current_user.id, release_data)
+    if not released:
+        raise HTTPException(status_code=404, detail="Allocation not found or could not be released")
+    return {"status": "success"}
+
+@router.get("/resources/utilization", response_model=Dict[str, Any])
+async def get_resource_utilization(
+    current_user: UserResponse = Depends(get_current_active_user),
+    resource_type: Optional[ResourceType] = None
+):
+    return await planning_service.get_resource_utilization(current_user.id, resource_type)
+
+@router.get("/initiatives/{initiative_id}/resource-conflicts", response_model=List[Dict[str, Any]])
+async def check_resource_conflicts(initiative_id: UUID, current_user: UserResponse = Depends(get_current_active_user)):
+    return await planning_service.check_resource_conflicts(current_user.id, initiative_id)

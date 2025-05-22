@@ -16,14 +16,17 @@ import { CanvasNode, CanvasEdge, NodeType } from '../../types/canvas';
 import { nodeTypes } from './nodes';
 import CanvasToolbar from './CanvasToolbar';
 import AIAssistPanel from './AIAssistPanel';
+import useCanvasVoiceCommands from '../../hooks/useCanvasVoiceCommands';
 
-import { Box, useTheme } from '@mui/material';
+import { Box, useTheme, Snackbar, Alert } from '@mui/material';
 
 const StrategicCanvas: React.FC = () => {
   const theme = useTheme();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [showAIPanel, setShowAIPanel] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
+  const [voiceCommandMessage, setVoiceCommandMessage] = useState<string>('');
+  const [showVoiceCommandAlert, setShowVoiceCommandAlert] = useState(false);
   
   // Access store state and actions
   const {
@@ -98,6 +101,36 @@ const StrategicCanvas: React.FC = () => {
     }
   }, [analyzeSelectedNodes, addAISuggestedEdges]);
 
+  // Initialize voice commands hook
+  const {
+    isRecording,
+    // isProcessing,
+    transcript,
+    startVoiceCommand,
+    stopVoiceCommand,
+  } = useCanvasVoiceCommands({
+    canvasId: 'main-canvas', // You might want to get this from props or store
+    onCommandComplete: (result) => {
+      if (result.message) {
+        setVoiceCommandMessage(result.message);
+        setShowVoiceCommandAlert(true);
+      }
+    },
+    onError: (error) => {
+      setVoiceCommandMessage(error);
+      setShowVoiceCommandAlert(true);
+    }
+  });
+
+  // Handle voice command toggle
+  const handleVoiceCommandToggle = useCallback(() => {
+    if (isRecording) {
+      stopVoiceCommand();
+    } else {
+      startVoiceCommand();
+    }
+  }, [isRecording, startVoiceCommand, stopVoiceCommand]);
+
   // Handle closing AI panel
   const handleCloseAIPanel = () => {
     setShowAIPanel(false);
@@ -155,6 +188,8 @@ const StrategicCanvas: React.FC = () => {
               <CanvasToolbar 
                 onAIAnalysisClick={handleAIAnalysis}
                 hasSelection={selectedElements.nodes.length > 0}
+                isVoiceRecording={isRecording}
+                onVoiceCommandToggle={handleVoiceCommandToggle}
               />
             </Panel>
             
@@ -170,6 +205,57 @@ const StrategicCanvas: React.FC = () => {
           </ReactFlow>
         </Box>
       </ReactFlowProvider>
+      
+      {/* Voice Command Feedback */}
+      <Snackbar
+        open={showVoiceCommandAlert}
+        autoHideDuration={4000}
+        onClose={() => setShowVoiceCommandAlert(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          severity="info" 
+          onClose={() => setShowVoiceCommandAlert(false)}
+          sx={{ width: '100%' }}
+        >
+          {voiceCommandMessage}
+        </Alert>
+      </Snackbar>
+      
+      {/* Voice Transcript Display */}
+      {isRecording && transcript && (
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 80,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            bgcolor: 'background.paper',
+            p: 2,
+            borderRadius: 2,
+            boxShadow: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            animation: 'fadeIn 0.3s ease-in',
+            '@keyframes fadeIn': {
+              from: { opacity: 0, transform: 'translateX(-50%) translateY(10px)' },
+              to: { opacity: 1, transform: 'translateX(-50%) translateY(0)' }
+            }
+          }}
+        >
+          <Box
+            sx={{
+              width: 12,
+              height: 12,
+              borderRadius: '50%',
+              bgcolor: 'error.main',
+              animation: 'pulse 1s infinite'
+            }}
+          />
+          <Box>{transcript || 'Listening...'}</Box>
+        </Box>
+      )}
     </Box>
   );
 };

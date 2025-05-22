@@ -18,6 +18,7 @@ from ..models.canvas_ai import (
     CanvasData
 )
 from ..services.canvas_ai_service import canvas_ai_service
+from ..services.canvas_voice_service import CanvasVoiceService
 from ..dependencies import get_current_user_id
 
 logger = logging.getLogger(__name__)
@@ -349,4 +350,100 @@ async def health_check():
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Canvas AI service is not available"
+        )
+
+
+# Initialize voice service
+canvas_voice_service = CanvasVoiceService()
+
+
+@router.post("/voice-command")
+async def process_canvas_voice_command(
+    canvas_id: UUID,
+    voice_command: str,
+    current_nodes: Optional[List[Dict[str, Any]]] = None,
+    selected_node_ids: Optional[List[str]] = None,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
+    """
+    Process voice commands for canvas operations.
+    
+    This endpoint accepts transcribed voice commands and executes canvas operations
+    such as adding nodes, creating connections, deleting nodes, etc.
+    
+    Example commands:
+    - "Add a node called Strategy"
+    - "Connect Goals to Objectives"
+    - "Delete the selected node"
+    - "Move Strategy node to the top"
+    - "Analyze the canvas"
+    """
+    try:
+        logger.info(f"Voice command from user {current_user_id}: {voice_command}")
+        
+        if not voice_command.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Voice command cannot be empty"
+            )
+        
+        result = await canvas_voice_service.process_voice_command(
+            user_id=current_user_id,
+            canvas_id=canvas_id,
+            voice_command=voice_command,
+            current_nodes=current_nodes,
+            selected_node_ids=selected_node_ids
+        )
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing voice command: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to process voice command"
+        )
+
+
+@router.post("/voice-compound-command")
+async def process_compound_voice_command(
+    canvas_id: UUID,
+    voice_command: str,
+    current_nodes: Optional[List[Dict[str, Any]]] = None,
+    selected_node_ids: Optional[List[str]] = None,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
+    """
+    Process compound voice commands with multiple operations.
+    
+    This endpoint handles complex voice commands that contain multiple operations
+    connected by "and", "then", etc.
+    
+    Example commands:
+    - "Create a node called Strategy and connect it to Goals"
+    - "Add Risk Assessment then link it to Mitigation Plan"
+    - "Delete old ideas and then analyze the remaining nodes"
+    """
+    try:
+        logger.info(f"Compound voice command from user {current_user_id}: {voice_command}")
+        
+        result = await canvas_voice_service.process_compound_command(
+            user_id=current_user_id,
+            canvas_id=canvas_id,
+            voice_command=voice_command,
+            current_nodes=current_nodes,
+            selected_node_ids=selected_node_ids
+        )
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing compound voice command: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to process compound voice command"
         )
