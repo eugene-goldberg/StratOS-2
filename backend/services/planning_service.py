@@ -1,5 +1,6 @@
 import os
 import uuid
+import json
 import logging
 from uuid import UUID
 from datetime import datetime
@@ -458,19 +459,33 @@ class PlanningService:
             north_star_context = "\n".join(ns_parts)
 
         prompt = (
-            f"Analyze the alignment of the following strategic plan initiatives with the user's North Star.\n"
-            f"User's North Star:\n{north_star_context}\n\n"
-            f"Plan Title: {plan.title}\nPlan Description: {plan.description or 'N/A'}\n"
-            f"Initiatives:\n{initiative_summaries if initiatives else 'No initiatives defined.'}\n\n"
-            f"Provide: \n1. An overall alignment assessment (Good, Fair, Poor). \n2. A brief explanation for the assessment. \n3. Suggest 1-2 areas for improvement if alignment is not Good."
-            f"Return as a JSON object with keys 'assessment', 'explanation', 'suggestions'."
+            f"As a strategic planning expert, analyze the alignment between this strategic plan and the organization's North Star foundation.\n\n"
+            f"STRATEGIC FOUNDATION:\n{north_star_context}\n\n"
+            f"STRATEGIC PLAN DETAILS:\n"
+            f"Title: {plan.title}\n"
+            f"Description: {plan.description or 'N/A'}\n"
+            f"Time Horizon: {plan.time_horizon}\n"
+            f"Status: {plan.status.value}\n\n"
+            f"INITIATIVES ({len(initiatives)} total):\n{initiative_summaries if initiatives else 'No initiatives defined.'}\n\n"
+            f"ANALYSIS REQUIREMENTS:\n"
+            f"1. PURPOSE ALIGNMENT: How well do the initiatives support the organization's purpose? Identify specific connections and gaps.\n"
+            f"2. VISION COHERENCE: Do the initiatives collectively move toward the stated vision? What's missing or misaligned?\n"
+            f"3. STRATEGIC GOAL COVERAGE: Which strategic goals are well-supported vs. under-addressed by current initiatives?\n"
+            f"4. VALUES INTEGRATION: How do the initiatives reflect and reinforce the organization's core values?\n"
+            f"5. OVERALL STRATEGIC COHESION: Do initiatives work synergistically or operate in isolation?\n\n"
+            f"Provide detailed qualitative feedback that helps leadership understand:\n"
+            f"- Specific strengths in strategic alignment\n"
+            f"- Critical gaps that need attention\n"
+            f"- Concrete recommendations for improving alignment\n"
+            f"- Strategic risks from current misalignments\n\n"
+            f"Return as JSON with keys: 'overall_assessment' (Excellent/Good/Fair/Poor), 'purpose_alignment', 'vision_coherence', 'goal_coverage', 'values_integration', 'strategic_cohesion', 'key_strengths', 'critical_gaps', 'recommendations', 'strategic_risks'."
         )
         try:
-            response_str = await kernel_service.generate_completion(prompt, max_tokens=300)
+            response_str = await kernel_service.generate_completion(prompt, max_tokens=1000)
             ai_analysis = json.loads(response_str)
         except Exception as e:
             self.logger.error(f"LLM error in analyze_plan_alignment: {e}")
-            ai_analysis = {"assessment": "Error", "explanation": str(e), "suggestions": []}
+            ai_analysis = {"overall_assessment": "Error", "purpose_alignment": str(e), "recommendations": []}
         
         # Update plan with score (if model supports it)
         # plan.overall_alignment_score = score # Example
@@ -480,36 +495,64 @@ class PlanningService:
 
     async def generate_plan_variants(self, base_plan_id: UUID, user_id: UUID, num_variants: int = 2, focus_areas: Optional[List[str]] = None) -> List[StrategicPlan]:
         base_plan = await self.get_strategic_plan(base_plan_id, user_id)
+        initiatives = await self.list_initiatives(plan_id=base_plan_id, user_id=user_id)
+        north_star = await self.foundation_service.get_north_star(user_id)
         variants: List[StrategicPlan] = []
 
+        # Build strategic context
+        north_star_context = "No strategic foundation defined."
+        if north_star:
+            ns_parts = [f"Purpose: {north_star.purpose.statement}"]
+            if north_star.vision: ns_parts.append(f"Vision: {north_star.vision.statement}")
+            if north_star.values: ns_parts.append(f"Values: {', '.join([v.name for v in north_star.values])}")
+            if north_star.strategic_goals: ns_parts.append(f"Strategic Goals: {', '.join([g.title for g in north_star.strategic_goals])}")
+            north_star_context = "\n".join(ns_parts)
+
+        initiative_context = "No initiatives defined." if not initiatives else "\n".join([f"- {i.title}: {i.description or 'N/A'}" for i in initiatives])
+
         prompt_context = (
-            f"Base Plan Title: {base_plan.title}\n"
-            f"Base Plan Description: {base_plan.description or 'N/A'}\n"
-            f"Base Plan Time Horizon: {base_plan.time_horizon}\n"
-            f"Focus Areas for Variants: {', '.join(focus_areas) if focus_areas else 'General strategic alternatives'}\n"
-            f"Generate {num_variants} distinct strategic plan variant summaries (title, description) based on the base plan and focus areas."
-            f"Return as a JSON list of objects, each with 'title' and 'description'."
+            f"As a strategic planning expert, generate {num_variants} strategically distinct plan variants that offer meaningfully different approaches to achieving the organization's strategic goals.\n\n"
+            f"STRATEGIC FOUNDATION:\n{north_star_context}\n\n"
+            f"BASE PLAN ANALYSIS:\n"
+            f"Title: {base_plan.title}\n"
+            f"Description: {base_plan.description or 'N/A'}\n"
+            f"Time Horizon: {base_plan.time_horizon}\n"
+            f"Current Initiatives:\n{initiative_context}\n\n"
+            f"VARIANT GENERATION FOCUS:\n{', '.join(focus_areas) if focus_areas else 'Generate diverse strategic approaches covering different execution philosophies, risk profiles, and resource allocation strategies.'}\n\n"
+            f"REQUIREMENTS FOR EACH VARIANT:\n"
+            f"1. STRATEGIC DISTINCTION: Each variant must represent a fundamentally different strategic approach (e.g., aggressive growth vs. steady optimization, technology-led vs. people-first, market expansion vs. vertical integration)\n"
+            f"2. PURPOSE ALIGNMENT: All variants must support the core purpose but through different paths\n"
+            f"3. FEASIBILITY: Consider different risk tolerances and resource requirements\n"
+            f"4. COMPLEMENTARY FOCUS: Variants should explore different strategic dimensions (market, operational, financial, organizational)\n"
+            f"5. ACTIONABILITY: Each should suggest a clear strategic direction with implied initiative types\n\n"
+            f"For each variant, provide:\n"
+            f"- A distinctive title that captures the strategic approach\n"
+            f"- A comprehensive description explaining the strategic logic, key differences from the base plan, and expected outcomes\n"
+            f"- The strategic rationale for why this approach could be superior in certain conditions\n\n"
+            f"Return as a JSON list of objects, each with 'title', 'description', and 'strategic_rationale'."
         )
         try:
-            response_str = await kernel_service.generate_completion(prompt_context, max_tokens=200 * num_variants)
+            response_str = await kernel_service.generate_completion(prompt_context, max_tokens=400 * num_variants)
             generated_variants_data = json.loads(response_str)
         except Exception as e:
             self.logger.error(f"LLM error in generate_plan_variants: {e}")
             generated_variants_data = []
 
         for i, variant_data_from_ai in enumerate(generated_variants_data[:num_variants]):
+            # Enhanced description that includes strategic rationale
+            enhanced_description = variant_data_from_ai.get("description", f"AI generated variant focusing on: {', '.join(focus_areas) if focus_areas else 'alternative approach'}")
+            if variant_data_from_ai.get("strategic_rationale"):
+                enhanced_description += f"\n\nStrategic Rationale: {variant_data_from_ai['strategic_rationale']}"
+            
             variant_create_data = StrategicPlanCreate(
-                title=variant_data_from_ai.get("title", f"{base_plan.title} - AI Variant {i+1}"),
-                description=variant_data_from_ai.get("description", f"AI generated variant focusing on: {', '.join(focus_areas) if focus_areas else 'alternative approach'}"),
+                title=variant_data_from_ai.get("title", f"{base_plan.title} - Strategic Variant {i+1}"),
+                description=enhanced_description,
                 status=PlanStatus.DRAFT,
                 time_horizon=base_plan.time_horizon, # Inherit from base
                 start_date=base_plan.start_date,
                 end_date=base_plan.end_date
             )
             variant = await self.create_strategic_plan(user_id, variant_create_data)
-            if focus_areas and hasattr(variant, 'ai_recommendations'): # If model supports this field
-                 variant.ai_recommendations = [f"Generated based on focus: {fa}" for fa in focus_areas]
-                 await self.update_strategic_plan(variant.id, user_id, variant.model_dump())
             variants.append(variant)
         return variants
 
@@ -545,28 +588,107 @@ class PlanningService:
         if not (hasattr(initiative, 'user_id') and initiative.user_id == user_id):
              raise HTTPException(status_code=403, detail="User not authorized for this initiative.")
 
+        # Get additional context - handle missing plans gracefully
+        plan = None
+        if hasattr(initiative, 'plan_id') and initiative.plan_id:
+            try:
+                plan = await self.get_strategic_plan(initiative.plan_id, user_id)
+            except HTTPException:
+                # Plan not found - continue without plan context
+                plan = None
+        north_star = await self.foundation_service.get_north_star(user_id)
+        
+        # Build strategic context
+        strategic_context = "No strategic foundation defined."
+        if north_star:
+            ns_parts = [f"Purpose: {north_star.purpose.statement}"]
+            if north_star.vision: ns_parts.append(f"Vision: {north_star.vision.statement}")
+            if north_star.strategic_goals: ns_parts.append(f"Strategic Goals: {', '.join([g.title for g in north_star.strategic_goals])}")
+            strategic_context = "\n".join(ns_parts)
+
+        plan_context = f"Plan: {plan.title} - {plan.description}" if plan else "No plan context available."
+        
+        existing_actions = "\n".join([f"- {action.title}: {action.description or 'N/A'}" for action in initiative.actions]) if initiative.actions else "No existing actions."
+
         new_actions: List[Action] = []
         prompt = (
-            f"Suggest three concrete, actionable steps for the following strategic initiative:\n"
-            f"Initiative Title: {initiative.title}\n"
-            f"Initiative Description: {initiative.description or 'N/A'}\n"
+            f"As a strategic execution expert, generate 3-4 SMART (Specific, Measurable, Achievable, Relevant, Time-bound) actions for this strategic initiative.\n\n"
+            f"STRATEGIC CONTEXT:\n{strategic_context}\n\n"
+            f"PLAN CONTEXT:\n{plan_context}\n\n"
+            f"INITIATIVE DETAILS:\n"
+            f"Title: {initiative.title}\n"
+            f"Description: {initiative.description or 'N/A'}\n"
+            f"Type: {initiative.initiative_type.value if hasattr(initiative, 'initiative_type') else 'N/A'}\n"
             f"Current Status: {initiative.status.value}\n"
-            f"Desired Outcome: (Infer from title and description)\n"
-            f"Return as a JSON list of strings, where each string is an action title."
+            f"Owner: {initiative.owner or 'Unassigned'}\n"
+            f"Timeline: {initiative.start_date} to {initiative.end_date}\n"
+            f"Linked Strategic Goal: {initiative.linked_strategic_goal or 'None'}\n\n"
+            f"EXISTING ACTIONS:\n{existing_actions}\n\n"
+            f"ACTION GENERATION REQUIREMENTS:\n"
+            f"1. SPECIFIC: Each action must have a clear, unambiguous deliverable\n"
+            f"2. MEASURABLE: Include concrete success criteria or completion indicators\n"
+            f"3. ACHIEVABLE: Consider realistic resource and capability constraints\n"
+            f"4. RELEVANT: Directly advance the initiative toward its strategic objective\n"
+            f"5. TIME-BOUND: Suggest appropriate timeframes relative to the initiative timeline\n"
+            f"6. NON-OVERLAPPING: Ensure actions complement rather than duplicate existing ones\n"
+            f"7. SEQUENTIAL LOGIC: Consider dependencies and logical execution order\n\n"
+            f"For each action, provide:\n"
+            f"- A clear action title (what will be accomplished)\n"
+            f"- A detailed description including success criteria and approach\n"
+            f"- Suggested owner role/department\n"
+            f"- Estimated timeline/deadline\n"
+            f"- Priority level (High/Medium/Low)\n\n"
+            f"Return as a JSON list of objects, each with 'title', 'description', 'suggested_owner', 'estimated_timeline', 'priority'."
         )
         try:
-            response_str = await kernel_service.generate_completion(prompt, max_tokens=200)
-            action_titles = json.loads(response_str)
-            if not isinstance(action_titles, list): action_titles = []
+            response_str = await kernel_service.generate_completion(prompt, max_tokens=800)
+            action_data_list = json.loads(response_str)
+            if not isinstance(action_data_list, list): action_data_list = []
         except Exception as e:
             self.logger.error(f"LLM error generating actions for initiative {initiative_id}: {e}")
-            action_titles = []
+            action_data_list = []
 
-        if not action_titles: # Fallback
-            action_titles = [f"Define detailed scope for {initiative.title}", f"Assign team and resources for {initiative.title}", f"Establish key milestones for {initiative.title}"]
+        if not action_data_list: # Fallback with SMART structure
+            action_data_list = [
+                {
+                    "title": f"Define detailed scope and requirements for {initiative.title}",
+                    "description": f"Create comprehensive scope document with success criteria, deliverables, and constraints for {initiative.title}. Success criteria: Approved scope document by stakeholders within 2 weeks.",
+                    "suggested_owner": "Project Manager",
+                    "estimated_timeline": "2 weeks",
+                    "priority": "High"
+                },
+                {
+                    "title": f"Assemble team and allocate resources for {initiative.title}",
+                    "description": f"Identify, recruit, and onboard team members with required skills. Secure budget and resource commitments. Success criteria: Full team assembled and resources committed within 3 weeks.",
+                    "suggested_owner": "Initiative Owner",
+                    "estimated_timeline": "3 weeks",
+                    "priority": "High"
+                },
+                {
+                    "title": f"Establish measurement framework and milestones for {initiative.title}",
+                    "description": f"Define KPIs, tracking mechanisms, and key milestones with specific dates. Success criteria: Measurement dashboard deployed and first milestone achieved within 4 weeks.",
+                    "suggested_owner": "Data Analyst",
+                    "estimated_timeline": "4 weeks",
+                    "priority": "Medium"
+                }
+            ]
 
-        for title in action_titles[:3]: # Max 3 actions
-            action_data = ActionCreate(title=title, description=f"AI-generated action for '{initiative.title}'")
+        for action_data_dict in action_data_list[:4]: # Max 4 actions
+            # Enhanced action creation with SMART details
+            enhanced_description = action_data_dict.get("description", f"AI-generated action for '{initiative.title}'")
+            if action_data_dict.get("estimated_timeline"):
+                enhanced_description += f"\n\nTimeline: {action_data_dict['estimated_timeline']}"
+            if action_data_dict.get("suggested_owner"):
+                enhanced_description += f"\nSuggested Owner: {action_data_dict['suggested_owner']}"
+            if action_data_dict.get("priority"):
+                enhanced_description += f"\nPriority: {action_data_dict['priority']}"
+            
+            action_data = ActionCreate(
+                title=action_data_dict.get("title", f"Strategic action for {initiative.title}"),
+                description=enhanced_description,
+                owner=action_data_dict.get("suggested_owner", "To be assigned"),
+                status=ActionStatus.NOT_STARTED
+            )
             action = await self.create_action(initiative_id, user_id, action_data)
             new_actions.append(action)
         return new_actions
