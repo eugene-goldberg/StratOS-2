@@ -62,21 +62,21 @@ export const useReactFlow = () => ({
   zoomOut: jest.fn(),
 });
 
-export const useNodesState = (initialNodes) => [
+export const useNodesState = (initialNodes: any) => [
   initialNodes,
   jest.fn(),
   jest.fn(),
 ];
 
-export const useEdgesState = (initialEdges) => [
+export const useEdgesState = (initialEdges: any) => [
   initialEdges,
   jest.fn(),
   jest.fn(),
 ];
 
 // Mock utility functions
-export const applyNodeChanges = jest.fn((changes, nodes) => nodes);
-export const applyEdgeChanges = jest.fn((changes, edges) => edges);
+export const applyNodeChanges = jest.fn((changes: any, nodes: any) => nodes);
+export const applyEdgeChanges = jest.fn((changes: any, edges: any) => edges);
 
 // Mock types and enums
 export const Position = {
