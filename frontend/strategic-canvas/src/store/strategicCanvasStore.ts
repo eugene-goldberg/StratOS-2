@@ -23,6 +23,8 @@ interface StrategicCanvasStore extends CanvasState {
   updateNode: (nodeId: string, data: Partial<NodeData>) => void;
   updateNodeStyle: (nodeId: string, style: React.CSSProperties) => void;
   onNodesChange: (changes: NodeChange[]) => void;
+  deleteNode?: (nodeId: string) => void; // Optional for backward compatibility
+  setNodes?: (nodes: CanvasNode[]) => void; // Optional for backward compatibility
   
   // Edge operations
   addEdge: (connection: Connection, label?: string) => void;
@@ -91,6 +93,16 @@ export const useStrategicCanvasStore = create<StrategicCanvasStore>((set, get) =
           : node
       ),
     }));
+  },
+  
+  deleteNode: (nodeId) => {
+    set((state) => ({
+      nodes: state.nodes.filter((node) => node.id !== nodeId),
+    }));
+  },
+  
+  setNodes: (nodes) => {
+    set({ nodes });
   },
   
   onNodesChange: (changes) => {
