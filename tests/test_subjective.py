@@ -4,14 +4,15 @@ import uuid
 from datetime import datetime
 from fastapi.testclient import TestClient
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "backend"))
+# Add the project root to the Python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import app
-from routers import subjective_input
-from services.subjective_input_service import SubjectiveInputService
-from models.subjective_input import LogEntry, LogEntryCreate, LogEntryType
-from models.user import UserResponse
-from dependencies import get_current_active_user, get_current_user_id
+from backend.main import app
+from backend.routers import subjective_input
+from backend.services.subjective_input_service import SubjectiveInputService
+from backend.models.subjective_input import LogEntry, LogEntryCreate, LogEntryType
+from backend.models.user import UserResponse
+from backend.dependencies import get_current_active_user, get_current_user_id
 
 client = TestClient(app)
 

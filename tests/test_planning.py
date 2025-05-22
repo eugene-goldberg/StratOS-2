@@ -5,11 +5,11 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
-# Ensure the backend directory is on the Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "backend"))
+# Add the project root to the Python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import app
-from routers.planning import planning_service
+from backend.main import app
+from backend.routers.planning import planning_service
 
 client = TestClient(app)
 
