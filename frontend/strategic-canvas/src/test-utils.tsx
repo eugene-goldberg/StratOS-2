@@ -3,6 +3,9 @@ import { render, RenderOptions } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { server } from './__mocks__/server';
 
+// Import act from react instead of react-dom/test-utils
+import { act } from 'react';
+
 // Mock theme for testing
 const mockTheme = createTheme({
   palette: {

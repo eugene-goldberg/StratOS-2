@@ -46,7 +46,7 @@
   },
   "jest": {
     "moduleNameMapper": {
-      "^reactflow$": "<rootDir>/src/__mocks__/reactflow.js"
+      "^reactflow$": "<rootDir>/src/__mocks__/reactflow.tsx"
     },
     "transformIgnorePatterns": [
       "node_modules/(?!(axios|reactflow|@reactflow)/)"

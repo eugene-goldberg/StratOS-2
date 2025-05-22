@@ -9,8 +9,7 @@ import { NodeType } from '../../types';
 jest.mock('../../store/strategicCanvasStore');
 const mockUseStrategicCanvasStore = useStrategicCanvasStore as jest.MockedFunction<typeof useStrategicCanvasStore>;
 
-// Mock ReactFlow
-jest.mock('reactflow');
+// ReactFlow is mocked via moduleNameMapper in package.json
 
 describe('StrategicCanvas', () => {
   const mockAnalyzeSelectedNodes = jest.fn();
@@ -109,7 +108,7 @@ describe('StrategicCanvas', () => {
     render(<StrategicCanvas />);
 
     // Find and click AI analysis button
-    const aiButton = screen.getByLabelText(/AI Assist/);
+    const aiButton = screen.getByRole('button', { name: /AI Assist/ });
     expect(aiButton).not.toBeDisabled();
 
     await userEvent.setup().click(aiButton);
@@ -151,7 +150,7 @@ describe('StrategicCanvas', () => {
 
     render(<StrategicCanvas />);
 
-    const aiButton = screen.getByLabelText(/AI Assist/);
+    const aiButton = screen.getByRole('button', { name: /AI Assist/ });
     await userEvent.setup().click(aiButton);
 
     await waitFor(() => {
@@ -165,7 +164,7 @@ describe('StrategicCanvas', () => {
 
     render(<StrategicCanvas />);
 
-    const aiButton = screen.getByLabelText(/AI Assist/);
+    const aiButton = screen.getByRole('button', { name: /AI Assist/ });
     await userEvent.setup().click(aiButton);
 
     await waitFor(() => {
@@ -240,7 +239,7 @@ describe('StrategicCanvas', () => {
     render(<StrategicCanvas />);
 
     // Open AI panel
-    const aiButton = screen.getByLabelText(/AI Assist/);
+    const aiButton = screen.getByRole('button', { name: /AI Assist/ });
     await userEvent.setup().click(aiButton);
 
     await waitFor(() => {

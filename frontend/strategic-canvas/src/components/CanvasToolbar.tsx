@@ -229,27 +229,31 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
       </Tooltip>
 
       <Tooltip title="Delete Selected" placement="right">
-        <IconButton 
-          color="error" 
-          disabled={!hasSelection}
-          aria-label="Delete Selected"
-        >
-          <Delete />
-        </IconButton>
+        <span>
+          <IconButton 
+            color="error" 
+            disabled={!hasSelection}
+            aria-label="Delete Selected"
+          >
+            <Delete />
+          </IconButton>
+        </span>
       </Tooltip>
 
       <Divider />
 
       {/* AI Operations */}
       <Tooltip title="AI Assist" placement="right">
-        <IconButton
-          onClick={onAIAnalysisClick}
-          color="primary"
-          disabled={!hasSelection}
-          aria-label="AI Assist"
-        >
-          <Psychology />
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={onAIAnalysisClick}
+            color="primary"
+            disabled={!hasSelection}
+            aria-label="AI Assist"
+          >
+            <Psychology />
+          </IconButton>
+        </span>
       </Tooltip>
 
       <Divider />

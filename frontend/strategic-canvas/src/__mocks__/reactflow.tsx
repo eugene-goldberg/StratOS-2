@@ -1,31 +1,47 @@
-// Mock ReactFlow components and hooks
-export const ReactFlow = ({ children, ...props }) => (
-  <div data-testid="react-flow" {...props}>
-    {children}
-  </div>
-);
+import React from 'react';
 
-export const ReactFlowProvider = ({ children }) => (
+// Mock ReactFlow components and hooks
+const ReactFlow: React.FC<any> = ({ children, ...props }) => {
+  // Filter out React-specific props that aren't valid DOM attributes
+  const { 
+    nodes, edges, nodeTypes, onNodesChange, onEdgesChange, onConnect, 
+    onNodeClick, onEdgeClick, onSelectionChange, onMove, fitView, 
+    snapToGrid, snapGrid, defaultViewport, selectNodesOnDrag, 
+    multiSelectionKeyCode, panActivationKeyCode, zoomActivationKeyCode,
+    ...domProps 
+  } = props;
+  
+  return (
+    <div data-testid="react-flow" {...domProps}>
+      {children}
+    </div>
+  );
+};
+
+export const ReactFlowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div data-testid="react-flow-provider">{children}</div>
 );
 
-export const Background = (props) => (
+export const Background: React.FC<any> = (props) => (
   <div data-testid="react-flow-background" {...props} />
 );
 
-export const Controls = (props) => (
+export const Controls: React.FC<any> = (props) => (
   <div data-testid="react-flow-controls" {...props} />
 );
 
-export const MiniMap = (props) => (
-  <div data-testid="react-flow-minimap" {...props} />
-);
+export const MiniMap: React.FC<any> = (props) => {
+  const { nodeStrokeColor, nodeColor, maskColor, ...domProps } = props;
+  return <div data-testid="react-flow-minimap" {...domProps} />;
+};
 
-export const Panel = ({ children, position, ...props }) => (
+export const Panel: React.FC<{ children: React.ReactNode; position: string; [key: string]: any }> = ({ children, position, ...props }) => (
   <div data-testid={`react-flow-panel-${position}`} {...props}>
     {children}
   </div>
 );
+
+export { ReactFlow };
 
 // Mock hooks
 export const useReactFlow = () => ({

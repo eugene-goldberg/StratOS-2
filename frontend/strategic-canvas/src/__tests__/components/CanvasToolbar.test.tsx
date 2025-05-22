@@ -110,7 +110,7 @@ describe('CanvasToolbar', () => {
     expect(screen.getByLabelText(/Zoom In/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Zoom Out/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Fit View/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/AI Assist/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /AI Assist/ })).toBeInTheDocument();
     expect(screen.getByLabelText(/Save Canvas/)).toBeInTheDocument();
   });
 
@@ -157,7 +157,7 @@ describe('CanvasToolbar', () => {
       <CanvasToolbar onAIAnalysisClick={mockOnAIAnalysisClick} hasSelection={false} />
     );
 
-    const aiButton = screen.getByLabelText(/AI Assist/);
+    const aiButton = screen.getByRole('button', { name: /AI Assist/ });
     expect(aiButton).toBeDisabled();
   });
 
@@ -166,7 +166,7 @@ describe('CanvasToolbar', () => {
       <CanvasToolbar onAIAnalysisClick={mockOnAIAnalysisClick} hasSelection={true} />
     );
 
-    const aiButton = screen.getByLabelText(/AI Assist/);
+    const aiButton = screen.getByRole('button', { name: /AI Assist/ });
     expect(aiButton).not.toBeDisabled();
   });
 
@@ -177,7 +177,7 @@ describe('CanvasToolbar', () => {
       <CanvasToolbar onAIAnalysisClick={mockOnAIAnalysisClick} hasSelection={true} />
     );
 
-    const aiButton = screen.getByLabelText(/AI Assist/);
+    const aiButton = screen.getByRole('button', { name: /AI Assist/ });
     await user.click(aiButton);
 
     expect(mockOnAIAnalysisClick).toHaveBeenCalled();
@@ -188,7 +188,7 @@ describe('CanvasToolbar', () => {
       <CanvasToolbar onAIAnalysisClick={mockOnAIAnalysisClick} hasSelection={false} />
     );
 
-    const deleteButton = screen.getByLabelText(/Delete Selected/);
+    const deleteButton = screen.getByRole('button', { name: /Delete Selected/ });
     expect(deleteButton).toBeDisabled();
   });
 
@@ -197,7 +197,7 @@ describe('CanvasToolbar', () => {
       <CanvasToolbar onAIAnalysisClick={mockOnAIAnalysisClick} hasSelection={true} />
     );
 
-    const deleteButton = screen.getByLabelText(/Delete Selected/);
+    const deleteButton = screen.getByRole('button', { name: /Delete Selected/ });
     expect(deleteButton).not.toBeDisabled();
   });
 
