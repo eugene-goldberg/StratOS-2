@@ -99,6 +99,8 @@ sys.modules['aiofiles'] = MagicMock()
 sys.modules['passlib'] = MagicMock()
 sys.modules['passlib.context'] = MagicMock()
 sys.modules['pydantic'] = MagicMock()
+sys.modules['pydantic_settings'] = MagicMock()
+sys.modules['pydantic.config'] = MagicMock()
 
 # Set up mock for fastapi.testclient
 class MockTestClient:
@@ -150,6 +152,33 @@ class MockStatus:
 fastapi_module.HTTPException = MockHTTPException
 fastapi_module.status = MockStatus
 fastapi_module.UploadFile = MagicMock()
+
+# Mock pydantic_settings
+class MockBaseSettings:
+    class Config:
+        pass
+
+# Mock pydantic 
+class MockConfigDict(dict):
+    pass
+
+sys.modules['pydantic_settings'].BaseSettings = MockBaseSettings
+sys.modules['pydantic_settings'].SettingsConfigDict = MockConfigDict
+sys.modules['pydantic'].ConfigDict = MockConfigDict
+
+# Set up mock configuration settings
+try:
+    from backend.core import config
+    config.settings = MagicMock()
+    config.settings.SECRET_KEY = "test_secret_key"
+    config.settings.ALGORITHM = "HS256"
+    config.settings.ACCESS_TOKEN_EXPIRE_MINUTES = 30
+    config.settings.REFRESH_TOKEN_EXPIRE_DAYS = 7
+    config.settings.AZURE_COSMOS_ENDPOINT = ""
+    config.settings.AZURE_COSMOS_KEY = ""
+    config.settings.AZURE_COSMOS_DATABASE_NAME = "testdb"
+except Exception as e:
+    print(f"Warning: Could not mock config settings: {e}")
 
 # Ensure our modules can be found
 import sys
