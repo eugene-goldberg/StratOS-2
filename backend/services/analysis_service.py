@@ -1277,3 +1277,204 @@ class AnalysisService:
             return [strategy for strategy in session.tows_strategies if strategy.get("cell_type") == cell_type]
         else:
             return []
+
+    # Additional Session Management Methods
+    
+    async def list_analysis_sessions(
+        self, 
+        user_id: UUID, 
+        status_filter: Optional[AnalysisSessionStatus] = None,
+        session_type: Optional[AnalysisSessionType] = None,
+        limit: int = 10, 
+        offset: int = 0
+    ) -> List[AnalysisSession]:
+        """List analysis sessions for a user with optional filtering"""
+        try:
+            sessions = []
+            
+            # If Cosmos DB is available, query from database
+            if self.cosmos_db_available and self.sessions_container:
+                query = "SELECT * FROM c WHERE c.user_id = @user_id"
+                parameters = [{"name": "@user_id", "value": str(user_id)}]
+                
+                # Add status filter
+                if status_filter:
+                    query += " AND c.status = @status"
+                    parameters.append({"name": "@status", "value": status_filter.value})
+                
+                # Add session type filter
+                if session_type:
+                    query += " AND c.session_type = @session_type"
+                    parameters.append({"name": "@session_type", "value": session_type.value})
+                
+                # Add ordering and pagination
+                query += " ORDER BY c.updated_at DESC OFFSET @offset LIMIT @limit"
+                parameters.extend([
+                    {"name": "@offset", "value": offset},
+                    {"name": "@limit", "value": limit}
+                ])
+                
+                async for item_data in self.sessions_container.query_items(
+                    query=query, parameters=parameters, enable_cross_partition_query=True
+                ):
+                    sessions.append(AnalysisSession(**item_data))
+            else:
+                # Use in-memory cache as fallback
+                user_sessions = [session for session in self.active_sessions.values() 
+                               if session.user_id == user_id]
+                
+                # Apply filters
+                if status_filter:
+                    user_sessions = [s for s in user_sessions if s.status == status_filter]
+                if session_type:
+                    user_sessions = [s for s in user_sessions if s.session_type == session_type]
+                
+                # Sort by updated_at and apply pagination
+                user_sessions.sort(key=lambda x: x.updated_at, reverse=True)
+                sessions = user_sessions[offset:offset + limit]
+            
+            self.logger.info(f"Listed {len(sessions)} analysis sessions for user {user_id}")
+            return sessions
+            
+        except Exception as e:
+            self.logger.error(f"Error listing analysis sessions for user {user_id}: {str(e)}")
+            return []
+
+    async def update_analysis_session(
+        self, 
+        session_id: UUID, 
+        session_update: AnalysisSessionUpdate, 
+        user_id: UUID
+    ) -> Optional[AnalysisSession]:
+        """Update an analysis session"""
+        try:
+            # Get existing session
+            session = await self.get_analysis_session(session_id, user_id)
+            if not session:
+                return None
+            
+            # Apply updates
+            if session_update.status is not None:
+                session.status = session_update.status
+            if session_update.current_step is not None:
+                session.current_step = session_update.current_step
+            if session_update.title is not None:
+                session.title = session_update.title
+            if session_update.description is not None:
+                session.description = session_update.description
+            
+            # Update timestamps
+            session.updated_at = datetime.now()
+            session.last_interaction_at = datetime.now()
+            
+            # Save to database
+            await self._save_session_to_db(session)
+            
+            self.logger.info(f"Updated analysis session {session_id} for user {user_id}")
+            return session
+            
+        except Exception as e:
+            self.logger.error(f"Error updating analysis session {session_id}: {str(e)}")
+            return None
+
+    async def delete_analysis_session(self, session_id: UUID, user_id: UUID) -> bool:
+        """Delete an analysis session"""
+        try:
+            # Verify session exists and belongs to user
+            session = await self.get_analysis_session(session_id, user_id)
+            if not session:
+                return False
+            
+            # Remove from database if available
+            if self.cosmos_db_available and self.sessions_container:
+                await self.sessions_container.delete_item(
+                    item=str(session_id),
+                    partition_key=str(user_id)
+                )
+            
+            # Remove from cache
+            cache_key = f"{user_id}_{session_id}"
+            if cache_key in self.active_sessions:
+                del self.active_sessions[cache_key]
+            
+            self.logger.info(f"Deleted analysis session {session_id} for user {user_id}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error deleting analysis session {session_id}: {str(e)}")
+            return False
+
+    async def request_analysis_guidance(
+        self, 
+        guidance_request: GuidanceRequest, 
+        user_id: UUID
+    ) -> GuidanceResponse:
+        """Request AI guidance for analysis session - wrapper for get_session_guidance"""
+        guidance = await self.get_session_guidance(guidance_request, user_id)
+        if not guidance:
+            raise HTTPException(status_code=500, detail="Failed to generate guidance")
+        return guidance
+
+    async def complete_session_step(
+        self, 
+        session_id: UUID, 
+        step_id: str, 
+        user_id: UUID
+    ) -> Optional[AnalysisSession]:
+        """Mark a session step as completed"""
+        try:
+            session = await self.get_analysis_session(session_id, user_id)
+            if not session:
+                return None
+            
+            # Update step state
+            if step_id in session.step_states:
+                session.step_states[step_id].is_completed = True
+                session.step_states[step_id].completion_percentage = 100.0
+            
+            # Add to completed steps if not already there
+            if step_id not in session.completed_steps:
+                session.completed_steps.append(step_id)
+            
+            # Determine next step based on session type and progress
+            session.current_step = self._get_next_step(session, step_id)
+            
+            # Update timestamps
+            session.updated_at = datetime.now()
+            session.last_interaction_at = datetime.now()
+            
+            # Save to database
+            await self._save_session_to_db(session)
+            
+            self.logger.info(f"Completed step {step_id} for session {session_id}")
+            return session
+            
+        except Exception as e:
+            self.logger.error(f"Error completing step {step_id} for session {session_id}: {str(e)}")
+            return None
+
+    def _get_next_step(self, session: AnalysisSession, completed_step: str) -> str:
+        """Determine the next step in the analysis session"""
+        if session.session_type in [AnalysisSessionType.SWOT, AnalysisSessionType.GUIDED_SWOT]:
+            swot_steps = ["swot_strengths", "swot_weaknesses", "swot_opportunities", "swot_threats"]
+            try:
+                current_index = swot_steps.index(completed_step)
+                if current_index < len(swot_steps) - 1:
+                    return swot_steps[current_index + 1]
+                else:
+                    return "swot_complete"
+            except ValueError:
+                return session.current_step
+        
+        elif session.session_type in [AnalysisSessionType.TOWS, AnalysisSessionType.GUIDED_TOWS]:
+            tows_steps = ["tows_so", "tows_wo", "tows_st", "tows_wt"]
+            try:
+                current_index = tows_steps.index(completed_step)
+                if current_index < len(tows_steps) - 1:
+                    return tows_steps[current_index + 1]
+                else:
+                    return "tows_complete"
+            except ValueError:
+                return session.current_step
+        
+        return session.current_step

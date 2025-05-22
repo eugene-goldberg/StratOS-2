@@ -16,7 +16,15 @@ from ..models.analysis import (
     SWOTCategory,
     SOLinkage,
     SOLinkageResponse,
-    LinkageType
+    LinkageType,
+    # Session management models
+    AnalysisSession,
+    AnalysisSessionCreate,
+    AnalysisSessionUpdate,
+    AnalysisSessionStatus,
+    AnalysisSessionType,
+    GuidanceRequest,
+    GuidanceResponse
 )
 from ..services.analysis_service import AnalysisService
 from ..ai.kernel_service import kernel_service
@@ -308,3 +316,143 @@ async def delete_so_linkage(
     if not deleted:
         raise HTTPException(status_code=404, detail="S+O linkage not found")
     return {"status": "success"}
+
+# Guided Analysis Session Endpoints
+
+@router.post("/sessions", response_model=AnalysisSession, status_code=status.HTTP_201_CREATED)
+async def create_analysis_session(
+    session_data: AnalysisSessionCreate,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    Create a new guided analysis session (SWOT/TOWS)
+    """
+    return await analysis_service.create_analysis_session(session_data, current_user.id)
+
+@router.get("/sessions/{session_id}", response_model=AnalysisSession)
+async def get_analysis_session(
+    session_id: UUID,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    Get an analysis session by ID
+    """
+    session = await analysis_service.get_analysis_session(session_id, current_user.id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Analysis session not found")
+    return session
+
+@router.get("/sessions", response_model=List[AnalysisSession])
+async def list_analysis_sessions(
+    status_filter: Optional[AnalysisSessionStatus] = None,
+    session_type: Optional[AnalysisSessionType] = None,
+    limit: int = 10,
+    offset: int = 0,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    List analysis sessions for the current user with optional filtering
+    """
+    return await analysis_service.list_analysis_sessions(
+        current_user.id, status_filter, session_type, limit, offset
+    )
+
+@router.put("/sessions/{session_id}", response_model=AnalysisSession)
+async def update_analysis_session(
+    session_id: UUID,
+    session_update: AnalysisSessionUpdate,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    Update an analysis session (status, progress, etc.)
+    """
+    updated_session = await analysis_service.update_analysis_session(
+        session_id, session_update, current_user.id
+    )
+    if not updated_session:
+        raise HTTPException(status_code=404, detail="Analysis session not found")
+    return updated_session
+
+@router.delete("/sessions/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_analysis_session(
+    session_id: UUID,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    Delete an analysis session
+    """
+    deleted = await analysis_service.delete_analysis_session(session_id, current_user.id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Analysis session not found")
+
+@router.post("/sessions/{session_id}/guidance", response_model=GuidanceResponse)
+async def request_session_guidance(
+    session_id: UUID,
+    guidance_request: GuidanceRequest,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    Request AI guidance for a specific step in the analysis session
+    """
+    # Validate session ownership
+    session = await analysis_service.get_analysis_session(session_id, current_user.id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Analysis session not found")
+    
+    # Ensure the guidance request matches the session
+    if guidance_request.session_id != session_id:
+        raise HTTPException(
+            status_code=400, 
+            detail="Guidance request session_id does not match endpoint session_id"
+        )
+    
+    guidance = await analysis_service.request_analysis_guidance(guidance_request, current_user.id)
+    return guidance
+
+@router.post("/sessions/{session_id}/steps/{step_id}/complete", response_model=AnalysisSession)
+async def complete_session_step(
+    session_id: UUID,
+    step_id: str,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    Mark a specific step as completed in the analysis session
+    """
+    updated_session = await analysis_service.complete_session_step(
+        session_id, step_id, current_user.id
+    )
+    if not updated_session:
+        raise HTTPException(status_code=404, detail="Analysis session not found")
+    return updated_session
+
+@router.post("/sessions/{session_id}/pause", response_model=AnalysisSession)
+async def pause_analysis_session(
+    session_id: UUID,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    Pause an active analysis session
+    """
+    session_update = AnalysisSessionUpdate(status=AnalysisSessionStatus.PAUSED)
+    updated_session = await analysis_service.update_analysis_session(
+        session_id, session_update, current_user.id
+    )
+    if not updated_session:
+        raise HTTPException(status_code=404, detail="Analysis session not found")
+    return updated_session
+
+@router.post("/sessions/{session_id}/resume", response_model=AnalysisSession)
+async def resume_analysis_session(
+    session_id: UUID,
+    current_user: UserResponse = Depends(get_current_active_user)
+):
+    """
+    Resume a paused analysis session
+    """
+    session_update = AnalysisSessionUpdate(status=AnalysisSessionStatus.ACTIVE)
+    updated_session = await analysis_service.update_analysis_session(
+        session_id, session_update, current_user.id
+    )
+    if not updated_session:
+        raise HTTPException(status_code=404, detail="Analysis session not found")
+    return updated_session
