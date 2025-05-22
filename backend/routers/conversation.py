@@ -176,6 +176,71 @@ async def chat_with_ai(
             "conversation_id": conversation_id
         }
 
+@router.post("/{conversation_id}/enhanced_ai_message")
+async def add_message_with_enhanced_ai(
+    conversation_id: UUID,
+    message_data: ConversationMessageCreate,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
+    """Add a message and get an AI response with enhanced memory and context."""
+    # Add user message first
+    user_message = await conversation_service.add_message(conversation_id, message_data, current_user_id)
+    
+    # Generate AI response with enhanced memory
+    try:
+        ai_response_with_memory = await conversation_service.generate_ai_response_with_memory(
+            conversation_id, message_data.content, current_user_id
+        )
+        
+        # Add AI response message with enhanced metadata
+        ai_message_data = ConversationMessageCreate(
+            content=ai_response_with_memory.response_content,
+            role="assistant",
+            metadata={
+                "generated_at": user_message.timestamp.isoformat(),
+                "enhanced_memory": True,
+                "context_updates": ai_response_with_memory.context_updates,
+                "related_entities": ai_response_with_memory.related_entities
+            }
+        )
+        ai_message = await conversation_service.add_message(conversation_id, ai_message_data, current_user_id)
+        
+        # Update conversation summary if needed
+        if ai_response_with_memory.should_update_summary and ai_response_with_memory.new_summary:
+            await conversation_service.update_conversation_summary(
+                conversation_id, current_user_id, ai_response_with_memory.new_summary
+            )
+        
+        return {
+            "user_message": user_message,
+            "ai_response": ai_message,
+            "memory_response": ai_response_with_memory,
+            "conversation_id": conversation_id
+        }
+    except Exception as e:
+        # If AI response fails, still return the user message
+        return {
+            "user_message": user_message,
+            "ai_response": None,
+            "error": str(e),
+            "conversation_id": conversation_id
+        }
+
+@router.get("/{conversation_id}/context")
+async def get_conversation_context(
+    conversation_id: UUID,
+    include_messages: int = 10,
+    current_user_id: UUID = Depends(get_current_user_id)
+):
+    """Get enhanced conversation context with memory and strategic data."""
+    context = await conversation_service.get_conversation_context(
+        conversation_id, current_user_id, include_messages
+    )
+    if not context:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    return context
+
 # Conversation management endpoints
 @router.post("/{conversation_id}/summarize")
 async def summarize_conversation(

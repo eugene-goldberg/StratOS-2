@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import asyncio
 from typing import List, Optional, Dict, Any, Tuple
 from uuid import UUID
 from datetime import datetime, timedelta
@@ -17,21 +18,12 @@ from ..models.conversation import (
     ConversationType,
     MessageRole,
     ConversationStatus,
-    ConversationContext
+    ConversationContext,
+    AIResponseWithMemory
 )
 from ..ai.kernel_service import kernel_service
 
 class ConversationService:
-    def __init__(self):
-        self.setup_logging()
-        self._initialize_cosmos_db_sync()
-        
-        # In-memory fallback if Cosmos DB is not available
-        if not self.cosmos_db_available:
-            self.conversations_cache = {}  # user_id -> {conversation_id: Conversation}
-            self.messages_cache = {}       # conversation_id -> [ConversationMessage]
-            self.logger.warning("Using in-memory storage as fallback for ConversationService.")
-
     def setup_logging(self):
         self.logger = logging.getLogger("conversation_service")
 
@@ -309,7 +301,7 @@ class ConversationService:
 
     # AI Integration methods
     async def get_conversation_context(self, conversation_id: UUID, user_id: UUID, include_messages: int = 10) -> Optional[ConversationContext]:
-        """Get enhanced conversation context for AI interactions."""
+        """Get enhanced conversation context for AI interactions with deep memory."""
         conversation = await self.get_conversation(conversation_id, user_id)
         if not conversation:
             return None
@@ -317,13 +309,29 @@ class ConversationService:
         # Get recent messages
         recent_messages = await self.get_messages(conversation_id, user_id, limit=include_messages)
 
-        # Create conversation context
+        # Enrich context with strategic data
+        north_star_context = await self._get_north_star_context(user_id)
+        recent_log_entries = await self._get_recent_log_entries(user_id, limit=5)
+        active_analysis_sessions = await self._get_active_analysis_sessions(user_id)
+        active_canvas_data = await self._get_active_canvas_data(user_id)
+        
+        # Get user conversation patterns and preferences
+        user_preferences = await self._get_user_conversation_preferences(user_id)
+        conversation_patterns = await self._analyze_conversation_patterns(user_id, conversation_id)
+
+        # Create enriched conversation context
         context = ConversationContext(
             conversation_id=conversation_id,
             user_id=user_id,
             conversation_type=conversation.conversation_type,
             recent_messages=recent_messages,
-            conversation_summary=conversation.summary
+            conversation_summary=conversation.summary,
+            north_star_context=north_star_context,
+            recent_log_entries=recent_log_entries,
+            active_analysis_sessions=active_analysis_sessions,
+            active_canvas_data=active_canvas_data,
+            user_preferences=user_preferences,
+            conversation_patterns=conversation_patterns
         )
 
         return context
@@ -370,6 +378,325 @@ class ConversationService:
         except Exception as e:
             self.logger.error(f"Error generating AI response: {str(e)}")
             return "I apologize, but I'm having trouble generating a response right now. Please try again."
+
+    # Enhanced memory management methods
+    async def _get_north_star_context(self, user_id: UUID) -> Optional[Dict[str, Any]]:
+        """Get user's North Star context for conversation memory."""
+        try:
+            # Import here to avoid circular imports
+            from .strategic_foundation_service import StrategicFoundationService
+            foundation_service = StrategicFoundationService()
+            
+            north_star = await foundation_service.get_north_star(user_id)
+            if north_star:
+                return {
+                    "purpose": north_star.purpose.statement if north_star.purpose else None,
+                    "vision": north_star.vision.statement if north_star.vision else None,
+                    "values": [{"name": v.name, "description": v.description} for v in north_star.values[:3]],
+                    "goals": [{"title": g.title, "description": g.description} for g in north_star.strategic_goals[:5]]
+                }
+        except Exception as e:
+            self.logger.warning(f"Could not retrieve North Star context for user {user_id}: {e}")
+        return None
+
+    async def _get_recent_log_entries(self, user_id: UUID, limit: int = 5) -> List[Dict[str, Any]]:
+        """Get recent CEO log entries for conversation context."""
+        try:
+            from .subjective_input_service import SubjectiveInputService
+            log_service = SubjectiveInputService()
+            
+            # Get recent entries (this would need to be implemented in the service)
+            # For now, return empty list as a placeholder
+            return []
+        except Exception as e:
+            self.logger.warning(f"Could not retrieve recent log entries for user {user_id}: {e}")
+            return []
+
+    async def _get_active_analysis_sessions(self, user_id: UUID) -> List[Dict[str, Any]]:
+        """Get active analysis sessions for conversation context."""
+        try:
+            from .analysis_service import AnalysisService
+            analysis_service = AnalysisService()
+            
+            # This would need analysis session tracking - placeholder for now
+            return []
+        except Exception as e:
+            self.logger.warning(f"Could not retrieve analysis sessions for user {user_id}: {e}")
+            return []
+
+    async def _get_active_canvas_data(self, user_id: UUID) -> Optional[Dict[str, Any]]:
+        """Get active canvas data for conversation context."""
+        try:
+            # This would integrate with canvas service when available
+            return None
+        except Exception as e:
+            self.logger.warning(f"Could not retrieve canvas data for user {user_id}: {e}")
+            return None
+
+    async def _get_user_conversation_preferences(self, user_id: UUID) -> Dict[str, Any]:
+        """Get user conversation preferences and patterns."""
+        try:
+            # Check if preferences exist in context cache
+            cache_key = f"preferences_{user_id}"
+            if cache_key in self.context_cache:
+                return self.context_cache[cache_key]
+            
+            # Default preferences - could be enhanced with actual user preference tracking
+            preferences = {
+                "communication_style": "collaborative",
+                "detail_level": "moderate",
+                "focus_areas": ["strategic_planning", "decision_making"],
+                "preferred_frameworks": ["SWOT", "strategic_canvas"],
+                "feedback_frequency": "regular"
+            }
+            
+            # Cache for future use
+            self.context_cache[cache_key] = preferences
+            return preferences
+            
+        except Exception as e:
+            self.logger.warning(f"Could not retrieve preferences for user {user_id}: {e}")
+            return {}
+
+    async def _analyze_conversation_patterns(self, user_id: UUID, conversation_id: UUID) -> Dict[str, Any]:
+        """Analyze conversation patterns to improve AI responses."""
+        try:
+            # Get conversation history to analyze patterns
+            messages = await self.get_messages(conversation_id, user_id, limit=50)
+            
+            if not messages:
+                return {}
+            
+            # Analyze patterns
+            user_messages = [m for m in messages if m.role == MessageRole.USER]
+            assistant_messages = [m for m in messages if m.role == MessageRole.ASSISTANT]
+            
+            patterns = {
+                "message_count": len(messages),
+                "user_message_count": len(user_messages),
+                "assistant_message_count": len(assistant_messages),
+                "avg_user_message_length": sum(len(m.content) for m in user_messages) / len(user_messages) if user_messages else 0,
+                "conversation_topics": self._extract_conversation_topics(messages),
+                "question_frequency": sum(1 for m in user_messages if '?' in m.content) / len(user_messages) if user_messages else 0,
+                "last_interaction": messages[-1].timestamp.isoformat() if messages else None
+            }
+            
+            return patterns
+            
+        except Exception as e:
+            self.logger.warning(f"Could not analyze conversation patterns for user {user_id}: {e}")
+            return {}
+
+    def _extract_conversation_topics(self, messages: List[ConversationMessage]) -> List[str]:
+        """Extract key topics from conversation messages."""
+        topics = []
+        strategic_keywords = {
+            "swot": "SWOT Analysis",
+            "goal": "Strategic Goals", 
+            "objective": "Strategic Goals",
+            "canvas": "Strategic Canvas",
+            "planning": "Strategic Planning",
+            "decision": "Decision Making",
+            "analysis": "Analysis",
+            "risk": "Risk Management",
+            "opportunity": "Opportunity Analysis",
+            "vision": "Vision & Purpose",
+            "values": "Values & Culture"
+        }
+        
+        content_text = " ".join([m.content.lower() for m in messages[-10:]])  # Last 10 messages
+        
+        for keyword, topic in strategic_keywords.items():
+            if keyword in content_text and topic not in topics:
+                topics.append(topic)
+        
+        return topics[:5]  # Return top 5 topics
+
+    async def generate_ai_response_with_memory(self, conversation_id: UUID, user_message: str, user_id: UUID) -> AIResponseWithMemory:
+        """Generate AI response with enhanced memory and context updates."""
+        # Get enriched conversation context
+        context = await self.get_conversation_context(conversation_id, user_id)
+        if not context:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # Build comprehensive context for AI
+        context_prompt = self._build_ai_context_prompt(context, user_message)
+        
+        # Generate AI response using enhanced context
+        try:
+            ai_variables = {
+                "conversation_history": context_prompt,
+                "user_message": user_message,
+                "conversation_type": context.conversation_type.value,
+                "north_star_context": json.dumps(context.north_star_context) if context.north_star_context else "{}",
+                "user_preferences": json.dumps(context.user_preferences),
+                "conversation_patterns": json.dumps(context.conversation_patterns)
+            }
+            
+            response_content = await kernel_service.invoke_semantic_function(
+                skill_name="conversation", 
+                function_name="GenerateResponse", 
+                input_text=user_message, 
+                variables=ai_variables
+            )
+            
+            # Determine if conversation summary should be updated
+            should_update_summary = await self._should_update_summary(context)
+            new_summary = None
+            if should_update_summary:
+                new_summary = await self._generate_conversation_summary(context, user_message, response_content)
+            
+            # Prepare context updates
+            context_updates = await self._prepare_context_updates(context, user_message, response_content)
+            
+            return AIResponseWithMemory(
+                response_content=str(response_content),
+                conversation_id=conversation_id,
+                should_update_summary=should_update_summary,
+                new_summary=new_summary,
+                context_updates=context_updates,
+                related_entities=self._extract_related_entities(user_message, response_content)
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Error generating AI response with memory: {str(e)}")
+            return AIResponseWithMemory(
+                response_content="I apologize, but I'm having trouble generating a response right now. Please try again.",
+                conversation_id=conversation_id
+            )
+
+    def _build_ai_context_prompt(self, context: ConversationContext, user_message: str) -> str:
+        """Build comprehensive context prompt for AI."""
+        prompt_parts = []
+        
+        # Add conversation history
+        if context.recent_messages:
+            prompt_parts.append("CONVERSATION HISTORY:")
+            for msg in context.recent_messages[-8:]:  # Last 8 messages
+                prompt_parts.append(f"{msg.role}: {msg.content}")
+        
+        # Add strategic context
+        if context.north_star_context:
+            prompt_parts.append("\nSTRATEGIC CONTEXT:")
+            if context.north_star_context.get("purpose"):
+                prompt_parts.append(f"Purpose: {context.north_star_context['purpose']}")
+            if context.north_star_context.get("vision"):
+                prompt_parts.append(f"Vision: {context.north_star_context['vision']}")
+            if context.north_star_context.get("goals"):
+                goals = [g["title"] for g in context.north_star_context["goals"][:3]]
+                prompt_parts.append(f"Key Goals: {', '.join(goals)}")
+        
+        # Add conversation patterns
+        if context.conversation_patterns:
+            topics = context.conversation_patterns.get("conversation_topics", [])
+            if topics:
+                prompt_parts.append(f"\nDISCUSSION TOPICS: {', '.join(topics)}")
+        
+        # Add user preferences
+        if context.user_preferences:
+            style = context.user_preferences.get("communication_style", "collaborative")
+            detail = context.user_preferences.get("detail_level", "moderate")
+            prompt_parts.append(f"\nUSER PREFERENCES: {style} style, {detail} detail level")
+        
+        return "\n".join(prompt_parts)
+
+    async def _should_update_summary(self, context: ConversationContext) -> bool:
+        """Determine if conversation summary should be updated."""
+        # Update summary every 10 messages or if no summary exists
+        message_count = len(context.recent_messages)
+        return message_count % 10 == 0 or not context.conversation_summary
+
+    async def _generate_conversation_summary(self, context: ConversationContext, user_message: str, ai_response: str) -> str:
+        """Generate updated conversation summary."""
+        try:
+            # Build context for summarization
+            conversation_text = "\n".join([f"{m.role}: {m.content}" for m in context.recent_messages[-20:]])
+            conversation_text += f"\nuser: {user_message}\nassistant: {ai_response}"
+            
+            summary_variables = {
+                "conversation_history": conversation_text,
+                "conversation_type": context.conversation_type.value,
+                "previous_summary": context.conversation_summary or "No previous summary"
+            }
+            
+            new_summary = await kernel_service.invoke_semantic_function(
+                skill_name="conversation",
+                function_name="SummarizeConversation",
+                input_text=conversation_text,
+                variables=summary_variables
+            )
+            
+            return str(new_summary)
+            
+        except Exception as e:
+            self.logger.error(f"Error generating conversation summary: {e}")
+            return context.conversation_summary or "Conversation about strategic planning and AI assistance."
+
+    async def _prepare_context_updates(self, context: ConversationContext, user_message: str, ai_response: str) -> Dict[str, Any]:
+        """Prepare context updates based on the conversation."""
+        updates = {}
+        
+        # Update conversation patterns
+        topics = self._extract_conversation_topics([
+            ConversationMessage(conversation_id=context.conversation_id, role=MessageRole.USER, content=user_message),
+            ConversationMessage(conversation_id=context.conversation_id, role=MessageRole.ASSISTANT, content=ai_response)
+        ])
+        
+        if topics:
+            updates["recent_topics"] = topics
+        
+        # Track user engagement patterns
+        updates["last_interaction_type"] = "question" if "?" in user_message else "statement"
+        updates["message_length"] = len(user_message)
+        
+        return updates
+
+    def _extract_related_entities(self, user_message: str, ai_response: str) -> List[Dict[str, Any]]:
+        """Extract related entities mentioned in the conversation."""
+        entities = []
+        
+        # Look for strategic entities in the conversation
+        entity_patterns = {
+            "goal": ["goal", "objective", "target"],
+            "initiative": ["initiative", "project", "action"],
+            "risk": ["risk", "threat", "challenge"],
+            "opportunity": ["opportunity", "chance", "potential"],
+            "metric": ["metric", "kpi", "measure", "indicator"]
+        }
+        
+        combined_text = f"{user_message} {ai_response}".lower()
+        
+        for entity_type, keywords in entity_patterns.items():
+            for keyword in keywords:
+                if keyword in combined_text:
+                    entities.append({
+                        "type": entity_type,
+                        "keyword": keyword,
+                        "context": "mentioned in conversation"
+                    })
+                    break  # Only add once per entity type
+        
+        return entities
+
+    def __init__(self):
+        """Initialize the Conversation Service with enhanced memory capabilities."""
+        # Initialize base service properties
+        self.cosmos_client = None
+        self.database = None
+        self.conversations_container = None
+        self.messages_container = None
+        self.cosmos_db_available = False
+        
+        # Caches for performance
+        self.conversations_cache = {}
+        self.messages_cache = {}
+        self.context_cache = {}  # Enhanced context memory cache
+        
+        # Logger
+        self.logger = logging.getLogger("conversation_service")
+        
+        # Initialize database connection (fallback to sync method for now)
+        self._initialize_cosmos_db_sync()
 
 # Create singleton instance
 conversation_service = ConversationService()
