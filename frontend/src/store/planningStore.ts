@@ -227,7 +227,7 @@ export const usePlanningStore = create<PlanningState>((set, get) => ({
   allocateResource: async (data) => {
     try {
       set({ isLoading: true });
-      const allocation = await planningService.allocateResource(data);
+      await planningService.allocateResource(data);
       
       // Reload plans to get updated resource allocations
       await get().loadPlans();

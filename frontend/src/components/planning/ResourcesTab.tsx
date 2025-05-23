@@ -73,7 +73,7 @@ const ResourcesTab: React.FC = () => {
   useEffect(() => {
     loadPlans();
     loadResourceUtilization();
-  }, []);
+  }, [loadPlans, loadResourceUtilization]);
 
   // Get all resources from all initiatives
   const allResources = initiatives.flatMap(i => i.resources || []);
