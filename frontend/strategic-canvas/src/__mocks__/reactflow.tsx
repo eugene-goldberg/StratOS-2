@@ -1,19 +1,17 @@
 import React from 'react';
 
 // Mock ReactFlow components and hooks
-const ReactFlow: React.FC<any> = ({ children, ...props }) => {
-  // Filter out React-specific props that aren't valid DOM attributes
-  const { 
-    nodes, edges, nodeTypes, onNodesChange, onEdgesChange, onConnect, 
-    onNodeClick, onEdgeClick, onSelectionChange, onMove, fitView, 
-    snapToGrid, snapGrid, defaultViewport, selectNodesOnDrag, 
-    multiSelectionKeyCode, panActivationKeyCode, zoomActivationKeyCode,
-    ...domProps 
-  } = props;
-  
+const ReactFlow: React.FC<any> = ({ children, nodes, edges, ...props }) => {
+  // Render children inside the mock ReactFlow container
   return (
-    <div data-testid="react-flow" {...domProps}>
-      {children}
+    <div data-testid="react-flow" {...props}>
+      {React.Children.map(children, (child) => {
+        // If it's a ReactElement, render it
+        if (React.isValidElement(child)) {
+          return child;
+        }
+        return null;
+      })}
     </div>
   );
 };
@@ -35,10 +33,8 @@ export const MiniMap: React.FC<any> = (props) => {
   return <div data-testid="react-flow-minimap" {...domProps} />;
 };
 
-export const Panel: React.FC<{ children: React.ReactNode; position: string; [key: string]: any }> = ({ children, position, ...props }) => (
-  <div data-testid={`react-flow-panel-${position}`} {...props}>
-    {children}
-  </div>
+export const Panel: React.FC<{ children: React.ReactNode; position: string; [key: string]: any }> = ({ children, position }) => (
+  <div data-testid={`react-flow-panel-${position}`}>{children}</div>
 );
 
 export { ReactFlow };
