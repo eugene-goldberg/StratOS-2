@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  stratos-api:
+    build: .
+    container_name: stratos-fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      # Azure OpenAI settings
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_DEPLOYMENT_NAME=${AZURE_OPENAI_DEPLOYMENT_NAME}
+      # Azure AI Foundry settings
+      - AZURE_AI_HUB_NAME=${AZURE_AI_HUB_NAME}
+      - AZURE_AI_PROJECT_NAME=${AZURE_AI_PROJECT_NAME}
+      - AZURE_AI_PROJECT_HOST=${AZURE_AI_PROJECT_HOST}
+      - AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID}
+      - AZURE_RESOURCE_GROUP=${AZURE_RESOURCE_GROUP}
+      # Azure Auth settings
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      # Development settings
+      - ENVIRONMENT=development
+      - DEBUG=true
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+networks:
+  default:
+    name: stratos-network

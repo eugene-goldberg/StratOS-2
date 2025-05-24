@@ -233,7 +233,7 @@ AZURE_CLIENT_SECRET=
 | Component | Status | Priority | Notes |
 |-----------|--------|----------|-------|
 | FastAPI Backend | ✅ Complete | DONE | Fully implemented |
-| Deploy to ACA | 🔴 Not Started | HIGHEST | Next critical step |
+| Deploy to ACA | ✅ Complete | DONE | Scripts ready |
 | Connected Agents | 🔴 Not Started | HIGH | Core feature |
 | MSAL Auth | ✅ Complete | DONE | With dev bypass |
 | WebSocket | ✅ Complete | DONE | Streaming ready |
@@ -243,6 +243,12 @@ AZURE_CLIENT_SECRET=
 | CI/CD Pipeline | 🔴 Not Started | LOW | After deployment |
 
 ## 📝 Key Adoption Achievements (May 24, 2025)
+
+### Infrastructure Achievements:
+- ✅ **Azure Container Apps Deployment**: Complete deployment tooling created
+- ✅ **Docker Configuration**: Production-ready Dockerfile and docker-compose
+- ✅ **Deployment Automation**: One-command deployment to Azure
+- ✅ **Interaction Tools**: Python CLI for testing deployed apps
 
 ### Successfully Adopted from semantic_kernel_multi_agent:
 1. **Plugin Architecture**: Using @kernel_function decorators and KernelPlugin.from_object()
@@ -256,10 +262,19 @@ AZURE_CLIENT_SECRET=
 - ✅ `plugins/ceo_log_plugin.py` - CEO Log plugin
 - ✅ `plugins/north_star_plugin.py` - North Star plugin
 - ✅ `north_star_agent.py` - North Star agent implementation
-- ✅ `scripts/deploy_stratos_agents.sh` - Deployment script
+- ✅ `scripts/deploy_stratos_agents.sh` - Agent deployment script
 - ✅ `scripts/test_orchestration.py` - Test script
 - ✅ `adoption_plan.md` - Comprehensive adoption guide
 - ✅ `.env` files - Real Azure configuration
+
+### Deployment Infrastructure Created (May 24):
+- ✅ `Dockerfile` - Multi-stage production build
+- ✅ `.dockerignore` - Optimized Docker context
+- ✅ `docker-compose.yml` - Local development setup
+- ✅ `scripts/deploy_to_azure_container_apps.sh` - Azure deployment automation
+- ✅ `scripts/test_docker_locally.sh` - Local Docker testing
+- ✅ `scripts/interact_with_azure_app.py` - Azure app interaction tool
+- ✅ `DEPLOYMENT_GUIDE.md` - Comprehensive deployment documentation
 
 ## 🔗 Related Documents
 - [Architecture Plan](../../docs/azure_ai_foundry_integration_plan.md)

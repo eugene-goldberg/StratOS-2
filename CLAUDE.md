@@ -40,6 +40,7 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - Run backend tests: `cd /path/to/project && source venv/bin/activate && python -m pytest tests/`
 - Run frontend tests: `cd frontend && npm test`
 - Run strategic canvas tests: `cd frontend/strategic-canvas && npm test`
+- Test Docker locally: `cd backend/agentic && ./scripts/test_docker_locally.sh`
 - CI workflows must pass before committing
 
 ## Architecture Patterns
@@ -67,7 +68,8 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 ## Development Workflow (Updated May 24, 2025)
 - Phase 2 is 89% complete - only CEO Preference Learning needs implementation
 - **Adopted semantic_kernel_multi_agent patterns**: plugin architecture, orchestration, deployment scripts
-- Primary focus: Complete remaining Strategic Foundation agents, then deploy to Azure Container Apps
+- **Azure Container Apps deployment tools created**: Docker configuration and deployment automation ready
+- Primary focus: Complete remaining Strategic Foundation agents (Memory & Preference)
 - Use TodoWrite/TodoRead tools to track implementation progress
 - Check mvp_status.md for detailed feature completion status
 
@@ -77,6 +79,14 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - Implement orchestration with AgentOrchestrator for function calling
 - Deploy agents using: `bash backend/agentic/scripts/deploy_stratos_agents.sh`
 - Test orchestration: `python backend/agentic/scripts/test_orchestration.py`
+
+## Azure Deployment (NEW - May 24)
+- Test Docker locally: `cd backend/agentic && ./scripts/test_docker_locally.sh`
+- Deploy to Azure: `cd backend/agentic && ./scripts/deploy_to_azure_container_apps.sh`
+- Interact with deployed app: `python backend/agentic/scripts/interact_with_azure_app.py health`
+- View logs: `az containerapp logs show -n stratos-fastapi -g stratos-container-apps-rg`
+- Update deployment: `./scripts/deploy_to_azure_container_apps.sh --tag v1.0.1`
+- See `backend/agentic/DEPLOYMENT_GUIDE.md` for detailed instructions
 
 ## Common Pitfalls to Avoid
 - Don't use 'python' command - always use 'python3'
@@ -95,6 +105,8 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - **backend/agentic/common/orchestration.py** - Orchestration framework implementation
 - **backend/agentic/agents/strategic_foundation/plugins/** - Example plugin implementations
 - **backend/agentic/scripts/** - Deployment and testing scripts
+- **backend/agentic/DEPLOYMENT_GUIDE.md** - Azure Container Apps deployment guide
+- **backend/agentic/Dockerfile** - Production Docker configuration
 - backend/ai/kernel_service.py - AI orchestration (being migrated to agents)
 - backend/ai/skills/* - Semantic Kernel skills (to be packaged as agents)
 - backend/core/db_setup.py - Database initialization

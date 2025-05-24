@@ -61,7 +61,7 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 - [x] **NEW: Implement plugin architecture with @kernel_function** ✅ COMPLETED
 - [x] **NEW: Implement orchestration with function calling** ✅ COMPLETED
 - [x] **NEW: Create deployment scripts** ✅ COMPLETED
-- [ ] **NEW: Deploy FastAPI to Azure Container Apps** (Next Priority)
+- [x] **NEW: Deploy FastAPI to Azure Container Apps** ✅ COMPLETED (May 24)
 - [x] **NEW: Implement WebSocket support for real-time agent streaming** ✅ COMPLETED
 - [x] **NEW: Configure MSAL authentication for React-Backend communication** ✅ COMPLETED
 - [ ] Set up Azure AI Foundry workspace with Standard Agent Setup
@@ -116,11 +116,24 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 - `/backend/agentic/agents/strategic_foundation/ceo_log_agent.py` - CEO Log Agent
 - `/backend/agentic/agents/strategic_foundation/north_star_agent.py` - North Star Agent (May 24)
 - `/backend/agentic/agents/strategic_foundation/plugins/` - Plugin implementations (May 24)
-- `/backend/agentic/scripts/deploy_stratos_agents.sh` - Deployment script (May 24)
+- `/backend/agentic/scripts/deploy_stratos_agents.sh` - Agent deployment script (May 24)
+- `/backend/agentic/scripts/deploy_to_azure_container_apps.sh` - Azure deployment (May 24)
+- `/backend/agentic/scripts/interact_with_azure_app.py` - Azure interaction tool (May 24)
 - `/backend/agentic/scripts/test_orchestration.py` - Test script (May 24)
+- `/backend/agentic/Dockerfile` - Production Docker build (May 24)
+- `/backend/agentic/docker-compose.yml` - Local development (May 24)
 - `/backend/agentic/examples/strategic_foundation_example.py` - Usage example
 - `/backend/agentic/README.md` - Architecture documentation
 - `/backend/agentic/adoption_plan.md` - SK project adoption guide (May 24)
+- `/backend/agentic/DEPLOYMENT_GUIDE.md` - Deployment documentation (May 24)
+
+## 🎯 Current Priority: Complete Multi-Agent Systems
+
+### Immediate Next Steps:
+1. Complete remaining Strategic Foundation agents (Memory & Preference)
+2. Implement Analysis & Intelligence System (4 agents)
+3. Implement Planning & Execution System (6 agents)
+4. Test deployed FastAPI backend with real agent invocations
 
 ## 🚨 Priority 1: Azure AI Service Integration
 
@@ -287,8 +300,11 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 ### Migration Status
 - ✅ Legacy backend moved to `/backend/legacy/`
 - ✅ New agent-based backend created at `/backend/agentic/`
-- 🚧 FastAPI integration layer to be updated to use new agents
+- ✅ FastAPI backend fully implemented and deployable
+- ✅ Azure Container Apps deployment tools created
+- 🚧 Integration with Azure AI Foundry Agent Service pending
 - 📝 See `/backend/agentic/README.md` for new architecture details
+- 📝 See `/backend/agentic/DEPLOYMENT_GUIDE.md` for deployment instructions
 
 ### Directory Structure
 ```
