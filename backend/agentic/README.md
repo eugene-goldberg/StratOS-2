@@ -261,3 +261,36 @@ python scripts/test_orchestration.py
 # Test deployed FastAPI app
 python scripts/interact_with_azure_app.py health
 ```
+
+## Agent Deployment to Azure AI Foundry
+
+### Prerequisites
+Before deploying agents, you need to set up the Azure AI Foundry infrastructure:
+
+```bash
+# Set up Azure AI resources (AI Hub, Project, OpenAI, Search)
+./scripts/setup_azure_ai_foundry.sh
+
+# Review and apply the updated configuration
+cp .env .env.backup
+mv .env.new .env
+```
+
+### Deploy Agents
+Once infrastructure is ready, deploy all 15 agents:
+
+```bash
+# Deploy all StratOS agents to Azure AI Agent Service
+./scripts/deploy_stratos_agents.sh
+```
+
+This will deploy:
+- Strategic Foundation & Insights System (5 agents)
+- Analysis & Intelligence System (4 agents)
+- Planning & Execution System (6 agents)
+
+### Available Deployment Tools
+- `scripts/setup_azure_ai_foundry.sh` - Creates required Azure AI resources
+- `scripts/deploy_stratos_agents.sh` - Deploys all 15 agents to Azure
+- `scripts/deploy_to_azure_container_apps.sh` - Deploys FastAPI backend
+- `scripts/interact_with_azure_app.py` - Tests deployed services
