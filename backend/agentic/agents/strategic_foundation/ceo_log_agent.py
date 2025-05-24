@@ -5,56 +5,17 @@ Responsibilities:
 - Tag generation
 - Entry summarization
 - Insight extraction
+
+Adopted from semantic_kernel_multi_agent pattern using plugin architecture.
 """
 
 from typing import Dict, Any, List, Optional
 from uuid import UUID
+import json
 from semantic_kernel import Kernel
-from semantic_kernel.functions import KernelPlugin, kernel_function
+from semantic_kernel.functions import KernelPlugin
 from ...common.base_agent import BaseStratosAgent
-
-
-class CEOLogSkills(KernelPlugin):
-    """Skills/functions for CEO Log operations."""
-    
-    name = "CEOLogSkills"
-    description = "Skills for processing CEO log entries"
-    
-    @kernel_function(
-        name="generate_tags",
-        description="Generate relevant tags for a log entry"
-    )
-    async def generate_tags(self, entry_text: str) -> List[str]:
-        """Generate tags for log entry.
-        
-        This would integrate with the existing tag generation prompts.
-        """
-        # Placeholder - would use existing prompt templates
-        return ["strategic", "planning", "insight"]
-    
-    @kernel_function(
-        name="summarize_entry",
-        description="Create a concise summary of a log entry"
-    )
-    async def summarize_entry(self, entry_text: str) -> str:
-        """Summarize log entry.
-        
-        This would integrate with existing summarization prompts.
-        """
-        # Placeholder - would use existing prompt templates
-        return f"Summary of: {entry_text[:50]}..."
-    
-    @kernel_function(
-        name="extract_insights",
-        description="Extract strategic insights from log entries"
-    )
-    async def extract_insights(self, entries: List[str]) -> List[str]:
-        """Extract insights from multiple entries.
-        
-        This would integrate with existing insight generation prompts.
-        """
-        # Placeholder - would use existing prompt templates
-        return ["Strategic insight 1", "Strategic insight 2"]
+from .plugins.ceo_log_plugin import CEOLogPlugin
 
 
 class CEOLogAgent(BaseStratosAgent):
@@ -66,6 +27,16 @@ class CEOLogAgent(BaseStratosAgent):
         Args:
             kernel: Semantic Kernel instance
         """
+        # Initialize the plugin using the pattern from semantic_kernel_multi_agent
+        self.ceo_log_plugin_instance = CEOLogPlugin()
+        
+        # Create KernelPlugin from the plugin instance
+        self.ceo_log_plugin = KernelPlugin.from_object(
+            "CEOLogPlugin",
+            self.ceo_log_plugin_instance,
+            description="CEO Log management capabilities"
+        )
+        
         instructions = """
 You are the CEO Log Agent responsible for processing executive log entries.
 Your capabilities include:
@@ -85,16 +56,16 @@ When processing entries, focus on:
 Always maintain confidentiality and highlight critical insights.
 """
         
-        # Create plugin with skills
-        ceo_log_skills = CEOLogSkills()
-        
         super().__init__(
             name="CEOLogAgent",
             instructions=instructions,
             kernel=kernel,
             description="Handles CEO log entries, voice transcription, and insights",
-            plugins=[ceo_log_skills]
+            plugins=[self.ceo_log_plugin]
         )
+        
+        # Add plugin to kernel for function calling
+        self.kernel.plugins["CEOLogPlugin"] = self.ceo_log_plugin
     
     async def process_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Process CEO log related requests.
@@ -142,6 +113,15 @@ Always maintain confidentiality and highlight critical insights.
         """Create a new CEO log entry."""
         entry_text = data.get("text", "")
         category = data.get("category", "general")
+        is_voice = data.get("is_voice", False)
+        
+        # Save the entry using the plugin
+        save_json = self.ceo_log_plugin_instance.save_entry(
+            content=entry_text,
+            category=category,
+            is_voice=is_voice
+        )
+        save_result = json.loads(save_json)
         
         # Generate tags
         tags = await self._generate_tags({"text": entry_text})
@@ -151,9 +131,11 @@ Always maintain confidentiality and highlight critical insights.
         
         return {
             "status": "success",
+            "entry_id": save_result.get("entry_id"),
             "entry": {
                 "text": entry_text,
                 "category": category,
+                "is_voice": is_voice,
                 "tags": tags["tags"],
                 "summary": summary["summary"]
             }
@@ -174,41 +156,43 @@ Always maintain confidentiality and highlight critical insights.
         """Generate tags for entry."""
         text = data.get("text", "")
         
-        # Use the skill function
-        result = await self.agent.kernel.invoke(
-            function_name="CEOLogSkills-generate_tags",
-            entry_text=text
-        )
+        # Use the plugin function directly
+        tags_json = self.ceo_log_plugin_instance.generate_tags(text)
+        tags_result = json.loads(tags_json)
         
         return {
             "status": "success",
-            "tags": result.value if result.value else []
+            "tags": tags_result.get("tags", [])
         }
     
     async def _summarize_entry(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Summarize log entry."""
         text = data.get("text", "")
+        max_length = data.get("max_length", 150)
         
-        result = await self.agent.kernel.invoke(
-            function_name="CEOLogSkills-summarize_entry",
-            entry_text=text
-        )
+        # Use the plugin function directly
+        summary = self.ceo_log_plugin_instance.summarize_entry(text, max_length)
         
         return {
             "status": "success",
-            "summary": result.value if result.value else ""
+            "summary": summary
         }
     
     async def _extract_insights(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Extract insights from entries."""
         entries = data.get("entries", [])
+        focus_area = data.get("focus_area")
         
-        result = await self.agent.kernel.invoke(
-            function_name="CEOLogSkills-extract_insights",
-            entries=entries
+        # Use the plugin function directly
+        insights_json = self.ceo_log_plugin_instance.extract_insights(
+            json.dumps(entries) if isinstance(entries, list) else entries,
+            focus_area
         )
+        insights_result = json.loads(insights_json)
         
         return {
             "status": "success",
-            "insights": result.value if result.value else []
+            "insights": insights_result.get("insights", []),
+            "themes": insights_result.get("themes", []),
+            "recommendations": insights_result.get("recommendations", [])
         }

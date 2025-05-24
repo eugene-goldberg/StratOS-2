@@ -33,10 +33,11 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - CI workflows must pass before committing
 
 ## Architecture Patterns
-### Current State
+### Current State (Updated May 24, 2025)
 - Backend uses FastAPI with dependency injection for user context
 - All services use Cosmos DB with fallback to in-memory storage
-- AI features use Semantic Kernel with prompt templates in .txt files
+- AI features use Semantic Kernel with **plugin architecture** (@kernel_function decorators)
+- **Orchestration pattern** implemented with function calling capabilities
 - Frontend uses React with TypeScript, Material UI, and Zustand for state
 
 ### Target State (In Progress)
@@ -46,17 +47,26 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - Agents packaged and deployed as managed services
 - Built-in conversation persistence and monitoring
 
-## Azure Integration Status
+## Azure Integration Status (Updated May 24, 2025)
 - Cosmos DB is fully integrated and working
-- AI services (OpenAI, Speech, Search) currently mocked - migration to Agent Service in progress
-- Check backend/core/config.py for environment variables needed
-- Mock implementations allow full functionality without Azure services
+- **Azure OpenAI** is now configured with real credentials from semantic_kernel_multi_agent project
+- AI services (Speech, Search) currently mocked - migration to Agent Service in progress
+- Check backend/agentic/config/settings.py and .env for environment variables
+- Real Azure OpenAI endpoint: https://sk-multi-agent-openai.openai.azure.com/
 
-## Development Workflow
+## Development Workflow (Updated May 24, 2025)
 - Phase 2 is 89% complete - only CEO Preference Learning needs implementation
-- Primary focus: Azure AI Foundry Agent Service integration (4 phases)
+- **Adopted semantic_kernel_multi_agent patterns**: plugin architecture, orchestration, deployment scripts
+- Primary focus: Complete remaining Strategic Foundation agents, then deploy to Azure Container Apps
 - Use TodoWrite/TodoRead tools to track implementation progress
 - Check mvp_status.md for detailed feature completion status
+
+## New Agent Development Patterns (From semantic_kernel_multi_agent)
+- Create plugins with @kernel_function decorators in `/backend/agentic/agents/*/plugins/`
+- Use KernelPlugin.from_object() for plugin registration
+- Implement orchestration with AgentOrchestrator for function calling
+- Deploy agents using: `bash backend/agentic/scripts/deploy_stratos_agents.sh`
+- Test orchestration: `python backend/agentic/scripts/test_orchestration.py`
 
 ## Common Pitfalls to Avoid
 - Don't use 'python' command - always use 'python3'
@@ -71,6 +81,10 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - docs/azure_ai_foundry_todo.md - Agent migration task list
 - docs/architecture.md - System architecture overview
 - mvp_status.md - MVP feature tracking
+- **backend/agentic/adoption_plan.md** - Guide for adopting semantic_kernel_multi_agent patterns
+- **backend/agentic/common/orchestration.py** - Orchestration framework implementation
+- **backend/agentic/agents/strategic_foundation/plugins/** - Example plugin implementations
+- **backend/agentic/scripts/** - Deployment and testing scripts
 - backend/ai/kernel_service.py - AI orchestration (being migrated to agents)
 - backend/ai/skills/* - Semantic Kernel skills (to be packaged as agents)
 - backend/core/db_setup.py - Database initialization

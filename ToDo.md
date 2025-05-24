@@ -52,8 +52,12 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 - [x] Create `StratosAgentGroupChat` wrapper for SK AgentGroupChat
 - [x] Implement selection and termination strategy helpers
 
-#### 🚧 In Progress - Updated Priorities
+#### 🚧 In Progress - Updated Priorities (May 24, 2025)
 - [x] **NEW: Set up FastAPI backend structure** ✅ COMPLETED
+- [x] **NEW: Adopt semantic_kernel_multi_agent patterns** ✅ COMPLETED
+- [x] **NEW: Implement plugin architecture with @kernel_function** ✅ COMPLETED
+- [x] **NEW: Implement orchestration with function calling** ✅ COMPLETED
+- [x] **NEW: Create deployment scripts** ✅ COMPLETED
 - [ ] **NEW: Deploy FastAPI to Azure Container Apps** (Next Priority)
 - [x] **NEW: Implement WebSocket support for real-time agent streaming** ✅ COMPLETED
 - [x] **NEW: Configure MSAL authentication for React-Backend communication** ✅ COMPLETED
@@ -69,8 +73,8 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 #### Strategic Foundation & Insights System
 - [x] Create StrategicContextRouter (routing logic implemented)
 - [x] Create CEOLogAgent structure with skills placeholder
-- [ ] Complete CEOLogAgent with actual skill integration
-- [ ] Implement NorthStarAgent for vision/values/goals
+- [x] Complete CEOLogAgent with plugin integration ✅ COMPLETED (May 24)
+- [x] Implement NorthStarAgent for vision/values/goals ✅ COMPLETED (May 24)
 - [ ] Implement MemoryRecallAgent with vector search
 - [ ] Implement PreferenceLearningAgent (complete the partial implementation)
 
@@ -105,17 +109,23 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 ### Key Files Created
 - `/backend/agentic/common/base_agent.py` - Base agent classes
 - `/backend/agentic/common/agent_group_chat.py` - Group chat implementation
+- `/backend/agentic/common/orchestration.py` - Orchestration framework (May 24)
 - `/backend/agentic/agents/strategic_foundation/router.py` - Strategic router
 - `/backend/agentic/agents/strategic_foundation/ceo_log_agent.py` - CEO Log Agent
+- `/backend/agentic/agents/strategic_foundation/north_star_agent.py` - North Star Agent (May 24)
+- `/backend/agentic/agents/strategic_foundation/plugins/` - Plugin implementations (May 24)
+- `/backend/agentic/scripts/deploy_stratos_agents.sh` - Deployment script (May 24)
+- `/backend/agentic/scripts/test_orchestration.py` - Test script (May 24)
 - `/backend/agentic/examples/strategic_foundation_example.py` - Usage example
 - `/backend/agentic/README.md` - Architecture documentation
+- `/backend/agentic/adoption_plan.md` - SK project adoption guide (May 24)
 
 ## 🚨 Priority 1: Azure AI Service Integration
 
 ### Azure OpenAI Service
-- [ ] Add configuration to `backend/core/config.py`
-- [ ] Update `KernelService` to use real Azure OpenAI client
-- [ ] Configure Semantic Kernel with Azure OpenAI settings
+- [x] Add configuration to `backend/agentic/config/settings.py` ✅ COMPLETED (May 24)
+- [x] Configure Semantic Kernel with Azure OpenAI settings ✅ COMPLETED (May 24)
+- [ ] Update legacy `KernelService` to use real Azure OpenAI client
 - [ ] Replace all mock AI responses with actual LLM calls
 - [ ] Implement token usage tracking and cost management
 - [ ] Add retry logic and error handling for API failures

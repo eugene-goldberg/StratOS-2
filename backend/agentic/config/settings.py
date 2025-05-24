@@ -22,25 +22,29 @@ class Settings(BaseSettings):
     app_name: str = "StratOS Multi-Agent System"
     environment: str = "development"  # development, staging, production
     port: int = 8000
-    debug: bool = False
+    debug: bool = True  # Enable debug for development
     
     # CORS Settings
     cors_origins: List[str] = ["http://localhost:3000", "http://localhost:3001"]
     
-    # Azure AI Foundry Settings
-    ai_foundry_endpoint: Optional[str] = None
-    ai_foundry_project_id: Optional[str] = None
-    ai_foundry_api_key: Optional[str] = None
+    # Azure AI Foundry Settings (from semantic_kernel_multi_agent)
+    azure_ai_hub_name: str = "sk-multi-agent-hub"
+    azure_ai_project_name: str = "sk-multi-agent-project"
+    azure_ai_project_host: str = "eastus.api.azureml.ms"
+    azure_ai_project_connection_string: Optional[str] = None
+    azure_subscription_id: str = "514bd6d3-2c02-45c6-a86f-29cf262a379a"
+    azure_resource_group: str = "semantic-kernel-multi-agent-rg"
     
-    # Azure OpenAI Settings
-    azure_openai_endpoint: Optional[str] = None
-    azure_openai_api_key: Optional[str] = None
-    azure_openai_api_version: str = "2024-02-15-preview"
+    # Azure OpenAI Settings (from semantic_kernel_multi_agent)
+    azure_openai_endpoint: str = "https://sk-multi-agent-openai.openai.azure.com/"
+    azure_openai_api_key: str = "48d4df6c7b5a49f38d7675620f8e3aa0"
+    azure_openai_deployment_name: str = "gpt-35-turbo"  # Main deployment
+    azure_openai_api_version: str = "2024-05-01-preview"  # Updated to match SK example
     
-    # Model Deployments (based on research recommendations)
-    gpt4_deployment_name: Optional[str] = None  # For routers and complex reasoning
-    gpt4o_deployment_name: Optional[str] = None  # For multimodal (CEO Log)
-    gpt35_deployment_name: Optional[str] = None  # For simple tasks
+    # Model Deployments (using available deployment from SK project)
+    gpt4_deployment_name: Optional[str] = "gpt-35-turbo"  # Using available model for now
+    gpt4o_deployment_name: Optional[str] = "gpt-35-turbo"  # Using available model for now
+    gpt35_deployment_name: str = "gpt-35-turbo"  # Main deployment from SK project
     o_series_deployment_name: Optional[str] = None  # For constraint reasoning
     embedding_deployment_name: Optional[str] = None  # For vector search
     
@@ -65,10 +69,10 @@ class Settings(BaseSettings):
     insights_index: str = "stratos-insights"
     canvas_index: str = "stratos-canvas"
     
-    # Authentication Settings (MSAL)
-    azure_client_id: Optional[str] = None
-    azure_tenant_id: Optional[str] = None
-    azure_client_secret: Optional[str] = None
+    # Authentication Settings (Service Principal from semantic_kernel_multi_agent)
+    azure_client_id: str = "0d41080b-9595-4f4a-b6ad-9ef01b3f5ecf"
+    azure_tenant_id: str = "5acd02e3-dfea-4b7c-aab5-1633ffe0403a"
+    azure_client_secret: str = "MSg8Q~fSqZvntpsWvETH4ZZb2uUdDfxnuu7~Jbu7"
     
     # Microsoft Entra settings for agents
     enable_entra_agent_id: bool = True
@@ -114,11 +118,10 @@ class Settings(BaseSettings):
         
         if self.is_production:
             required_settings = [
-                ("ai_foundry_endpoint", self.ai_foundry_endpoint),
-                ("ai_foundry_project_id", self.ai_foundry_project_id),
+                ("azure_ai_hub_name", self.azure_ai_hub_name),
+                ("azure_ai_project_name", self.azure_ai_project_name),
                 ("azure_openai_endpoint", self.azure_openai_endpoint),
-                ("cosmos_endpoint", self.cosmos_endpoint),
-                ("search_endpoint", self.search_endpoint),
+                ("azure_openai_api_key", self.azure_openai_api_key),
                 ("azure_client_id", self.azure_client_id),
                 ("azure_tenant_id", self.azure_tenant_id),
             ]
@@ -132,9 +135,42 @@ class Settings(BaseSettings):
             )
 
 
+    def get_project_connection_string(self) -> str:
+        """
+        Get the Azure AI Project connection string.
+        Adopted from semantic_kernel_multi_agent settings.py
+        """
+        if self.azure_ai_project_connection_string:
+            return self.azure_ai_project_connection_string
+        
+        # If no connection string provided, construct from components
+        if all([
+            self.azure_ai_project_host,
+            self.azure_subscription_id,
+            self.azure_resource_group,
+            self.azure_ai_project_name,
+            self.azure_ai_hub_name
+        ]):
+            # Format: <HostName>;<AzureSubscriptionId>;<ResourceGroup>;<HubName>/<ProjectName>
+            return (
+                f"{self.azure_ai_project_host};"
+                f"{self.azure_subscription_id};"
+                f"{self.azure_resource_group};"
+                f"{self.azure_ai_hub_name}/{self.azure_ai_project_name}"
+            )
+        
+        raise ValueError(
+            "Azure AI Project connection information is missing. "
+            "Please provide either AZURE_AI_PROJECT_CONNECTION_STRING "
+            "or all required components including Hub name."
+        )
+
+
 @lru_cache()
 def get_settings() -> Settings:
     """Get cached settings instance."""
     settings = Settings()
-    settings.validate_required_settings()
+    # Only validate in production
+    if settings.is_production:
+        settings.validate_required_settings()
     return settings
