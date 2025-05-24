@@ -29,7 +29,7 @@ load_dotenv(os.path.join(backend_dir, '.env'))
 try:
     from azure.identity.aio import DefaultAzureCredential
     from azure.ai.projects.aio import AIProjectClient
-    from semantic_kernel.agents.azure_ai import AzureAIAgent, AzureAIAgentSettings
+    from semantic_kernel.agents import AzureAIAgent, AzureAIAgentSettings
 except ImportError as e:
     print(f"Error importing required modules: {e}")
     print("\nPlease install required packages:")
