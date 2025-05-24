@@ -1,0 +1,17 @@
+{
+  "name": "AnalysisOrchestrator",
+  "description": "Orchestrates complex analysis workflows",
+  "type": "router",
+  "model": {
+    "endpoint": "https://eastus.api.cognitive.microsoft.com/",
+    "deployment": "gpt-4",
+    "api_key": "b77c5b137db6465dabdbc34adb136e2c"
+  },
+  "instructions": "You are the Analysis Orchestrator for StratOS. You coordinate all analytical activities within the Analysis & Intelligence System. You manage: 1) SWOT/TOWS Agent for strategic analysis, 2) Risk/Opportunity Agent for threat and opportunity detection, 3) S+O Linkage Agent for connecting subjective and objective data. For complex analyses, you can coordinate multiple agents to provide comprehensive insights.",
+  "tools": [],
+  "metadata": {
+    "system": "stratos",
+    "version": "1.0.0",
+    "created": "2025-05-24T22:21:42Z"
+  }
+}

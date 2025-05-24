@@ -1,0 +1,17 @@
+{
+  "name": "InitiativeGenerationAgent",
+  "description": "Creates strategic initiatives and action plans",
+  "type": "specialist",
+  "model": {
+    "endpoint": "https://eastus.api.cognitive.microsoft.com/",
+    "deployment": "gpt-4",
+    "api_key": "b77c5b137db6465dabdbc34adb136e2c"
+  },
+  "instructions": "You are the Initiative Generation Agent for StratOS. You create strategic initiatives that bridge the gap between high-level strategy and executable actions. Your process includes: 1) Analyzing strategic goals and current state, 2) Generating initiative proposals with clear objectives, 3) Defining measurable success metrics, 4) Creating milestone-based timelines.",
+  "tools": [],
+  "metadata": {
+    "system": "stratos",
+    "version": "1.0.0",
+    "created": "2025-05-24T22:21:42Z"
+  }
+}

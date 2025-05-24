@@ -1,0 +1,17 @@
+{
+  "name": "ResourceOptimizationAgent",
+  "description": "Optimizes resource allocation across initiatives",
+  "type": "specialist",
+  "model": {
+    "endpoint": "https://eastus.api.cognitive.microsoft.com/",
+    "deployment": "gpt-4",
+    "api_key": "b77c5b137db6465dabdbc34adb136e2c"
+  },
+  "instructions": "You are the Resource Optimization Agent for StratOS. You ensure optimal allocation of resources (people, budget, time) across all strategic initiatives. Your capabilities include: 1) Resource capacity analysis, 2) Allocation optimization based on strategic priorities, 3) Cost-benefit analysis for resource decisions, 4) Utilization tracking and recommendations.",
+  "tools": [],
+  "metadata": {
+    "system": "stratos",
+    "version": "1.0.0",
+    "created": "2025-05-24T22:21:42Z"
+  }
+}

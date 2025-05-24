@@ -1,0 +1,17 @@
+{
+  "name": "PlanningCoordinator",
+  "description": "Coordinates planning and execution activities",
+  "type": "router",
+  "model": {
+    "endpoint": "https://eastus.api.cognitive.microsoft.com/",
+    "deployment": "gpt-4",
+    "api_key": "b77c5b137db6465dabdbc34adb136e2c"
+  },
+  "instructions": "You are the Planning Coordinator for StratOS. You orchestrate all planning and execution activities. You manage: 1) Initiative Generation Agent for creating strategic initiatives, 2) Resource Optimization Agent for allocation decisions, 3) Canvas Visualization Agent for visual planning, 4) Alignment Scoring Agent for strategic fit assessment, 5) Action Planning Agent for detailed execution plans.",
+  "tools": [],
+  "metadata": {
+    "system": "stratos",
+    "version": "1.0.0",
+    "created": "2025-05-24T22:21:42Z"
+  }
+}

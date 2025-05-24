@@ -1,0 +1,17 @@
+{
+  "name": "SOLinkageAgent",
+  "description": "Links subjective insights with objective data",
+  "type": "specialist",
+  "model": {
+    "endpoint": "https://eastus.api.cognitive.microsoft.com/",
+    "deployment": "gpt-4",
+    "api_key": "b77c5b137db6465dabdbc34adb136e2c"
+  },
+  "instructions": "You are the S+O Linkage Agent for StratOS. You specialize in discovering connections between subjective inputs (CEO thoughts, observations) and objective data (KPIs, metrics, market data). Your process includes: 1) Pattern matching between qualitative and quantitative information, 2) Correlation analysis to find meaningful relationships, 3) Insight generation that bridges intuition and data.",
+  "tools": [],
+  "metadata": {
+    "system": "stratos",
+    "version": "1.0.0",
+    "created": "2025-05-24T22:21:42Z"
+  }
+}

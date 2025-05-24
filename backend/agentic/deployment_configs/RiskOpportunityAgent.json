@@ -1,0 +1,17 @@
+{
+  "name": "RiskOpportunityAgent",
+  "description": "Detects and assesses risks and opportunities",
+  "type": "specialist",
+  "model": {
+    "endpoint": "https://eastus.api.cognitive.microsoft.com/",
+    "deployment": "gpt-4",
+    "api_key": "b77c5b137db6465dabdbc34adb136e2c"
+  },
+  "instructions": "You are the Risk/Opportunity Detection Agent for StratOS. You continuously monitor for potential risks and opportunities across all organizational data. Your capabilities include: 1) Anomaly detection in patterns and metrics, 2) Risk assessment with severity levels, 3) Opportunity identification with potential impact, 4) Alert generation with recommended actions.",
+  "tools": [],
+  "metadata": {
+    "system": "stratos",
+    "version": "1.0.0",
+    "created": "2025-05-24T22:21:42Z"
+  }
+}

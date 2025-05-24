@@ -31,16 +31,19 @@ This todo list tracks the implementation of the 3 Multi-Agent System architectur
 **Live URL**: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io
 
 ### Environment & Infrastructure
-- [ ] Set up Azure AI Foundry workspace with Standard Agent Setup
+- [x] Set up Azure AI Foundry workspace with Standard Agent Setup ✅ (Hub & Project exist)
+- [x] Create Azure OpenAI Service with GPT-4 deployment ✅ (May 24)
+- [x] Configure Azure AI Search service ✅ (May 24)
 - [ ] Configure Microsoft Entra Agent ID for all agents
 - [ ] Set up customer-managed Cosmos DB with 3 containers (thread-message-store, system-thread-message-store, agent-entity-store)
-- [ ] Configure Azure AI Search with hybrid search (keyword + vector) enabled
 - [ ] Set up Azure Monitor and Application Insights integration
 - [ ] Configure VNet and private endpoints for security
 
 ### Development Framework
-- [x] Create base agent template with Semantic Kernel and common interfaces
-- [ ] Implement "Agents-as-Code" repository structure (JSON/YAML configs)
+- [x] Create base agent template with Semantic Kernel and common interfaces ✅
+- [x] Implement "Agents-as-Code" repository structure (JSON/YAML configs) ✅ (May 24)
+- [x] Create agent deployment configurations for all 15 agents ✅ (May 24)
+- [ ] Deploy agents to Azure AI Agent Service (pending API availability)
 - [ ] Set up Connected Agents integration patterns
 - [ ] Create agent evaluation framework for CI/CD
 - [ ] Set up prompt versioning system

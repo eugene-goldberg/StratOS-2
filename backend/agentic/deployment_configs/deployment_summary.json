@@ -1,0 +1,26 @@
+{
+  "deployment_name": "StratOS Multi-Agent System",
+  "version": "1.0.0",
+  "created": "2025-05-24T22:21:42Z",
+  "environment": {
+    "azure_subscription": "514bd6d3-2c02-45c6-a86f-29cf262a379a",
+    "resource_group": "semantic-kernel-multi-agent-rg",
+    "ai_hub": "sk-multi-agent-hub",
+    "ai_project": "sk-multi-agent-project"
+  },
+  "systems": [
+    {
+      "name": "Strategic Foundation & Insights System",
+      "agents": ["StrategicContextRouter", "CEOLogAgent", "NorthStarAgent", "MemoryRecallAgent", "PreferenceLearningAgent"]
+    },
+    {
+      "name": "Analysis & Intelligence System",
+      "agents": ["AnalysisOrchestrator", "SWOTTOWSAgent", "RiskOpportunityAgent", "SOLinkageAgent"]
+    },
+    {
+      "name": "Planning & Execution System",
+      "agents": ["PlanningCoordinator", "InitiativeGenerationAgent", "ResourceOptimizationAgent", "CanvasVisualizationAgent", "AlignmentScoringAgent", "ActionPlanningAgent"]
+    }
+  ],
+  "total_agents": 15
+}
