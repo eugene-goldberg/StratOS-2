@@ -13,7 +13,9 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from agents.strategic_foundation import (
     StrategicContextRouter,
     CEOLogAgent,
-    # Other agents would be imported here
+    NorthStarAgent,
+    MemoryRecallAgent,
+    PreferenceLearningAgent
 )
 from common.agent_group_chat import (
     StratosAgentGroupChat,
@@ -41,16 +43,16 @@ async def setup_strategic_foundation_system() -> Dict[str, Any]:
     
     # Create specialized agents
     ceo_log_agent = CEOLogAgent(kernel)
-    # north_star_agent = NorthStarAgent(kernel)
-    # memory_agent = MemoryRecallAgent(kernel)
-    # preference_agent = PreferenceLearningAgent(kernel)
+    north_star_agent = NorthStarAgent(kernel)
+    memory_agent = MemoryRecallAgent(kernel)
+    preference_agent = PreferenceLearningAgent(kernel)
     
     # Create router with specialized agents
     specialized_agents = {
         "CEOLogAgent": ceo_log_agent,
-        # "NorthStarAgent": north_star_agent,
-        # "MemoryRecallAgent": memory_agent,
-        # "PreferenceLearningAgent": preference_agent
+        "NorthStarAgent": north_star_agent,
+        "MemoryRecallAgent": memory_agent,
+        "PreferenceLearningAgent": preference_agent
     }
     
     router = StrategicContextRouter(kernel, specialized_agents)
