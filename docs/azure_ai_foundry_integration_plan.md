@@ -1,10 +1,18 @@
 # Azure AI Foundry Agent Service Integration Plan for StratOS
 *Created: May 23, 2025*
-*Updated: May 23, 2025 - Added 3 Multi-Agent System Architecture*
+*Updated: May 24, 2025 - Incorporated Deep Research Findings and Architectural Refinements*
 
 ## Executive Summary
 
 This document outlines the integration plan for migrating StratOS's Semantic Kernel-based AI capabilities to Azure AI Foundry Agent Service using a **3 Multi-Agent System architecture**. This architectural transformation will provide enterprise-grade agent hosting, automatic scaling, built-in persistence, and comprehensive observability for our AI-powered strategic planning platform.
+
+**Key Updates Based on Research:**
+- Adopting Standard Agent Setup pattern with customer-managed resources
+- FastAPI on Azure Container Apps as primary backend (not Azure Functions)
+- Leveraging "Connected Agents" feature for orchestration
+- Microsoft Entra Agent ID for first-class agent identities
+- Hybrid search (keyword + vector) in Azure AI Search from the start
+- Voice capabilities deferred to v2 but architecture prepared for integration
 
 The plan organizes agents into three distinct systems aligned with StratOS's core pillars:
 1. **Strategic Foundation & Insights System** (WHY/WHAT)
@@ -38,10 +46,20 @@ The plan organizes agents into three distinct systems aligned with StratOS's cor
 
 ### 1.2 Target Architecture with AI Foundry Agent Service (3 Multi-Agent Systems)
 ```
-                        ┌─────────────────┐
-                        │ FastAPI Gateway │
-                        └────────┬────────┘
-                                 │
+                    ┌─────────────────────┐
+                    │   React Web App     │
+                    └──────────┬──────────┘
+                               │ WebSockets/REST
+                    ┌──────────▼──────────┐
+                    │FastAPI Backend (ACA)│ ← Primary Backend
+                    └──────────┬──────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │ AI Foundry Agent    │
+                    │ Service Runtime     │
+                    │ "Connected Agents"  │
+                    └──────────┬──────────┘
+                               │
          ┌───────────────────────┼───────────────────────┐
          │                       │                       │
          ▼                       ▼                       ▼
@@ -58,12 +76,13 @@ The plan organizes agents into three distinct systems aligned with StratOS's cor
          │                       │                       │
          └───────────────────────┴───────────────────────┘
                                  │
-                        ┌────────┴────────┐
-                        │                 │
-                ┌───────▼───────┐ ┌───────▼───────┐
-                │  Cosmos DB    │ │Azure Monitor  │
-                │ (Shared State)│ │  (Metrics)    │
-                └───────────────┘ └───────────────┘
+                ┌────────────────┴────────────────┐
+                │                                 │
+        ┌───────▼───────┐  ┌──────────────┐  ┌──▼──────────┐
+        │  Cosmos DB    │  │ Azure AI     │  │Azure Monitor│
+        │ (Agent State) │  │ Search       │  │ (Metrics)   │
+        └───────────────┘  │(Hybrid RAG)  │  └─────────────┘
+                          └──────────────┘
 ```
 
 **Key Benefits:**
@@ -72,6 +91,47 @@ The plan organizes agents into three distinct systems aligned with StratOS's cor
 - Specialized routers for optimal task distribution
 - Reduced complexity within each system
 - Better fault isolation and recovery
+
+### 1.3 Key Architectural Decisions (Based on Research)
+
+#### Backend Architecture: FastAPI on Azure Container Apps
+- **Primary Backend**: FastAPI deployed on Azure Container Apps (ACA)
+- **Why Not Azure Functions**: Better WebSocket support, stateful connections, superior async handling
+- **Supplementary Use**: Azure Functions for discrete tool implementations and event-driven tasks
+
+#### Agent Orchestration: Connected Agents
+- Leverage Azure AI Foundry's "Connected Agents" feature
+- Agents can call each other as tools
+- Automatic lifecycle management, retry logic, and state persistence
+- Built-in thread management for conversation history
+
+#### Security: Microsoft Entra Agent ID
+- Each agent gets a first-class identity in Microsoft Entra
+- Agent-specific Conditional Access policies
+- Comprehensive audit logging for agent actions
+- RBAC at the agent level
+
+#### Data Architecture
+- **Standard Agent Setup**: Customer-managed resources (BYOS, BYOSearch, BYO Cosmos DB)
+- **Cosmos DB Containers**:
+  - `thread-message-store`: End-user conversations
+  - `system-thread-message-store`: Internal system messages  
+  - `agent-entity-store`: Model inputs/outputs
+- **Partition Keys**: 
+  - Chat history: `thread_id`
+  - Agent state: `agent_id`
+  - Consider hierarchical partitioning for multi-tenancy
+
+#### Search Strategy: Hybrid from Day One
+- Azure AI Search with both keyword and vector search enabled
+- Semantic ranking for improved relevance
+- Built-in indexers for Cosmos DB integration
+
+#### Deployment: Agents-as-Code
+- Agent definitions stored as version-controlled JSON/YAML
+- Prompts and configurations in Git
+- CI/CD pipelines for agent deployment
+- Automated agent evaluation in pipelines
 
 ---
 
@@ -142,34 +202,54 @@ The plan organizes agents into three distinct systems aligned with StratOS's cor
 ### Phase 1: Foundation Setup (Weeks 1-2)
 
 #### 3.1.1 Environment Configuration
-- [ ] Set up Azure AI Foundry workspace
-- [ ] Configure Agent Service with appropriate SKUs
-- [ ] Establish connectivity with existing Cosmos DB
-- [ ] Set up Azure Monitor integration
-- [ ] Configure networking and security policies
+- [ ] Set up Azure AI Foundry workspace with Standard Agent Setup
+- [ ] Configure Agent Service with Microsoft Entra Agent ID enabled
+- [ ] Set up customer-managed Cosmos DB with required containers
+- [ ] Configure Azure AI Search with hybrid search capabilities
+- [ ] Set up Azure Monitor and Application Insights integration
+- [ ] Configure VNet and private endpoints for security
 
-#### 3.1.2 Agent Development Framework
+#### 3.1.2 Backend Infrastructure
+- [ ] Set up FastAPI project structure
+- [ ] Deploy FastAPI to Azure Container Apps
+- [ ] Configure WebSocket support for real-time streaming
+- [ ] Implement MSAL authentication for React-Backend communication
+- [ ] Set up managed identity for Backend-Azure services communication
+- [ ] Create Azure Functions project for tool implementations
+
+#### 3.1.3 Agent Development Framework
 - [ ] Create base agent template with Semantic Kernel
-- [ ] Implement common agent interfaces
-- [ ] Set up agent testing framework
-- [ ] Create deployment pipelines for agents
-- [ ] Implement agent versioning strategy
+- [ ] Implement "Agents-as-Code" repository structure
+- [ ] Set up agent configuration files (JSON/YAML)
+- [ ] Create prompt versioning system
+- [ ] Implement Connected Agents integration patterns
+- [ ] Set up agent evaluation framework
 
-#### 3.1.3 FastAPI Integration Layer
+#### 3.1.4 FastAPI Integration Layer
 ```python
-# Example Agent Service Client
-class AIFoundryAgentClient:
-    def __init__(self, endpoint: str, credential: AzureKeyCredential):
-        self.client = AgentServiceClient(endpoint, credential)
-    
-    async def invoke_agent(self, agent_name: str, request: dict) -> dict:
-        """Invoke an agent and return response"""
-        response = await self.client.agents.invoke(
-            agent_name=agent_name,
-            request_body=request,
-            timeout=30
+# Example Agent Service Client with Connected Agents
+from azure.identity import DefaultAzureCredential
+from azure.ai.projects import AIProjectClient
+
+class StratOSAgentClient:
+    def __init__(self):
+        self.credential = DefaultAzureCredential()
+        self.client = AIProjectClient(
+            credential=self.credential,
+            endpoint=settings.AI_FOUNDRY_ENDPOINT,
+            project_id=settings.PROJECT_ID
         )
-        return response.result
+    
+    async def invoke_agent_system(self, system: str, request: dict) -> dict:
+        """Invoke an agent system with Connected Agents orchestration"""
+        agent = self.client.agents.get(f"{system}-router")
+        thread = await self.client.threads.create()
+        
+        response = await agent.invoke(
+            thread_id=thread.id,
+            request_body=request
+        )
+        return response
 ```
 
 ### Phase 2: Multi-Agent System Implementation (Weeks 3-5)
@@ -377,7 +457,19 @@ class CanvasVisualizationAgent:
 
 ## 4. Technical Implementation Details
 
-### 4.1 Agent Service Configuration
+### 4.1 Model Selection Strategy
+
+Based on research recommendations for optimal performance and cost:
+
+| Agent Type | Recommended Model | Rationale |
+|------------|------------------|-----------|
+| Router Agents | GPT-4 or GPT-4.5 | Complex reasoning for task routing |
+| CEO Log Agent | GPT-4o | Multimodal capabilities for future voice |
+| Analysis Agents | GPT-4 | Advanced reasoning for SWOT/TOWS |
+| Simple Task Agents | GPT-3.5-Turbo | Cost-effective for focused tasks |
+| Constraint Agents | o-series (o1, o3-mini) | Optimized for reasoning and constraints |
+
+### 4.2 Agent Service Configuration
 ```json
 {
   "agentService": {
@@ -386,10 +478,30 @@ class CanvasVisualizationAgent:
     "sku": "Standard",
     "properties": {
       "persistenceEnabled": true,
-      "cosmosDbConnection": "{{cosmos_connection_string}}",
+      "standardSetup": {
+        "enabled": true,
+        "cosmosDb": {
+          "customerManaged": true,
+          "containers": [
+            "thread-message-store",
+            "system-thread-message-store",
+            "agent-entity-store"
+          ]
+        },
+        "aiSearch": {
+          "customerManaged": true,
+          "hybridSearch": true
+        }
+      },
+      "identity": {
+        "microsoftEntraAgentId": true
+      },
       "monitoringEnabled": true,
       "autoScaleEnabled": true,
-      "maxConcurrentAgents": 100
+      "connectedAgents": {
+        "enabled": true,
+        "agentToAgentCalls": true
+      }
     }
   }
 }

@@ -1,8 +1,114 @@
 # StratOS Future Development Tasks
-*Last Updated: May 23, 2025*
+*Last Updated: May 24, 2025*
 
 ## Overview
-This document tracks future development tasks for StratOS. The MVP and most of Phase 2 are complete. The primary remaining work involves Azure AI service integration and production deployment.
+This document tracks future development tasks for StratOS. The MVP and most of Phase 2 are complete. The primary focus is now on the **Azure AI Foundry Agent Service migration** to implement a 3 multi-agent system architecture, followed by Azure AI service integration and production deployment.
+
+## 🆕 Key Architectural Updates (Based on Deep Research)
+1. **FastAPI on Azure Container Apps** as primary backend (not Azure Functions)
+2. **Connected Agents** feature for agent orchestration
+3. **Microsoft Entra Agent ID** for first-class agent identities
+4. **Standard Agent Setup** with customer-managed resources
+5. **Hybrid Search** in Azure AI Search from day one
+6. **Agents-as-Code** approach for version control
+7. **Voice capabilities** deferred to v2 (architecture prepared)
+
+## 🎯 Current Priority: Multi-Agent System Migration
+
+### Architecture Overview
+StratOS is migrating to Azure AI Foundry Agent Service with 3 multi-agent systems:
+1. **Strategic Foundation & Insights System** (WHY/WHAT) - 5 agents
+2. **Analysis & Intelligence System** (ANALYZE) - 4 agents
+3. **Planning & Execution System** (PLAN/HOW) - 6 agents
+
+### Implementation Progress
+- ✅ Base agent template created with Semantic Kernel patterns
+- ✅ Common components implemented (BaseStratosAgent, RouterAgent, AgentGroupChat)
+- ✅ Strategic Foundation router and CEO Log Agent example created
+- ✅ New backend structure established under `/backend/agentic/`
+- ✅ Deep research completed on best practices
+- 🚧 FastAPI backend migration needed
+- 🚧 Remaining agents and systems to be implemented
+
+### Model Selection Strategy
+Based on research recommendations:
+- **Router Agents**: GPT-4 or GPT-4.5 (complex reasoning)
+- **CEO Log Agent**: GPT-4o (multimodal for future voice)
+- **Analysis Agents**: GPT-4 (advanced reasoning)
+- **Simple Task Agents**: GPT-3.5-Turbo (cost-effective)
+- **Constraint Agents**: o-series (optimized for reasoning)
+
+### Detailed Migration Tasks
+See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the complete 40-task breakdown.
+
+## 🏗️ Priority 0: Multi-Agent System Implementation (NEW)
+
+### Phase 1: Foundation Setup (Weeks 1-2)
+#### ✅ Completed
+- [x] Create base agent template with Semantic Kernel and common interfaces
+- [x] Set up new backend structure under `/backend/agentic/`
+- [x] Create `BaseStratosAgent` class following SK patterns
+- [x] Implement `RouterAgent` base class for system routers
+- [x] Create `StratosAgentGroupChat` wrapper for SK AgentGroupChat
+- [x] Implement selection and termination strategy helpers
+
+#### 🚧 In Progress - Updated Priorities
+- [x] **NEW: Set up FastAPI backend structure** ✅ COMPLETED
+- [ ] **NEW: Deploy FastAPI to Azure Container Apps** (Next Priority)
+- [x] **NEW: Implement WebSocket support for real-time agent streaming** ✅ COMPLETED
+- [x] **NEW: Configure MSAL authentication for React-Backend communication** ✅ COMPLETED
+- [ ] Set up Azure AI Foundry workspace with Standard Agent Setup
+- [ ] Configure Microsoft Entra Agent ID for all agents
+- [ ] Set up customer-managed Cosmos DB with 3 required containers
+- [ ] Configure Azure AI Search with hybrid search enabled
+- [ ] Implement Connected Agents integration patterns
+- [ ] Create Agents-as-Code repository structure (JSON/YAML)
+- [ ] Set up CI/CD pipeline with agent evaluation
+
+### Phase 2: Multi-Agent System Implementation (Weeks 3-5)
+#### Strategic Foundation & Insights System
+- [x] Create StrategicContextRouter (routing logic implemented)
+- [x] Create CEOLogAgent structure with skills placeholder
+- [ ] Complete CEOLogAgent with actual skill integration
+- [ ] Implement NorthStarAgent for vision/values/goals
+- [ ] Implement MemoryRecallAgent with vector search
+- [ ] Implement PreferenceLearningAgent (complete the partial implementation)
+
+#### Analysis & Intelligence System
+- [ ] Implement AnalysisOrchestrator router
+- [ ] Deploy SWOT/TOWS Agent with session management
+- [ ] Deploy Risk/Opportunity Detection Agent with alerts
+- [ ] Deploy S+O Linkage Agent for pattern discovery
+
+#### Planning & Execution System
+- [ ] Implement PlanningCoordinator router
+- [ ] Deploy InitiativeGenerationAgent
+- [ ] Deploy ResourceOptimizationAgent
+- [ ] Deploy CanvasVisualizationAgent with voice commands
+- [ ] Deploy AlignmentScoringAgent
+- [ ] Deploy ActionPlanningAgent
+
+### Phase 3: Integration Testing (Week 5)
+- [ ] Test individual agent functionality
+- [ ] Test inter-agent communication within systems
+- [ ] Test cross-system event flow
+- [ ] Performance benchmarks (<300ms target)
+- [ ] Failover and resilience testing
+
+### Phase 4: Production Deployment (Week 6)
+- [ ] Update FastAPI services to use MultiAgentSystemClient
+- [ ] Implement blue-green deployment
+- [ ] Set up monitoring dashboards
+- [ ] Configure cost alerts and quotas
+- [ ] Team training on new architecture
+
+### Key Files Created
+- `/backend/agentic/common/base_agent.py` - Base agent classes
+- `/backend/agentic/common/agent_group_chat.py` - Group chat implementation
+- `/backend/agentic/agents/strategic_foundation/router.py` - Strategic router
+- `/backend/agentic/agents/strategic_foundation/ceo_log_agent.py` - CEO Log Agent
+- `/backend/agentic/examples/strategic_foundation_example.py` - Usage example
+- `/backend/agentic/README.md` - Architecture documentation
 
 ## 🚨 Priority 1: Azure AI Service Integration
 
@@ -14,23 +120,24 @@ This document tracks future development tasks for StratOS. The MVP and most of P
 - [ ] Implement token usage tracking and cost management
 - [ ] Add retry logic and error handling for API failures
 
-### Azure AI Search
+### Azure AI Search (Hybrid from Day One)
 - [ ] Add configuration for search endpoint and keys
-- [ ] Create search indexes:
-  - [ ] CEO Log entries with embeddings
+- [ ] Create hybrid search indexes (keyword + vector):
+  - [ ] CEO Log entries with embeddings and metadata
   - [ ] Strategic documents and datasets
   - [ ] AI-generated insights
   - [ ] Canvas elements
-- [ ] Implement vector search for semantic similarity
-- [ ] Add hybrid search capabilities (keyword + vector)
-- [ ] Update strategic context retriever to use real search
+- [ ] Configure semantic ranking for improved relevance
+- [ ] Set up built-in indexers for Cosmos DB integration
+- [ ] Implement both keyword and vector search queries
+- [ ] Update strategic context retriever for hybrid search
 
-### Azure Speech Services
-- [ ] Complete configuration in `config.py`
-- [ ] Update `process_voice_input` to use real Speech SDK
-- [ ] Implement continuous recognition for streaming
-- [ ] Add custom speech models for business terminology
-- [ ] Enable Text-to-Speech for voice feedback
+### Azure Speech Services (Architecture Prep for v2)
+- [ ] **DEFERRED TO v2**: Full voice implementation
+- [ ] Design WebSocket infrastructure to support future voice streaming
+- [ ] Prepare agent instructions for GPT-4o multimodal capabilities
+- [ ] Structure code to easily integrate Speech SDK later
+- [ ] Document voice interaction patterns for v2
 
 ### Azure Blob Storage
 - [ ] Add storage configuration
@@ -160,6 +267,32 @@ This document tracks future development tasks for StratOS. The MVP and most of P
 - [ ] Compliance certifications (SOC2, ISO)
 - [ ] Enterprise SLA guarantees
 - [ ] 24/7 support infrastructure
+
+---
+
+## 📁 Backend Structure Changes
+
+### Migration Status
+- ✅ Legacy backend moved to `/backend/legacy/`
+- ✅ New agent-based backend created at `/backend/agentic/`
+- 🚧 FastAPI integration layer to be updated to use new agents
+- 📝 See `/backend/agentic/README.md` for new architecture details
+
+### Directory Structure
+```
+backend/
+├── agentic/              # NEW: Multi-agent system implementation
+│   ├── common/          # Base classes and shared components
+│   ├── agents/          # Agent implementations (3 systems)
+│   ├── strategies/      # Selection/termination strategies
+│   ├── clients/         # AI Foundry clients
+│   └── examples/        # Usage examples
+└── legacy/              # Original implementation (preserved for reference)
+    ├── ai/              # Semantic Kernel skills
+    ├── models/          # Data models
+    ├── routers/         # FastAPI endpoints
+    └── services/        # Business logic
+```
 
 ---
 

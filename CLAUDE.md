@@ -3,6 +3,11 @@ Always use python3 virtual environment for running tests
 Always read docs/implementation_status.md to understand the current status of this project
 Always read docs/azure_ai_foundry_integration_plan.md to understand the multi-agent architecture
 Always read docs/azure_ai_foundry_todo.md to track agent migration progress
+Always read docs/multi_agent_best_practices.md for implementation guidelines and patterns
+Always read docs/Deep_Research_Multi-Agent_Systems_Azure_Best_Practices.md for research findings
+Always read ToDo.md to understand current priorities and tasks
+Always read backend/agentic/agentic_implementation_status.md to understand what is implemented and next steps
+Always maintain close cohesion between ToDo.md and agentic_implementation_status.md - update both files when tasks are completed or priorities change, ensuring session continuity
 
 # StratOS Project-Specific Instructions
 
@@ -14,6 +19,12 @@ StratOS is migrating from in-process Semantic Kernel to Azure AI Foundry Agent S
 
 See `docs/azure_ai_foundry_integration_plan.md` for detailed architecture.
 See `docs/azure_ai_foundry_todo.md` for implementation tasks.
+
+## IMPORTANT: Backend Development Location
+ALL backend development work takes place exclusively under `/backend/agentic/`
+- The `/backend/legacy/` folder contains the old implementation for reference only
+- Do NOT modify or create files in `/backend/legacy/`
+- All new backend code, APIs, and agent implementations go in `/backend/agentic/`
 
 ## Testing
 - Run backend tests: `cd /path/to/project && source venv/bin/activate && python -m pytest tests/`

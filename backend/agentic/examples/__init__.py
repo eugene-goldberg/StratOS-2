@@ -1,0 +1,1 @@
+"""Examples demonstrating multi-agent system patterns."""

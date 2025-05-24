@@ -1,26 +1,42 @@
 # Azure AI Foundry Agent Service Integration - Todo List
 *Created: May 23, 2025*
-*Based on: azure_ai_foundry_integration_plan.md*
+*Updated: May 24, 2025 - Reprioritized based on deep research findings*
+*Based on: azure_ai_foundry_integration_plan.md and Deep_Research_Multi-Agent_Systems_Azure_Best_Practices.md*
 
 ## Overview
-This todo list tracks the implementation of the 3 Multi-Agent System architecture for StratOS using Azure AI Foundry Agent Service. The systems are:
-1. **Strategic Foundation & Insights System** (WHY/WHAT)
-2. **Analysis & Intelligence System** (ANALYZE)
-3. **Planning & Execution System** (PLAN/HOW)
+This todo list tracks the implementation of the 3 Multi-Agent System architecture for StratOS using Azure AI Foundry Agent Service. 
+
+**Key Updates**:
+- FastAPI on Azure Container Apps as primary backend
+- Connected Agents for orchestration
+- Microsoft Entra Agent ID for security
+- Standard Agent Setup pattern
+- Hybrid search from day one
 
 ## Phase 1: Foundation Setup (Weeks 1-2)
 
+### FastAPI Backend Infrastructure (NEW PRIORITY)
+- [ ] **Create FastAPI project structure in /backend/agentic/**
+- [ ] **Deploy FastAPI to Azure Container Apps**
+- [ ] **Implement WebSocket support for agent streaming**
+- [ ] **Configure MSAL authentication middleware**
+- [ ] **Set up managed identity for Azure service access**
+- [ ] **Create health check and monitoring endpoints**
+
 ### Environment & Infrastructure
-- [ ] Set up Azure AI Foundry workspace and configure Agent Service with appropriate SKUs
-- [ ] Establish connectivity between Agent Service and existing Cosmos DB
-- [ ] Set up Azure Monitor integration for all 3 agent systems
-- [ ] Configure networking, security policies, and RBAC for agent management
-- [ ] Set up Azure Service Bus for cross-system event communication
+- [ ] Set up Azure AI Foundry workspace with Standard Agent Setup
+- [ ] Configure Microsoft Entra Agent ID for all agents
+- [ ] Set up customer-managed Cosmos DB with 3 containers (thread-message-store, system-thread-message-store, agent-entity-store)
+- [ ] Configure Azure AI Search with hybrid search (keyword + vector) enabled
+- [ ] Set up Azure Monitor and Application Insights integration
+- [ ] Configure VNet and private endpoints for security
 
 ### Development Framework
-- [ ] Create base agent template with Semantic Kernel and common interfaces
-- [ ] Set up agent testing framework and deployment pipelines
-- [ ] Implement AIFoundryAgentClient in FastAPI integration layer
+- [x] Create base agent template with Semantic Kernel and common interfaces
+- [ ] Implement "Agents-as-Code" repository structure (JSON/YAML configs)
+- [ ] Set up Connected Agents integration patterns
+- [ ] Create agent evaluation framework for CI/CD
+- [ ] Set up prompt versioning system
 
 ## Phase 2: Multi-Agent System Implementation (Weeks 3-5)
 
@@ -93,11 +109,26 @@ This todo list tracks the implementation of the 3 Multi-Agent System architectur
 2. **Analysis & Intelligence**: 4 agents (1 router + 3 specialized) 
 3. **Planning & Execution**: 6 agents (1 router + 5 specialized)
 
+### Model Selection Strategy
+- **Router Agents**: GPT-4 or GPT-4.5 for complex reasoning
+- **CEO Log Agent**: GPT-4o for multimodal capabilities
+- **Analysis Agents**: GPT-4 for advanced reasoning
+- **Simple Task Agents**: GPT-3.5-Turbo for cost efficiency
+- **Constraint Agents**: o-series for reasoning optimization
+
+### Key Architectural Decisions
+- **Backend**: FastAPI on Azure Container Apps (not Azure Functions)
+- **Orchestration**: Connected Agents feature
+- **Security**: Microsoft Entra Agent ID
+- **Data**: Standard Agent Setup with customer resources
+- **Search**: Hybrid search from day one
+- **Voice**: Deferred to v2, but architecture prepared
+
 ### Key Dependencies
 - Azure AI Foundry Agent Service availability in target region
-- Cosmos DB containers already configured
-- Semantic Kernel skills already implemented (need packaging)
-- FastAPI backend ready for agent client integration
+- Cosmos DB containers with proper partitioning
+- Azure AI Search with hybrid indexing configured
+- FastAPI backend deployed to Azure Container Apps
 
 ### Risk Mitigation
 - Maintain ability to rollback to current in-process implementation
