@@ -4,6 +4,11 @@
 ## Overview
 This document tracks the implementation status of the new multi-agent system backend (`/backend/agentic/`) for StratOS, including what has been implemented, what remains to be done, and immediate next steps.
 
+**Current Progress: 67% Complete (10 of 15 agents implemented)**
+- Strategic Foundation & Insights: 100% (5 of 5 agents) ✅
+- Analysis & Intelligence: 100% (4 of 4 agents) ✅ 
+- Planning & Execution: 0% (0 of 6 agents) 🔴
+
 ## Architecture Summary
 - **Primary Backend**: FastAPI on Azure Container Apps (not Azure Functions)
 - **Agent Runtime**: Azure AI Foundry Agent Service with Connected Agents
@@ -39,16 +44,28 @@ backend/agentic/
 │   ├── base_agent.py         # ✅ BaseStratosAgent, RouterAgent classes
 │   └── agent_group_chat.py   # ✅ StratosAgentGroupChat, strategies
 ├── agents/                   # ✅ Created
-│   └── strategic_foundation/ # ✅ Created
+│   ├── strategic_foundation/ # ✅ Created (100% Complete)
+│   │   ├── __init__.py      # ✅ Created
+│   │   ├── router.py        # ✅ StrategicContextRouter
+│   │   ├── ceo_log_agent.py # ✅ CEOLogAgent
+│   │   ├── north_star_agent.py # ✅ NorthStarAgent
+│   │   ├── memory_recall_agent.py # ✅ MemoryRecallAgent
+│   │   ├── preference_learning_agent.py # ✅ PreferenceLearningAgent
+│   │   └── plugins/         # ✅ All plugins implemented
+│   └── analysis_intelligence/ # ✅ Created (100% Complete)
 │       ├── __init__.py      # ✅ Created
-│       ├── router.py        # ✅ StrategicContextRouter
-│       └── ceo_log_agent.py # ✅ CEOLogAgent (skeleton)
+│       ├── router.py        # ✅ AnalysisOrchestrator
+│       ├── swot_tows_agent.py # ✅ SwotTowsAgent
+│       ├── risk_opportunity_agent.py # ✅ RiskOpportunityAgent
+│       ├── so_linkage_agent.py # ✅ SOLinkageAgent
+│       └── plugins/         # ✅ All plugins implemented
 ├── strategies/              # 📁 Directory created, empty
 ├── clients/                 # 📁 Directory created, empty
 ├── core/                    # 📁 Directory created, empty
 ├── examples/                # ✅ Created
 │   ├── __init__.py         # ✅ Created
-│   └── strategic_foundation_example.py # ✅ Example usage
+│   ├── strategic_foundation_example.py # ✅ Example usage
+│   └── analysis_intelligence_example.py # ✅ Example usage
 ├── requirements.txt         # ✅ Updated with FastAPI deps
 ├── .env.example            # ✅ Environment template
 ├── API_README.md           # ✅ API documentation
@@ -75,7 +92,13 @@ backend/agentic/
 - ✅ `MemoryRecallAgent`: Full implementation with semantic search and pattern recognition
 - ✅ `PreferenceLearningAgent`: Full implementation with feedback tracking and personalization
 
-#### 4. FastAPI Backend Infrastructure
+### 4. Analysis & Intelligence System (100% Complete - 4 of 4 agents) ✅ May 24
+- ✅ `AnalysisOrchestrator`: Routes analysis requests to specialized agents
+- ✅ `SwotTowsAgent`: SWOT analysis, TOWS strategy generation, guided sessions
+- ✅ `RiskOpportunityAgent`: Risk detection, opportunity identification, alerts
+- ✅ `SOLinkageAgent`: Subjective-Objective linkage discovery, pattern recognition
+
+#### 5. FastAPI Backend Infrastructure
 - ✅ `main.py`: FastAPI app with lifespan management
 - ✅ `config/settings.py`: Comprehensive settings with validation
 - ✅ `api/routes/health.py`: Health, readiness, and liveness checks
@@ -89,15 +112,16 @@ backend/agentic/
 
 ### 1. ~~FastAPI Backend Infrastructure~~ ✅ COMPLETED
 
-### 2. Deploy FastAPI to Azure Container Apps (NEW HIGHEST PRIORITY)
-- [ ] Create Dockerfile for the FastAPI app
-- [ ] Build and test Docker image locally
-- [ ] Create Azure Container Registry
-- [ ] Push image to registry
-- [ ] Create Azure Container Apps environment
-- [ ] Deploy container with proper configuration
-- [ ] Set up custom domain and SSL
-- [ ] Configure auto-scaling rules
+### 2. Deploy FastAPI to Azure Container Apps ✅ COMPLETED (May 24)
+- [x] Created Dockerfile for the FastAPI app
+- [x] Built and tested Docker image locally
+- [x] Created Azure Container Registry (stratosregistry)
+- [x] Pushed image to registry
+- [x] Created Azure Container Apps environment
+- [x] Deployed container with proper configuration
+- [x] Live at: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io
+- [ ] Set up custom domain and SSL (optional)
+- [x] Configured auto-scaling rules (1-3 replicas)
 
 ### 3. Connected Agents Integration
 - [ ] Update base classes to use Connected Agents features
@@ -129,13 +153,27 @@ backend/agentic/
 - [x] Implement MemoryRecallAgent with vector search ✅ COMPLETED (May 24)
 - [x] Implement PreferenceLearningAgent ✅ COMPLETED (May 24)
 
-### 5. Authentication & Security
+### 5. Complete Analysis & Intelligence Agents ✅ ALL COMPLETED (May 24)
+- [x] Implement AnalysisOrchestrator router ✅ COMPLETED
+- [x] Implement SwotTowsAgent with guided sessions ✅ COMPLETED
+- [x] Implement RiskOpportunityAgent with alerts ✅ COMPLETED
+- [x] Implement SOLinkageAgent for pattern discovery ✅ COMPLETED
+
+### 6. Planning & Execution Agents (NEXT PRIORITY)
+- [ ] Implement PlanningCoordinator router
+- [ ] Implement InitiativeGenerationAgent
+- [ ] Implement ResourceOptimizationAgent
+- [ ] Implement CanvasVisualizationAgent with voice
+- [ ] Implement AlignmentScoringAgent
+- [ ] Implement ActionPlanningAgent
+
+### 7. Authentication & Security
 - [ ] Microsoft Entra Agent ID configuration
 - [ ] MSAL integration for React-Backend auth
 - [ ] Managed Identity for Backend-Azure auth
 - [ ] Agent-specific RBAC policies
 
-### 6. Data Layer Integration
+### 8. Data Layer Integration
 - [ ] Cosmos DB client with proper containers
 - [ ] Azure AI Search client with hybrid search
 - [ ] Implement proper partition strategies
@@ -144,12 +182,12 @@ backend/agentic/
 
 ### Step 1: ~~Create FastAPI Backend Structure~~ ✅ COMPLETED
 
-### Step 2: Deploy to Azure Container Apps
-Now that the FastAPI backend is complete, deploy it:
-- FastAPI app initialization
-- CORS configuration
-- WebSocket support
-- Basic health check endpoint
+### Step 2: Deploy to Azure Container Apps ✅ COMPLETED
+Successfully deployed to Azure:
+- Live URL: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io
+- Container Registry: stratosregistry.azurecr.io
+- Auto-scaling configured (1-3 replicas)
+- Health checks operational
 
 ### Step 3: Create Configuration Module
 Create `config/settings.py` with:
@@ -230,16 +268,18 @@ AZURE_CLIENT_SECRET=
 
 ## 📊 Progress Tracking
 
+**Overall Agent Implementation: 67% (10 of 15 agents)**
+
 | Component | Status | Priority | Notes |
 |-----------|--------|----------|-------|
 | FastAPI Backend | ✅ Complete | DONE | Fully implemented |
-| Deploy to ACA | ✅ Complete | DONE | Scripts ready |
+| Deploy to ACA | ✅ Complete | DONE | Live in production |
 | Connected Agents | 🔴 Not Started | HIGH | Core feature |
 | MSAL Auth | ✅ Complete | DONE | With dev bypass |
 | WebSocket | ✅ Complete | DONE | Streaming ready |
 | Strategic Agents | ✅ Complete | DONE | 5 of 5 complete |
-| Analysis Agents | 🔴 Not Started | MEDIUM | Next system |
-| Planning Agents | 🔴 Not Started | MEDIUM | Final system |
+| Analysis Agents | ✅ Complete | DONE | 4 of 4 complete |
+| Planning Agents | 🔴 Not Started | HIGH | Next priority |
 | CI/CD Pipeline | 🔴 Not Started | LOW | After deployment |
 
 ## 📝 Key Adoption Achievements (May 24, 2025)

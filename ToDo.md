@@ -25,14 +25,18 @@ StratOS is migrating to Azure AI Foundry Agent Service with 3 multi-agent system
 - ✅ Base agent template created with Semantic Kernel patterns
 - ✅ Common components implemented (BaseStratosAgent, RouterAgent, AgentGroupChat)
 - ✅ Strategic Foundation System COMPLETE (5 of 5 agents) (May 24)
+- ✅ Analysis & Intelligence System COMPLETE (4 of 4 agents) (May 24)
 - ✅ New backend structure established under `/backend/agentic/`
 - ✅ Deep research completed on best practices
 - ✅ FastAPI backend fully implemented with all routes
 - ✅ Plugin architecture adopted from semantic_kernel_multi_agent
 - ✅ Orchestration framework with function calling implemented
-- ✅ Deployment scripts created for all 14 agents
+- ✅ Deployment scripts created for all agents
 - ✅ Azure Container Apps deployment infrastructure ready
-- 🚧 Analysis & Planning systems to be implemented (10 agents remaining)
+- ✅ Successfully deployed to Azure (Live at: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io)
+- 🚧 Planning & Execution System to be implemented (6 agents remaining)
+
+**Overall Progress: 67% Complete (10 of 15 agents implemented)**
 
 ### Model Selection Strategy
 Based on research recommendations:
@@ -81,11 +85,11 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 - [x] Implement MemoryRecallAgent with vector search ✅ COMPLETED (May 24)
 - [x] Implement PreferenceLearningAgent with feedback tracking ✅ COMPLETED (May 24)
 
-#### Analysis & Intelligence System
-- [ ] Implement AnalysisOrchestrator router
-- [ ] Deploy SWOT/TOWS Agent with session management
-- [ ] Deploy Risk/Opportunity Detection Agent with alerts
-- [ ] Deploy S+O Linkage Agent for pattern discovery
+#### Analysis & Intelligence System (100% Complete - 4 of 4 agents)
+- [x] Implement AnalysisOrchestrator router ✅ COMPLETED (May 24)
+- [x] Deploy SWOT/TOWS Agent with session management ✅ COMPLETED (May 24)
+- [x] Deploy Risk/Opportunity Detection Agent with alerts ✅ COMPLETED (May 24)
+- [x] Deploy S+O Linkage Agent for pattern discovery ✅ COMPLETED (May 24)
 
 #### Planning & Execution System
 - [ ] Implement PlanningCoordinator router
@@ -117,6 +121,8 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 - `/backend/agentic/agents/strategic_foundation/ceo_log_agent.py` - CEO Log Agent
 - `/backend/agentic/agents/strategic_foundation/north_star_agent.py` - North Star Agent (May 24)
 - `/backend/agentic/agents/strategic_foundation/plugins/` - Plugin implementations (May 24)
+- `/backend/agentic/agents/analysis_intelligence/` - Analysis system agents (May 24)
+- `/backend/agentic/agents/analysis_intelligence/plugins/` - Analysis plugins (May 24)
 - `/backend/agentic/scripts/deploy_stratos_agents.sh` - Agent deployment script (May 24)
 - `/backend/agentic/scripts/deploy_to_azure_container_apps.sh` - Azure deployment (May 24)
 - `/backend/agentic/scripts/interact_with_azure_app.py` - Azure interaction tool (May 24)
@@ -124,6 +130,7 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 - `/backend/agentic/Dockerfile` - Production Docker build (May 24)
 - `/backend/agentic/docker-compose.yml` - Local development (May 24)
 - `/backend/agentic/examples/strategic_foundation_example.py` - Usage example
+- `/backend/agentic/examples/analysis_intelligence_example.py` - Analysis examples (May 24)
 - `/backend/agentic/README.md` - Architecture documentation
 - `/backend/agentic/adoption_plan.md` - SK project adoption guide (May 24)
 - `/backend/agentic/DEPLOYMENT_GUIDE.md` - Deployment documentation (May 24)
@@ -131,10 +138,11 @@ See [docs/azure_ai_foundry_todo.md](docs/azure_ai_foundry_todo.md) for the compl
 ## 🎯 Current Priority: Complete Multi-Agent Systems
 
 ### Immediate Next Steps:
-1. Complete remaining Strategic Foundation agents (Memory & Preference)
-2. Implement Analysis & Intelligence System (4 agents)
-3. Implement Planning & Execution System (6 agents)
+1. ~~Complete remaining Strategic Foundation agents (Memory & Preference)~~ ✅ COMPLETED
+2. ~~Implement Analysis & Intelligence System (4 agents)~~ ✅ COMPLETED
+3. Implement Planning & Execution System (6 agents) - NEXT PRIORITY
 4. Test deployed FastAPI backend with real agent invocations
+5. Integrate with Azure AI Foundry Agent Service when SDK available
 
 ## 🚨 Priority 1: Azure AI Service Integration
 
@@ -313,6 +321,9 @@ backend/
 ├── agentic/              # NEW: Multi-agent system implementation
 │   ├── common/          # Base classes and shared components
 │   ├── agents/          # Agent implementations (3 systems)
+│   │   ├── strategic_foundation/  # ✅ Complete (5 agents)
+│   │   ├── analysis_intelligence/ # ✅ Complete (4 agents)
+│   │   └── planning_execution/    # 🚧 To be implemented (6 agents)
 │   ├── strategies/      # Selection/termination strategies
 │   ├── clients/         # AI Foundry clients
 │   └── examples/        # Usage examples

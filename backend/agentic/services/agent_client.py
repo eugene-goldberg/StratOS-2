@@ -210,17 +210,86 @@ class StratOSAgentClient:
         request: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Mock response for Analysis & Intelligence system."""
-        return {
-            "agent": "AnalysisOrchestrator",
-            "data": {
-                "analysis_id": "mock-analysis-456",
-                "type": request.get("type"),
-                "status": "completed"
-            },
-            "duration_ms": 500,
-            "tokens_used": 300,
-            "model": "gpt-4"
-        }
+        request_type = request.get("type")
+        
+        if request_type == "swot":
+            return {
+                "agent": "SwotTowsAgent",
+                "data": {
+                    "analysis_id": "mock-swot-456",
+                    "type": "swot",
+                    "items": {
+                        "strengths": [
+                            {"content": "Strong market position", "impact_score": 8},
+                            {"content": "Innovative product line", "impact_score": 7}
+                        ],
+                        "weaknesses": [
+                            {"content": "Limited digital infrastructure", "impact_score": 7}
+                        ],
+                        "opportunities": [
+                            {"content": "Emerging market expansion", "impact_score": 9}
+                        ],
+                        "threats": [
+                            {"content": "New regulations", "impact_score": 6}
+                        ]
+                    },
+                    "status": "completed"
+                },
+                "duration_ms": 600,
+                "tokens_used": 400,
+                "model": "gpt-4"
+            }
+        elif request_type == "risk":
+            return {
+                "agent": "RiskOpportunityAgent",
+                "data": {
+                    "analysis_id": "mock-risk-457",
+                    "risks": [
+                        {
+                            "title": "Supply chain disruption",
+                            "probability_score": 7,
+                            "impact_score": 8,
+                            "category": "operational"
+                        }
+                    ],
+                    "alerts": [],
+                    "status": "completed"
+                },
+                "duration_ms": 450,
+                "tokens_used": 350,
+                "model": "gpt-4"
+            }
+        elif request_type == "linkage":
+            return {
+                "agent": "SOLinkageAgent",
+                "data": {
+                    "analysis_id": "mock-linkage-458",
+                    "linkages": [
+                        {
+                            "type": "correlation",
+                            "subjective": "CEO concerns about morale",
+                            "objective": "15% drop in productivity metrics",
+                            "confidence_score": 8
+                        }
+                    ],
+                    "status": "completed"
+                },
+                "duration_ms": 500,
+                "tokens_used": 300,
+                "model": "gpt-4"
+            }
+        else:
+            return {
+                "agent": "AnalysisOrchestrator",
+                "data": {
+                    "analysis_id": "mock-analysis-456",
+                    "type": request.get("type"),
+                    "status": "completed"
+                },
+                "duration_ms": 500,
+                "tokens_used": 300,
+                "model": "gpt-4"
+            }
     
     async def _mock_planning_response(
         self,
