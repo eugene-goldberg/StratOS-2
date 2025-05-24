@@ -9,6 +9,16 @@ Always read ToDo.md to understand current priorities and tasks
 Always read backend/agentic/agentic_implementation_status.md to understand what is implemented and next steps
 Always maintain close cohesion between ToDo.md and agentic_implementation_status.md - update both files when tasks are completed or priorities change, ensuring session continuity
 
+## IMPORTANT: Documentation Update Protocol
+After completing ANY task or making significant progress:
+1. Update ToDo.md - mark completed items with ✅ and date
+2. Update backend/agentic/agentic_implementation_status.md - update progress percentages and component status
+3. Update docs/implementation_status.md - add major milestones and architecture changes
+4. Ensure all three documents are consistent with each other
+5. Include completion date (e.g., "✅ COMPLETED (May 24)") for tracking
+
+This ensures accurate progress tracking and session continuity between different Claude sessions.
+
 # StratOS Project-Specific Instructions
 
 ## Current Architecture Direction: Azure AI Foundry Agent Service
