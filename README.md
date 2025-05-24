@@ -47,6 +47,9 @@ StratOS empowers leaders by seamlessly integrating their subjective insights wit
 - 89% of Phase 2 features complete
 - 376+ backend tests, 93+ frontend tests passing
 - Production-ready architecture
+- **🚀 LIVE DEPLOYMENT**: FastAPI backend deployed to Azure Container Apps
+  - Production URL: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io
+  - API Docs: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io/docs
 
 ## Project Structure
 
@@ -100,8 +103,26 @@ can use the convenience scripts:
 
 ## Deployment
 
-StratOS is designed to be deployed on Azure using:
-- Azure App Service for the backend
+### 🚀 Current Production Deployment
+The FastAPI backend is **LIVE** on Azure Container Apps:
+- **Production URL**: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io
+- **API Documentation**: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io/docs
+- **Health Check**: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io/api/health/
+
+See [docs/azure_deployment_details.md](docs/azure_deployment_details.md) for complete deployment information.
+
+### Quick Deploy Commands
+```bash
+# Deploy to Azure Container Apps
+cd backend/agentic
+./scripts/deploy_to_azure_container_apps.sh
+
+# View logs
+az containerapp logs show -n stratos-fastapi -g stratos-container-apps-rg --follow
+```
+
+### Azure Services Architecture
+- **Azure Container Apps** for the backend (✅ DEPLOYED)
 - Azure Static Web Apps for the frontend
 - Azure Cosmos DB (✅ Currently integrated)
 - Azure OpenAI Service (🟡 Ready for integration)

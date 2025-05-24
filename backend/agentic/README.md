@@ -2,7 +2,9 @@
 
 This directory contains the new multi-agent system implementation using Azure AI Foundry Agent Service and Semantic Kernel.
 
-**Status**: FastAPI backend implemented and deployable to Azure Container Apps. Strategic Foundation System 100% complete (5 of 5 agents). Overall agent migration 33% complete (5 of 15 agents) - May 24, 2025.
+**Status**: FastAPI backend implemented and **DEPLOYED** to Azure Container Apps. Strategic Foundation System 100% complete (5 of 5 agents). Overall agent migration 33% complete (5 of 15 agents) - May 24, 2025.
+
+**🚀 Live Production URL**: https://stratos-fastapi.gentlesea-48f3e5ad.eastus.azurecontainerapps.io
 
 ## Architecture Overview
 

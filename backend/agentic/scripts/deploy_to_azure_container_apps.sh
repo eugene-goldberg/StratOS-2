@@ -92,11 +92,11 @@ SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 print_status "Using subscription: $SUBSCRIPTION_ID"
 
 # Load environment variables
-if [ -f ../.env ]; then
+if [ -f .env ]; then
     print_status "Loading environment variables from .env file..."
-    export $(grep -v '^#' ../.env | xargs)
+    export $(grep -v '^#' .env | xargs)
 else
-    print_error ".env file not found in parent directory"
+    print_error ".env file not found"
     exit 1
 fi
 
