@@ -13,8 +13,7 @@ from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.connectors.ai.chat_completion_client_base import ChatCompletionClientBase
 from semantic_kernel.contents import ChatMessageContent, AuthorRole
-from semantic_kernel.agents import Agent
-from semantic_kernel.agents.open_ai import AzureAssistantAgent
+from semantic_kernel.agents import Agent, AzureAIAgent
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 # Load environment variables
@@ -55,7 +54,7 @@ class StratosAgentClient:
         if os.path.exists(config_path):
             with open(config_path, 'r') as f:
                 data = json.load(f)
-                return data.get('agents', {})
+                return data.get('deployed_agents', {})
         return {}
     
     def _create_kernel(self) -> Kernel:
@@ -76,7 +75,7 @@ class StratosAgentClient:
         
         return kernel
     
-    async def get_agent(self, agent_name: str) -> Optional[AzureAssistantAgent]:
+    async def get_agent(self, agent_name: str) -> Optional[AzureAIAgent]:
         """Get an agent instance by name."""
         if agent_name not in self.agent_configs:
             print(f"Agent '{agent_name}' not found in deployment configuration.")
@@ -85,7 +84,7 @@ class StratosAgentClient:
         agent_id = self.agent_configs[agent_name]
         
         try:
-            agent = await AzureAssistantAgent.retrieve(
+            agent = await AzureAIAgent.retrieve(
                 id=agent_id,
                 endpoint=self.endpoint,
                 api_version=self.api_version,
@@ -107,11 +106,15 @@ class StratosAgentClient:
         message: str,
         thread_id: Optional[str] = None,
         stream: bool = False
-    ) -> Dict[str, Any]:
+    ):
         """Have a conversation with a specific agent."""
         agent = await self.get_agent(agent_name)
         if not agent:
-            return {"error": f"Agent '{agent_name}' not found"}
+            if stream:
+                yield {"error": f"Agent '{agent_name}' not found"}
+                return
+            else:
+                return {"error": f"Agent '{agent_name}' not found"}
         
         try:
             # Create or retrieve thread
@@ -137,11 +140,13 @@ class StratosAgentClient:
                             "streaming": True
                         }
                 
-                return {
+                # Final yield with complete response
+                yield {
                     "agent": agent_name,
                     "thread_id": thread.id,
                     "response": response_text,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "complete": True
                 }
             else:
                 # Get complete response
@@ -163,11 +168,18 @@ class StratosAgentClient:
                 }
                 
         except Exception as e:
-            return {
-                "error": str(e),
-                "agent": agent_name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+            if stream:
+                yield {
+                    "error": str(e),
+                    "agent": agent_name,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+            else:
+                return {
+                    "error": str(e),
+                    "agent": agent_name,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
     
     async def route_to_system(
         self, 

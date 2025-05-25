@@ -2,6 +2,47 @@
 
 This directory contains scripts for interacting with the deployed StratOS agents on Azure AI Agent Service.
 
+## ✅ Working Scripts
+
+The following scripts have been tested and work with the deployed agents:
+
+1. **demo_agent_interaction.py** - Simple demonstration of agent interaction
+2. **interact_with_ai_project_agent.py** - Interactive agent chat with thread management
+
+## Scripts Under Development
+
+The following scripts need updates to work with the current Azure AI Agent Service API:
+
+- agent_interaction_client.py
+- interactive_agent_chat.py
+- test_agent_systems.py
+- batch_test_agents.py
+- benchmark_agent_performance.py
+
+## Quick Start
+
+### 1. Test Basic Agent Interaction
+
+```bash
+python3 demo_agent_interaction.py
+```
+
+This will:
+- Connect to Azure AI Agent Service
+- Retrieve the CEO Log Agent
+- Send a test message
+- Display the agent's response
+
+### 2. Interactive Chat
+
+```bash
+python3 interact_with_ai_project_agent.py
+```
+
+This will prompt you for:
+- Agent ID (get from `list_ai_project_agents.py`)
+- Your message to the agent
+
 ## Prerequisites
 
 1. Ensure you have deployed the agents using `deploy_agents_ai_project.py`
