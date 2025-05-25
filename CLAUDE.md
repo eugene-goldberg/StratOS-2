@@ -22,7 +22,9 @@ This ensures accurate progress tracking and session continuity between different
 # StratOS Project-Specific Instructions
 
 ## IMPORTANT: Azure Deployment Strategy
-**DO NOT use Azure OpenAI Assistants API for any deployments.** StratOS agents must be deployed to Azure AI Agent Service (part of Azure AI Studio) using the proper SDK and deployment methods. The semantic_kernel_multi_agent project used OpenAI Assistants as a workaround, but we will use the correct Azure AI Agent Service approach.
+**DO NOT use Azure OpenAI Assistants API for any deployments.** StratOS agents must be deployed to Azure AI Agent Service (part of Azure AI Studio) within an AI Project. 
+
+**CRITICAL UPDATE (May 24, 2025)**: Azure AI Agent Service deployment API is not yet publicly available. Attempts to deploy to the AI Project endpoint result in 405 Method Not Allowed errors. Continue using in-process Semantic Kernel implementation until the service becomes available. See `backend/agentic/AZURE_AI_AGENT_SERVICE_STATUS.md` for details.
 
 ## Current Architecture Direction: Azure AI Foundry Agent Service
 StratOS is migrating from in-process Semantic Kernel to Azure AI Foundry Agent Service with a **3 Multi-Agent System Architecture**:
