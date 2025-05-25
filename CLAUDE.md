@@ -7,6 +7,8 @@ Always read docs/multi_agent_best_practices.md for implementation guidelines and
 Always read docs/Deep_Research_Multi-Agent_Systems_Azure_Best_Practices.md for research findings
 Always read ToDo.md to understand current priorities and tasks
 Always read backend/agentic/agentic_implementation_status.md to understand what is implemented and next steps
+Always read backend/agentic/AGENT_DEPLOYMENT_SUCCESS.md to understand agent deployment status and interaction capabilities
+Always read backend/agentic/scripts/INTERACTION_SCRIPTS_README.md to understand available agent interaction scripts
 Always maintain close cohesion between ToDo.md and agentic_implementation_status.md - update both files when tasks are completed or priorities change, ensuring session continuity
 
 ## IMPORTANT: Documentation Update Protocol
@@ -24,7 +26,7 @@ This ensures accurate progress tracking and session continuity between different
 ## IMPORTANT: Azure Deployment Strategy
 **DO NOT use Azure OpenAI Assistants API for any deployments.** StratOS agents must be deployed to Azure AI Agent Service (part of Azure AI Studio) within an AI Project. 
 
-**CRITICAL UPDATE (May 24, 2025)**: Azure AI Agent Service deployment API is not yet publicly available. Attempts to deploy to the AI Project endpoint result in 405 Method Not Allowed errors. Continue using in-process Semantic Kernel implementation until the service becomes available. See `backend/agentic/AZURE_AI_AGENT_SERVICE_STATUS.md` for details.
+**SUCCESS UPDATE (May 25, 2025)**: All 15 StratOS agents have been successfully deployed to Azure AI Agent Service! 100% of agents are tested and responding correctly. See `backend/agentic/AGENT_DEPLOYMENT_SUCCESS.md` for details on deployment and interaction.
 
 ## Current Architecture Direction: Azure AI Foundry Agent Service
 StratOS is migrating from in-process Semantic Kernel to Azure AI Foundry Agent Service with a **3 Multi-Agent System Architecture**:
@@ -106,10 +108,15 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - docs/azure_ai_foundry_todo.md - Agent migration task list
 - docs/architecture.md - System architecture overview
 - mvp_status.md - MVP feature tracking
+- **backend/agentic/AGENT_DEPLOYMENT_SUCCESS.md** - Agent deployment status and test results
+- **backend/agentic/agentic_implementation_status.md** - Detailed implementation progress
+- **backend/agentic/scripts/INTERACTION_SCRIPTS_README.md** - Guide for agent interaction scripts
 - **backend/agentic/adoption_plan.md** - Guide for adopting semantic_kernel_multi_agent patterns
 - **backend/agentic/common/orchestration.py** - Orchestration framework implementation
 - **backend/agentic/agents/strategic_foundation/plugins/** - Example plugin implementations
 - **backend/agentic/scripts/** - Deployment and testing scripts
+- **backend/agentic/scripts/test_all_agents.py** - Comprehensive agent testing (100% success)
+- **backend/agentic/scripts/demo_agent_interaction.py** - Simple agent interaction demo
 - **backend/agentic/DEPLOYMENT_GUIDE.md** - Azure Container Apps deployment guide
 - **backend/agentic/Dockerfile** - Production Docker configuration
 - backend/ai/kernel_service.py - AI orchestration (being migrated to agents)
