@@ -289,6 +289,8 @@ AZURE_CLIENT_SECRET=
 |-----------|--------|----------|-------|
 | FastAPI Backend | ✅ Complete | DONE | Fully implemented |
 | Deploy to ACA | ✅ Complete | DONE | Live in production |
+| Deploy to Azure AI Agent Service | ✅ Complete | DONE | All 15 agents deployed (May 25) |
+| Agent Interaction Scripts | ✅ Complete | DONE | 5 scripts created |
 | Connected Agents | 🔴 Not Started | HIGH | Core feature |
 | MSAL Auth | ✅ Complete | DONE | With dev bypass |
 | WebSocket | ✅ Complete | DONE | Streaming ready |
@@ -296,6 +298,24 @@ AZURE_CLIENT_SECRET=
 | Analysis Agents | ✅ Complete | DONE | 4 of 4 complete |
 | Planning Agents | ✅ Complete | DONE | 6 of 6 complete |
 | CI/CD Pipeline | 🔴 Not Started | LOW | After deployment |
+
+## 🚀 Agent Deployment & Interaction (May 25, 2025)
+
+### Successfully Deployed to Azure AI Agent Service:
+- ✅ All 15 StratOS agents deployed to Azure AI Agent Service
+- ✅ Working endpoint: `https://ai.azure.com/api/eastus/agents/v1.0/...`
+- ✅ API Version: `2024-12-01-preview`
+- ✅ Model: `gpt-35-turbo`
+- ✅ Deployment configuration saved in `deployment_configs/ai_project_agents_deployment.json`
+
+### Agent Interaction Scripts Created:
+1. **agent_interaction_client.py** - Base client library for agent interactions
+2. **interactive_agent_chat.py** - Interactive CLI for chatting with agents
+3. **test_agent_systems.py** - System-level testing script
+4. **batch_test_agents.py** - Comprehensive batch testing
+5. **benchmark_agent_performance.py** - Performance benchmarking tool
+
+See `scripts/INTERACTION_SCRIPTS_README.md` for detailed usage instructions.
 
 ## 📝 Key Adoption Achievements (May 24, 2025)
 
