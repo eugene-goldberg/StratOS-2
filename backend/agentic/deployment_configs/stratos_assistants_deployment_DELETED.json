@@ -1,0 +1,125 @@
+{
+  "deployment_time": "2025-05-24T18:48:47.411072",
+  "deployment_type": "azure_openai_assistants",
+  "endpoint": "https://sk-multi-agent-openai.openai.azure.com/",
+  "model": "gpt-35-turbo",
+  "total_agents": 15,
+  "deployed_count": 15,
+  "failed_count": 0,
+  "deployed_agents": {
+    "StrategicContextRouter": "asst_Olb1JURCjn9i7MtEKlEeogcj",
+    "CEOLogAgent": "asst_0QgsT6Zvd1rgf0REzXFieiQo",
+    "NorthStarAgent": "asst_NgmLdkJbEskT0mRFTJktRLbk",
+    "MemoryRecallAgent": "asst_BJQZvZA0YAYNPn96XGWr0ivv",
+    "PreferenceLearningAgent": "asst_LcJShYPo3n1PKcpsxldG96q7",
+    "AnalysisOrchestrator": "asst_p47Uf47nuBHjxrtmV8C48RBq",
+    "SWOTTOWSAgent": "asst_FVAddJZ2dqVZHAkLlNnc4Sm3",
+    "RiskOpportunityAgent": "asst_Pmm2FROEaY4YzG2tNLMpON0D",
+    "SOLinkageAgent": "asst_dZgPRHFD3DxcmcCKg58b9Ihc",
+    "PlanningCoordinator": "asst_Bb9ysg5E0ymDp7JtpdEWSl9R",
+    "InitiativeGenerationAgent": "asst_mSgdKRamLtP8MZ6AUeDCu7G0",
+    "ResourceOptimizationAgent": "asst_5B2FwYpLHL7p25id7RTfpog7",
+    "CanvasVisualizationAgent": "asst_GfoF0AFXEK0QkC1HPplrFgPx",
+    "AlignmentScoringAgent": "asst_DxNWFxfmaXJenPfQele8WQnW",
+    "ActionPlanningAgent": "asst_LwvpG3oB7vLILc4SWsD0tqsh"
+  },
+  "failed_agents": [],
+  "agents_by_system": {
+    "Strategic Foundation & Insights": [
+      {
+        "name": "StrategicContextRouter",
+        "id": "asst_Olb1JURCjn9i7MtEKlEeogcj",
+        "system": "Strategic Foundation & Insights",
+        "status": "created"
+      },
+      {
+        "name": "CEOLogAgent",
+        "id": "asst_0QgsT6Zvd1rgf0REzXFieiQo",
+        "system": "Strategic Foundation & Insights",
+        "status": "created"
+      },
+      {
+        "name": "NorthStarAgent",
+        "id": "asst_NgmLdkJbEskT0mRFTJktRLbk",
+        "system": "Strategic Foundation & Insights",
+        "status": "created"
+      },
+      {
+        "name": "MemoryRecallAgent",
+        "id": "asst_BJQZvZA0YAYNPn96XGWr0ivv",
+        "system": "Strategic Foundation & Insights",
+        "status": "created"
+      },
+      {
+        "name": "PreferenceLearningAgent",
+        "id": "asst_LcJShYPo3n1PKcpsxldG96q7",
+        "system": "Strategic Foundation & Insights",
+        "status": "created"
+      }
+    ],
+    "Analysis & Intelligence": [
+      {
+        "name": "AnalysisOrchestrator",
+        "id": "asst_p47Uf47nuBHjxrtmV8C48RBq",
+        "system": "Analysis & Intelligence",
+        "status": "created"
+      },
+      {
+        "name": "SWOTTOWSAgent",
+        "id": "asst_FVAddJZ2dqVZHAkLlNnc4Sm3",
+        "system": "Analysis & Intelligence",
+        "status": "created"
+      },
+      {
+        "name": "RiskOpportunityAgent",
+        "id": "asst_Pmm2FROEaY4YzG2tNLMpON0D",
+        "system": "Analysis & Intelligence",
+        "status": "created"
+      },
+      {
+        "name": "SOLinkageAgent",
+        "id": "asst_dZgPRHFD3DxcmcCKg58b9Ihc",
+        "system": "Analysis & Intelligence",
+        "status": "created"
+      }
+    ],
+    "Planning & Execution": [
+      {
+        "name": "PlanningCoordinator",
+        "id": "asst_Bb9ysg5E0ymDp7JtpdEWSl9R",
+        "system": "Planning & Execution",
+        "status": "created"
+      },
+      {
+        "name": "InitiativeGenerationAgent",
+        "id": "asst_mSgdKRamLtP8MZ6AUeDCu7G0",
+        "system": "Planning & Execution",
+        "status": "created"
+      },
+      {
+        "name": "ResourceOptimizationAgent",
+        "id": "asst_5B2FwYpLHL7p25id7RTfpog7",
+        "system": "Planning & Execution",
+        "status": "created"
+      },
+      {
+        "name": "CanvasVisualizationAgent",
+        "id": "asst_GfoF0AFXEK0QkC1HPplrFgPx",
+        "system": "Planning & Execution",
+        "status": "created"
+      },
+      {
+        "name": "AlignmentScoringAgent",
+        "id": "asst_DxNWFxfmaXJenPfQele8WQnW",
+        "system": "Planning & Execution",
+        "status": "created"
+      },
+      {
+        "name": "ActionPlanningAgent",
+        "id": "asst_LwvpG3oB7vLILc4SWsD0tqsh",
+        "system": "Planning & Execution",
+        "status": "created"
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # Azure AI Foundry Agent Service Integration - Todo List
 *Created: May 23, 2025*
-*Updated: May 24, 2025 - Reprioritized based on deep research findings*
+*Updated: May 25, 2025 - All agents successfully deployed to Azure AI Agent Service*
 *Based on: azure_ai_foundry_integration_plan.md and Deep_Research_Multi-Agent_Systems_Azure_Best_Practices.md*
 
 ## Overview
@@ -43,7 +43,7 @@ This todo list tracks the implementation of the 3 Multi-Agent System architectur
 - [x] Create base agent template with Semantic Kernel and common interfaces ✅
 - [x] Implement "Agents-as-Code" repository structure (JSON/YAML configs) ✅ (May 24)
 - [x] Create agent deployment configurations for all 15 agents ✅ (May 24)
-- [ ] Deploy agents to Azure AI Agent Service (pending API availability)
+- [x] Deploy agents to Azure AI Agent Service ✅ (May 25, 2025 - All 15 agents deployed)
 - [ ] Set up Connected Agents integration patterns
 - [ ] Create agent evaluation framework for CI/CD
 - [ ] Set up prompt versioning system
@@ -145,3 +145,10 @@ This todo list tracks the implementation of the 3 Multi-Agent System architectur
 - Test each system independently before cross-system integration
 - Monitor costs closely during initial deployment
 - Have fallback to synchronous processing if async fails
+
+### Agent Deployment Status (May 25, 2025)
+- ✅ All 15 StratOS agents successfully deployed to Azure AI Agent Service
+- ✅ Deployment configuration saved to `deployment_configs/ai_project_agents_deployment.json`
+- ✅ Working endpoint: `https://ai.azure.com/api/eastus/agents/v1.0/subscriptions/.../workspaces/sk-multi-agent-project`
+- ✅ API Version: `2024-12-01-preview`
+- ✅ Model: `gpt-35-turbo`

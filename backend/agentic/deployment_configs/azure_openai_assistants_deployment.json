@@ -1,0 +1,13 @@
+{
+  "deployment_time": "2025-05-24T19:19:04.669427",
+  "deployment_type": "azure_openai_assistant_via_sk",
+  "azure_openai_endpoint": "https://sk-multi-agent-openai.openai.azure.com/",
+  "model_deployment": "gpt-35-turbo",
+  "api_version_used": "2024-05-01-preview",
+  "project_name_context": "sk-multi-agent-project",
+  "resource_group_context": "semantic-kernel-multi-agent-rg",
+  "total_agents_attempted": 2,
+  "total_agents_deployed": 0,
+  "deployed_agents": {},
+  "note": "Agents deployed as Azure OpenAI Assistants using Semantic Kernel."
+}
