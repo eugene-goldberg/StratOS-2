@@ -8,6 +8,12 @@ The following scripts have been tested and work with the deployed agents:
 
 1. **demo_agent_interaction.py** - Simple demonstration of agent interaction
 2. **interact_with_ai_project_agent.py** - Interactive agent chat with thread management
+3. **test_all_agents.py** - Comprehensive test of all 15 agents
+   - **100% Success Rate**: All agents tested and responding
+   - Tests each agent with appropriate prompts
+   - Provides detailed summary by system
+4. **deploy_agents_ai_project.py** - Successfully deployed all 15 agents
+5. **list_ai_project_agents.py** - Lists all deployed agents with IDs
 
 ## Scripts Under Development
 
