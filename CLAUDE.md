@@ -1,25 +1,28 @@
 Always use python3 instead of python
 Always use python3 virtual environment for running tests
-Always read docs/implementation_status.md to understand the current status of this project
-Always read docs/azure_ai_foundry_integration_plan.md to understand the multi-agent architecture
-Always read docs/azure_ai_foundry_todo.md to track agent migration progress
-Always read docs/multi_agent_best_practices.md for implementation guidelines and patterns
-Always read docs/Deep_Research_Multi-Agent_Systems_Azure_Best_Practices.md for research findings
-Always read ToDo.md to understand current priorities and tasks
-Always read backend/agentic/agentic_implementation_status.md to understand what is implemented and next steps
-Always read backend/agentic/AGENT_DEPLOYMENT_SUCCESS.md to understand agent deployment status and interaction capabilities
-Always read backend/agentic/scripts/INTERACTION_SCRIPTS_README.md to understand available agent interaction scripts
-Always maintain close cohesion between ToDo.md and agentic_implementation_status.md - update both files when tasks are completed or priorities change, ensuring session continuity
 
-## IMPORTANT: Documentation Update Protocol
+## IMPORTANT: Phase 1 Implementation Guidance
+**PRIMARY DOCUMENTS FOR PHASE 1:**
+- Always read **docs/phase_1_architecture.md** FIRST - this is the authoritative guide for Phase 1 Unified MAS architecture
+- Always read **docs/phase_1_todo.md** to understand current implementation tasks and priorities
+- Always read **docs/phase_1_status.md** to track implementation progress and completion status
+
+## IMPORTANT: Documentation Update Protocol for Phase 1
 After completing ANY task or making significant progress:
-1. Update ToDo.md - mark completed items with ✅ and date
-2. Update backend/agentic/agentic_implementation_status.md - update progress percentages and component status
-3. Update docs/implementation_status.md - add major milestones and architecture changes
-4. Ensure all three documents are consistent with each other
-5. Include completion date (e.g., "✅ COMPLETED (May 24)") for tracking
+1. Update **docs/phase_1_todo.md** - mark completed items with ✅ and date
+2. Update **docs/phase_1_status.md** - update progress percentages and component status
+3. Update completion date (e.g., "✅ COMPLETED (May 25)") for tracking
+4. Ensure both Phase 1 documents are consistent with each other
 
-This ensures accurate progress tracking and session continuity between different Claude sessions.
+## Reference Documents (For Context Only)
+These documents provide background but Phase 1 documents take precedence:
+- docs/implementation_status.md - Historical implementation status
+- docs/azure_ai_foundry_integration_plan.md - Original 3-system architecture (Phase 2+)
+- docs/multi_agent_best_practices.md - General implementation guidelines
+- backend/agentic/AGENT_DEPLOYMENT_SUCCESS.md - Agent deployment details
+- backend/agentic/scripts/INTERACTION_SCRIPTS_README.md - Agent interaction scripts
+
+This ensures accurate progress tracking and session continuity for Phase 1 implementation.
 
 # StratOS Project-Specific Instructions
 
@@ -28,14 +31,15 @@ This ensures accurate progress tracking and session continuity between different
 
 **SUCCESS UPDATE (May 25, 2025)**: All 15 StratOS agents have been successfully deployed to Azure AI Agent Service! 100% of agents are tested and responding correctly. See `backend/agentic/AGENT_DEPLOYMENT_SUCCESS.md` for details on deployment and interaction.
 
-## Current Architecture Direction: Azure AI Foundry Agent Service
-StratOS is migrating from in-process Semantic Kernel to Azure AI Foundry Agent Service with a **3 Multi-Agent System Architecture**:
-1. **Strategic Foundation & Insights System** (WHY/WHAT) - 5 agents
-2. **Analysis & Intelligence System** (ANALYZE) - 4 agents  
-3. **Planning & Execution System** (PLAN/HOW) - 6 agents
+## Current Architecture Direction: Phase 1 Unified MAS
+**PHASE 1 FOCUS**: StratOS is implementing a **Unified Multi-Agent System (MAS)** architecture as the first phase of migration to Azure AI Foundry Agent Service. This approach simplifies initial deployment while preparing for future evolution.
 
-See `docs/azure_ai_foundry_integration_plan.md` for detailed architecture.
-See `docs/azure_ai_foundry_todo.md` for implementation tasks.
+**Phase 1**: Single Unified MAS containing all 15 agents with a Main Orchestrator
+**Future Phases**: Evolution to 3 specialized systems based on usage patterns and requirements
+
+See `docs/phase_1_architecture.md` for current architecture.
+See `docs/phase_1_todo.md` for implementation tasks.
+See `docs/phase_1_status.md` for progress tracking.
 
 ## IMPORTANT: Backend Development Location
 ALL backend development work takes place exclusively under `/backend/agentic/`
@@ -58,12 +62,12 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - **Orchestration pattern** implemented with function calling capabilities
 - Frontend uses React with TypeScript, Material UI, and Zustand for state
 
-### Target State (In Progress)
-- FastAPI will communicate with Azure AI Foundry Agent Service
-- 3 independent multi-agent systems with specialized routers
-- Event-driven communication via Azure Service Bus
-- Agents packaged and deployed as managed services
-- Built-in conversation persistence and monitoring
+### Target State - Phase 1 (In Progress)
+- FastAPI will communicate with Azure AI Foundry Agent Service (Unified MAS)
+- Single Main Orchestrator routing to all 15 agents
+- Connected Agents for intra-system communication
+- Agents deployed as managed services with built-in persistence
+- Deterministic routing initially, LLM-based routing as future enhancement
 
 ## Azure Integration Status (Updated May 24, 2025)
 - Cosmos DB is fully integrated and working
@@ -72,13 +76,13 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - Check backend/agentic/config/settings.py and .env for environment variables
 - Real Azure OpenAI endpoint: https://sk-multi-agent-openai.openai.azure.com/
 
-## Development Workflow (Updated May 24, 2025)
-- Phase 2 is 89% complete - only CEO Preference Learning needs implementation
-- **Adopted semantic_kernel_multi_agent patterns**: plugin architecture, orchestration, deployment scripts
-- **Azure Container Apps deployment tools created**: Docker configuration and deployment automation ready
-- Primary focus: Complete remaining Strategic Foundation agents (Memory & Preference)
+## Development Workflow - Phase 1 (Updated May 25, 2025)
+- **Phase 1 Focus**: Implement Unified MAS with Main Orchestrator
+- **Current Status**: 10% complete - agents deployed but not integrated
+- **Immediate Priority**: Implement Main Orchestrator with deterministic routing
+- **Next Steps**: FastAPI integration layer for Unified MAS
 - Use TodoWrite/TodoRead tools to track implementation progress
-- Check mvp_status.md for detailed feature completion status
+- Check docs/phase_1_status.md for detailed completion status
 
 ## New Agent Development Patterns (From semantic_kernel_multi_agent)
 - Create plugins with @kernel_function decorators in `/backend/agentic/agents/*/plugins/`
@@ -102,23 +106,22 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - Don't assume AI services are connected - check for mock implementations
 - Don't modify existing Semantic Kernel skills - they'll be packaged into agents
 
-## Key Files for Understanding
-- docs/implementation_status.md - Current implementation status
-- docs/azure_ai_foundry_integration_plan.md - Multi-agent system architecture
-- docs/azure_ai_foundry_todo.md - Agent migration task list
-- docs/architecture.md - System architecture overview
+## Key Files for Phase 1 Implementation
+### Primary Phase 1 Documents
+- **docs/phase_1_architecture.md** - Phase 1 Unified MAS architecture guide
+- **docs/phase_1_todo.md** - Phase 1 implementation tasks and priorities
+- **docs/phase_1_status.md** - Phase 1 progress tracking
+
+### Supporting Files
+- backend/agentic/AGENT_DEPLOYMENT_SUCCESS.md - Agent deployment status
+- backend/agentic/scripts/INTERACTION_SCRIPTS_README.md - Agent interaction scripts
+- backend/agentic/scripts/test_all_agents.py - Agent testing scripts
+- backend/agentic/DEPLOYMENT_GUIDE.md - Azure Container Apps deployment
+- backend/ai/kernel_service.py - AI orchestration (being migrated)
+- backend/ai/skills/* - Semantic Kernel skills (being packaged as agents)
+
+### Reference Documents (Historical Context)
+- docs/implementation_status.md - Pre-Phase 1 status
+- docs/azure_ai_foundry_integration_plan.md - Original 3-system plan (future phases)
+- docs/azure_ai_foundry_todo.md - Original migration tasks
 - mvp_status.md - MVP feature tracking
-- **backend/agentic/AGENT_DEPLOYMENT_SUCCESS.md** - Agent deployment status and test results
-- **backend/agentic/agentic_implementation_status.md** - Detailed implementation progress
-- **backend/agentic/scripts/INTERACTION_SCRIPTS_README.md** - Guide for agent interaction scripts
-- **backend/agentic/adoption_plan.md** - Guide for adopting semantic_kernel_multi_agent patterns
-- **backend/agentic/common/orchestration.py** - Orchestration framework implementation
-- **backend/agentic/agents/strategic_foundation/plugins/** - Example plugin implementations
-- **backend/agentic/scripts/** - Deployment and testing scripts
-- **backend/agentic/scripts/test_all_agents.py** - Comprehensive agent testing (100% success)
-- **backend/agentic/scripts/demo_agent_interaction.py** - Simple agent interaction demo
-- **backend/agentic/DEPLOYMENT_GUIDE.md** - Azure Container Apps deployment guide
-- **backend/agentic/Dockerfile** - Production Docker configuration
-- backend/ai/kernel_service.py - AI orchestration (being migrated to agents)
-- backend/ai/skills/* - Semantic Kernel skills (to be packaged as agents)
-- backend/core/db_setup.py - Database initialization
