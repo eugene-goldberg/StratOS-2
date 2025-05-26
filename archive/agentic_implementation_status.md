@@ -1,5 +1,5 @@
 # Agentic Backend Implementation Status
-*Last Updated: May 25, 2025 (20:10 UTC)*
+*Last Updated: May 26, 2025*
 
 ## Overview
 This document tracks the implementation status of the new multi-agent system backend (`/backend/agentic/`) for StratOS, including what has been implemented, what remains to be done, and immediate next steps.
@@ -9,6 +9,7 @@ This document tracks the implementation status of the new multi-agent system bac
 - Analysis & Intelligence: 100% (4 of 4 agents) ✅ 
 - Planning & Execution: 100% (6 of 6 agents) ✅
 - Main Orchestrator with Plugin-Based Architecture: 100% ✅ (Deployed with ID: asst_DvAoA85m6eCsWdOT2bsTxE6i)
+- Telemetry & Monitoring Infrastructure: 100% ✅ COMPLETED (May 26)
 
 ## Architecture Summary
 - **Primary Backend**: FastAPI on Azure Container Apps (not Azure Functions)
@@ -71,7 +72,8 @@ backend/agentic/
 │       └── plugins/         # ✅ All plugins implemented
 ├── strategies/              # 📁 Directory created, empty
 ├── clients/                 # 📁 Directory created, empty
-├── core/                    # 📁 Directory created, empty
+├── core/                    # ✅ Created
+│   └── telemetry.py        # ✅ OpenTelemetry configuration
 ├── examples/                # ✅ Created
 │   ├── __init__.py         # ✅ Created
 │   ├── strategic_foundation_example.py # ✅ Example usage
@@ -117,6 +119,20 @@ backend/agentic/
 - ✅ `api/middleware/auth.py`: MSAL authentication with dev bypass
 - ✅ `api/middleware/error.py`: Global error handling
 - ✅ `services/agent_client.py`: AI Foundry client wrapper (mock mode)
+
+#### 6. Telemetry & Monitoring Infrastructure (100% Complete - May 26) ✅
+- ✅ `core/telemetry.py`: OpenTelemetry configuration with Azure Monitor
+- ✅ `api/middleware/telemetry.py`: Request/response tracking middleware
+- ✅ `services/telemetry_agent_client.py`: Agent client with automatic trace propagation
+- ✅ `deployment_configs/telemetry_configuration.json`: Agent telemetry metadata
+- ✅ `scripts/setup_agent_telemetry_metadata.py`: Configure agent service names
+- ✅ `scripts/query_telemetry.sh`: Query Application Insights traces
+- ✅ `scripts/show_recent_telemetry.py`: View recent telemetry data
+- ✅ `scripts/verify_telemetry_traces.py`: Verify telemetry integration
+- ✅ `scripts/view_detailed_traces.py`: Detailed trace analysis
+- ✅ All 16 agents configured with unique service names for tracing
+- ✅ Automatic trace context propagation across agent calls
+- ✅ Custom spans for agent interactions and tool execution
 
 ## 🚧 What Needs Implementation (Priority Order)
 
@@ -299,6 +315,7 @@ AZURE_CLIENT_SECRET=
 | Strategic Agents | ✅ Complete | DONE | 5 of 5 complete |
 | Analysis Agents | ✅ Complete | DONE | 4 of 4 complete |
 | Planning Agents | ✅ Complete | DONE | 6 of 6 complete |
+| Telemetry & Monitoring | ✅ Complete | DONE | OpenTelemetry + Azure Monitor (May 26) |
 | CI/CD Pipeline | 🔴 Not Started | LOW | After deployment |
 
 ## 🚀 Agent Deployment & Interaction (May 25, 2025)

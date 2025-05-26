@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 
 from api.routes import agents, health, websocket
 from api.middleware.error import ErrorHandlerMiddleware
+from api.middleware.telemetry import setup_telemetry_middleware
 from config.settings import get_settings
 
 # Configure logging
@@ -65,6 +66,9 @@ app.add_middleware(
 
 # Add custom error handling
 app.add_middleware(ErrorHandlerMiddleware)
+
+# Add telemetry middleware
+setup_telemetry_middleware(app)
 
 # Include routers
 app.include_router(health.router, prefix="/api/health", tags=["health"])

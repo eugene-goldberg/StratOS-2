@@ -75,7 +75,7 @@ StratOS is a comprehensive AI-powered strategic planning platform designed for C
 - Customer-managed Cosmos DB setup
 - Microsoft Entra Agent ID configuration
 - CI/CD pipeline for agent deployment
-- Monitoring and analytics
+- ~~Monitoring and analytics~~ ✅ Application Insights telemetry implemented
 
 ## Key Technical Decisions
 
@@ -95,6 +95,13 @@ StratOS is a comprehensive AI-powered strategic planning platform designed for C
 6. ✅ Implemented end-to-end orchestration flow with actual specialist agent invocation
 7. ✅ Created test_complete_orchestration_flow.py demonstrating full working system
 8. ✅ Abandoned Connected Agents pattern in favor of more reliable tool calling approach
+9. ✅ **Implemented Application Insights telemetry with OpenTelemetry**
+   - Created stratos-multi-agent-appinsights resource
+   - Integrated OpenTelemetry with Azure Monitor
+   - Added automatic instrumentation for FastAPI
+   - Configured custom spans for agent interactions
+   - All 16 agents (Main + 15 specialists) have unique service names
+   - Successfully tested trace submission to Application Insights
 
 ## Known Issues and Limitations
 
@@ -141,6 +148,7 @@ StratOS is a comprehensive AI-powered strategic planning platform designed for C
 3. Container Apps Environment: stratos-container-apps-env
 4. Container Registry: stratoscontainerregistry
 5. OpenAI Service: sk-multi-agent-openai
+6. Application Insights: stratos-multi-agent-appinsights (with connection string)
 
 ### Estimated Costs
 - Agent API calls: ~$0.01-0.03 per interaction

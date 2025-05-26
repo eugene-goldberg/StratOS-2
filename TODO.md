@@ -47,7 +47,7 @@
 - [ ] Configure customer-managed Cosmos DB
 - [ ] Implement Microsoft Entra Agent ID
 - [ ] Set up Azure Key Vault for secrets
-- [ ] Configure Application Insights
+- [x] Configure Application Insights ✅ COMPLETED (May 26)
 
 #### Authentication & Security
 - [ ] Remove development auth bypass
@@ -80,7 +80,17 @@
 - [ ] Add database indexing
 
 #### Monitoring & Analytics
-- [ ] Set up distributed tracing
+- [x] Set up distributed tracing ✅ COMPLETED (May 26)
+  - Implemented OpenTelemetry with Azure Monitor
+  - Configured automatic instrumentation for FastAPI
+  - Added custom spans for agent interactions
+  - All 16 agents now have unique service names
+- [x] Configure Application Insights telemetry ✅ COMPLETED (May 26)
+  - Implemented comprehensive telemetry infrastructure
+  - Created telemetry.py core module with OpenTelemetry setup
+  - Added telemetry middleware for FastAPI request/response tracking
+  - Integrated telemetry_agent_client.py with automatic trace context propagation
+  - Set up query and visualization scripts for monitoring
 - [ ] Create custom metrics
 - [ ] Build admin dashboard
 - [ ] Add usage analytics

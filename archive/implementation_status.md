@@ -1,5 +1,5 @@
 # StratOS Implementation Status Report
-*Last Updated: May 24, 2025*
+*Last Updated: May 26, 2025*
 
 ## Executive Summary
 
@@ -8,6 +8,8 @@ StratOS has achieved **MVP Complete + Enhanced** status with nearly all Phase 1 
 **Key Achievement**: 8 out of 9 Phase 2 features are fully implemented, with only CEO Preference Learning partially complete.
 
 **May 24 Update**: Successfully adopted semantic_kernel_multi_agent patterns, implementing plugin architecture, orchestration framework, and deployment scripts. Multi-agent backend is now 100% complete with all 15 agents implemented. FastAPI backend deployed to Azure Container Apps and live in production.
+
+**May 26 Update**: Implemented comprehensive telemetry and monitoring infrastructure using OpenTelemetry with Azure Monitor integration. All 16 agents (including Main Orchestrator) now have unique service names and automatic trace propagation for end-to-end observability.
 
 ---
 
@@ -193,6 +195,7 @@ StratOS has achieved **MVP Complete + Enhanced** status with nearly all Phase 1 
 ### 🟢 **Fully Integrated Services**
 - **Azure Cosmos DB**: Complete with 15 containers, fallback mechanisms
 - **Authentication**: JWT implementation ready for Azure AD extension
+- **Azure Application Insights**: ✅ COMPLETED (May 26) - OpenTelemetry integration with automatic instrumentation
 
 ### 🟡 **Mock Implementations (Ready for Azure Integration)**
 - **Azure OpenAI Service**: Semantic Kernel structured, mock responses
@@ -201,7 +204,6 @@ StratOS has achieved **MVP Complete + Enhanced** status with nearly all Phase 1 
 - **Azure Blob Storage**: Package installed, not implemented
 
 ### 🔴 **Not Implemented**
-- **Azure Application Insights**: No monitoring integration
 - **Azure Key Vault**: Secrets in environment variables
 - **Azure Service Bus/Event Grid**: No event-driven architecture
 
@@ -241,11 +243,13 @@ StratOS has achieved **MVP Complete + Enhanced** status with nearly all Phase 1 
 - Python and JavaScript test runners
 - **NEW**: Azure CLI deployment scripts for all agents
 - **NEW**: Test orchestration scripts
+- **NEW**: OpenTelemetry monitoring with Azure Application Insights
+- **NEW**: Telemetry query and visualization scripts
 
 ### 🔴 **Not Implemented**
 - Infrastructure as Code (Terraform/Bicep)
-- Container orchestration (Azure Container Apps deployment pending)
-- Production monitoring
+- ~~Container orchestration~~ ✅ COMPLETED (Azure Container Apps deployed)
+- ~~Production monitoring~~ ✅ COMPLETED (Application Insights integrated)
 
 ---
 
@@ -260,9 +264,9 @@ StratOS has achieved **MVP Complete + Enhanced** status with nearly all Phase 1 
 
 ### **Short Term (Production Readiness)**
 1. Azure Blob Storage implementation
-2. Application Insights integration
+2. ~~Application Insights integration~~ ✅ COMPLETED (May 26)
 3. Azure Key Vault for secrets
-4. Deployment automation
+4. ~~Deployment automation~~ ✅ COMPLETED (Azure Container Apps scripts)
 
 ### **Medium Term (Enhancement)**
 1. Complete CEO Preference Learning
@@ -297,6 +301,8 @@ StratOS represents a mature, well-architected platform with 95%+ feature complet
 
 **May 24 Progress**: Successfully adopted proven patterns from semantic_kernel_multi_agent project, establishing a solid foundation for the multi-agent system migration. The plugin architecture, orchestration framework, and deployment infrastructure are now in place. All three multi-agent systems are 100% complete: Strategic Foundation System (5 agents), Analysis & Intelligence System (4 agents), and Planning & Execution System (6 agents). Total: 15 of 15 agents fully implemented (100% complete).
 
+**May 26 Progress**: Implemented comprehensive telemetry infrastructure with OpenTelemetry and Azure Application Insights. All 16 agents (including Main Orchestrator) now have unique service names, automatic trace propagation, and custom spans for detailed observability. Created multiple telemetry scripts for querying, visualizing, and verifying traces.
+
 **Key Strengths**:
 - Comprehensive feature set exceeding original MVP scope
 - Robust error handling and fallback mechanisms
@@ -304,6 +310,8 @@ StratOS represents a mature, well-architected platform with 95%+ feature complet
 - Extensive test coverage ensuring reliability
 - **NEW**: Plugin architecture and orchestration framework ready
 - **NEW**: Deployment scripts for all 15 agents created
+- **NEW**: Full observability with distributed tracing across all agents
+- **NEW**: Production-ready monitoring and telemetry infrastructure
 
 **Primary Gap**:
 - External Azure AI service connections (structured but using mocks)

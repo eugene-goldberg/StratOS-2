@@ -129,3 +129,6 @@ All historical documents have been moved to `/archive/` directory including:
 - implementation_status.md files - Various status tracking
 - azure_ai_foundry_*.md - Original migration plans
 - AGENT_DEPLOYMENT_*.md - Deployment logs
+
+## Testing Philosophy
+- You will always verify every element of every feature through a set of comprehensive tests run against the fully deployed feature

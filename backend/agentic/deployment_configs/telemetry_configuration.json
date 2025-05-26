@@ -1,0 +1,60 @@
+{
+  "telemetry": {
+    "enabled": true,
+    "provider": "Azure Application Insights",
+    "connection_string": "",
+    "instrumentation_key": "189923ab-6ad8-408f-b3f6-7ae4817a3988",
+    "app_insights_name": "stratos-multi-agent-appinsights",
+    "resource_group": "semantic-kernel-multi-agent-rg",
+    "configuration_date": "2025-05-26T09:17:56.028656"
+  },
+  "agent_service_names": {
+    "MainOrchestrator": "stratos.orchestrator.main",
+    "StrategicContextRouter": "stratos.strategic.router",
+    "CEOLogAgent": "stratos.strategic.ceo_log",
+    "NorthStarAgent": "stratos.strategic.northstar",
+    "MemoryRecallAgent": "stratos.strategic.memory",
+    "PreferenceLearningAgent": "stratos.strategic.preference",
+    "AnalysisOrchestrator": "stratos.analysis.orchestrator",
+    "SWOTTOWSAgent": "stratos.analysis.swot",
+    "RiskOpportunityAgent": "stratos.analysis.risk",
+    "SOLinkageAgent": "stratos.analysis.linkage",
+    "PlanningCoordinator": "stratos.planning.coordinator",
+    "InitiativeGenerationAgent": "stratos.planning.initiative",
+    "ResourceOptimizationAgent": "stratos.planning.resource",
+    "CanvasVisualizationAgent": "stratos.planning.canvas",
+    "AlignmentScoringAgent": "stratos.planning.alignment",
+    "ActionPlanningAgent": "stratos.planning.action"
+  },
+  "trace_operations": {
+    "orchestrator": [
+      "process_request",
+      "route_decision",
+      "invoke_specialist",
+      "aggregate_response"
+    ],
+    "ceo_log": [
+      "record_entry",
+      "retrieve_entries",
+      "analyze_sentiment",
+      "categorize_entry"
+    ],
+    "strategic_planning": [
+      "create_plan",
+      "update_plan",
+      "evaluate_progress",
+      "generate_initiatives"
+    ],
+    "analysis": [
+      "perform_swot",
+      "identify_risks",
+      "find_opportunities",
+      "link_subjective_objective"
+    ]
+  },
+  "integration_points": {
+    "fastapi_middleware": "backend/agentic/api/middleware/telemetry.py",
+    "agent_client": "backend/agentic/services/agent_client.py",
+    "telemetry_module": "backend/agentic/core/telemetry.py"
+  }
+}
