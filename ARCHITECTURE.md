@@ -1,5 +1,5 @@
 # StratOS Architecture Document
-*Last Updated: May 25, 2025*
+*Last Updated: May 26, 2025 - Main Orchestrator Tool Calling Pattern Implemented*
 
 ## System Overview
 
@@ -81,10 +81,17 @@ backend/agentic/
 ### Multi-Agent System Architecture
 
 #### Main Orchestrator
-- **ID**: `asst_DvAoA85m6eCsWdOT2bsTxE6i`
-- **Role**: Analyzes requests and routes to appropriate specialist
-- **Routing Format**: `ROUTE TO: [AgentName] - REASON: [explanation]`
-- **Implementation**: Instruction-based due to Azure limitations
+- **Current ID**: `asst_IkSbH3d9TaRWfpOcCCE4QxK4` (deployed May 26, 2025)
+- **Implementation**: Function tool-based orchestration (VERIFIED WORKING)
+- **Tool Calling Pattern**: 
+  - Orchestrator has 15 function tool definitions (one per specialist agent)
+  - Returns `requires_action` status with tool calls when delegation needed
+  - Client handles tool calls by invoking specialist agents
+  - Results submitted back to orchestrator for final response
+- **Following**: semantic_kernel_multi_agent pattern for tool-based delegation
+- **Verified**: All tool calls routing correctly to appropriate agents
+- **Test Script**: test_complete_orchestration_flow.py demonstrates full working system
+- **Previous Approach**: Connected Agents pattern (abandoned due to unpredictable behavior)
 
 #### Agent Organization
 
@@ -124,12 +131,23 @@ backend/agentic/
 
 ### Integration Architecture
 
-#### Agent Communication Flow
+#### Agent Communication Flow (Current Implementation - Being Updated)
 1. User request → FastAPI endpoint
-2. FastAPI → Main Orchestrator (get routing decision)
-3. Parse routing response → Extract target agent
-4. FastAPI → Target Agent (execute request)
-5. Agent response → Format and return to user
+2. FastAPI → Main Orchestrator (asst_IkSbH3d9TaRWfpOcCCE4QxK4)
+3. Main Orchestrator analyzes and returns tool call (invoke_agent_name)
+4. FastAPI parses tool call and invokes specified specialist agent
+5. Specialist agent processes request and returns response
+6. FastAPI submits tool output back to Main Orchestrator
+7. Main Orchestrator formulates final response
+8. Final response → FastAPI → User
+
+**Key Implementation Details**: 
+- Main Orchestrator uses function calling pattern (verified working)
+- Each specialist agent has a corresponding function tool (invoke_agent_name)
+- FastAPI handles tool execution without making routing decisions
+- The orchestrator determines which agent to use via tool calls
+- Tool calling provides better control and debuggability than Connected Agents
+- This pattern aligns with industry standards and semantic_kernel_multi_agent approach
 
 #### External Integrations
 - **Azure OpenAI**: LLM capabilities (via Assistants API)
@@ -230,11 +248,11 @@ Resources:
 - **Decision**: Single system with Main Orchestrator
 - **Rationale**: Simpler deployment, easier maintenance, clearer routing
 
-### ADR-002: Plugin-Based Architecture
-- **Status**: Modified
-- **Context**: Following semantic_kernel_multi_agent patterns
-- **Decision**: Instruction-based routing due to Azure limitations
-- **Rationale**: Azure AI Agent Service cannot deploy plugin instances
+### ADR-002: Tool Calling Pattern
+- **Status**: Accepted (May 26, 2025)
+- **Context**: Choice between Connected Agents vs Tool Calling patterns
+- **Decision**: Function tool calling with explicit tool definitions
+- **Rationale**: More reliable, better control, easier debugging than Connected Agents
 
 ### ADR-003: FastAPI over Azure Functions
 - **Status**: Accepted
@@ -247,6 +265,12 @@ Resources:
 - **Context**: Frontend state management
 - **Decision**: Zustand for simplicity
 - **Rationale**: Less boilerplate, TypeScript-first, better DX
+
+### ADR-005: Tool Calling over Connected Agents
+- **Status**: Accepted (May 26, 2025)
+- **Context**: Main Orchestrator delegation mechanism
+- **Decision**: Use function tools with requires_action pattern
+- **Rationale**: Connected Agents proved unreliable; tool calling is industry standard
 
 ## Future Architecture Considerations
 

@@ -1,0 +1,11 @@
+{
+  "agent_name": "MainOrchestratorWithTools",
+  "agent_id": "asst_IkSbH3d9TaRWfpOcCCE4QxK4",
+  "deployment_time": "2025-05-26T09:17:29.452868+00:00",
+  "deployment_type": "main_orchestrator_with_function_tools",
+  "architecture": "tool_calling",
+  "routing_method": "function_tools",
+  "specialist_agents": 15,
+  "tools_count": 15,
+  "notes": "Deployed with function tools for all specialist agents following semantic_kernel_multi_agent pattern"
+}

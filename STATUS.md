@@ -1,5 +1,5 @@
 # StratOS Project Status
-*Last Updated: May 25, 2025 (20:30 UTC)*
+*Last Updated: May 26, 2025 - Main Orchestrator with Tool Calling Pattern Complete*
 
 ## Executive Summary
 StratOS is a comprehensive AI-powered strategic planning platform designed for CEOs and executive teams. The project has successfully deployed a single multi-agent system with 15 specialized agents orchestrated by a Main Orchestrator using plugin-based architecture.
@@ -10,9 +10,10 @@ StratOS is a comprehensive AI-powered strategic planning platform designed for C
 
 #### Multi-Agent System (100% Complete)
 - **Architecture**: Single unified multi-agent system with Main Orchestrator
-- **Main Orchestrator ID**: `asst_DvAoA85m6eCsWdOT2bsTxE6i`
+- **Main Orchestrator ID**: `asst_IkSbH3d9TaRWfpOcCCE4QxK4` (with function tools - VERIFIED WORKING)
+- **Previous Orchestrator**: `asst_l9a3lYgFH3v1EWv3A9GQ0t49` (Connected Agents pattern, abandoned)
 - **Total Agents Deployed**: 15 specialist agents
-- **Routing Method**: Instruction-based with "ROUTE TO: [Agent] - REASON: [explanation]" format
+- **Routing Method**: Function tool calling pattern (requires_action → tool call → response)
 - **Deployment Platform**: Azure AI Agent Service (using OpenAI Assistants API)
 
 #### Deployed Agents by System
@@ -61,9 +62,11 @@ StratOS is a comprehensive AI-powered strategic planning platform designed for C
 ### 🚧 In Progress Components
 
 #### Backend-Agent Integration
-- Connecting FastAPI endpoints to deployed agents
-- Implementing routing logic based on Main Orchestrator decisions
-- Adding conversation state management
+- **Main Orchestrator Tool Calling**: ✅ COMPLETE - Orchestrator successfully returns tool calls
+- **Tool Call Execution**: 🚧 IN PROGRESS - Need to update agent_client.py to handle tool calls
+- **Response Flow**: Request → Orchestrator → Tool Call → Specialist Agent → Tool Output → Final Response
+- **Architecture**: FastAPI will pass all requests to Main Orchestrator and handle tool execution
+- **Conversation Management**: Thread persistence and context window handling needed
 
 ### 🔴 Not Started Components
 
@@ -82,13 +85,16 @@ StratOS is a comprehensive AI-powered strategic planning platform designed for C
 4. **Instruction-Based Routing**: Due to Azure limitations, using text-based routing instructions
 5. **FastAPI on Container Apps**: Chosen over Azure Functions for better WebSocket support
 
-## Recent Accomplishments (May 25, 2025)
+## Recent Accomplishments (May 25-26, 2025)
 
-1. ✅ Deployed new Main Orchestrator with plugin-based architecture
-2. ✅ Fixed agent name mismatches in routing
-3. ✅ Achieved 100% routing success across all agent systems
-4. ✅ Created comprehensive testing suite for agent interactions
-5. ✅ Documented Azure AI Agent Service limitations and workarounds
+1. ✅ Deployed Main Orchestrator with function tool definitions for all 15 agents
+2. ✅ Verified orchestrator uses tool calling pattern (requires_action status)
+3. ✅ Tested complete flow: request → tool call → specialist → response
+4. ✅ Created test scripts demonstrating tool-based delegation
+5. ✅ Aligned with semantic_kernel_multi_agent pattern for orchestration
+6. ✅ Implemented end-to-end orchestration flow with actual specialist agent invocation
+7. ✅ Created test_complete_orchestration_flow.py demonstrating full working system
+8. ✅ Abandoned Connected Agents pattern in favor of more reliable tool calling approach
 
 ## Known Issues and Limitations
 
@@ -96,6 +102,7 @@ StratOS is a comprehensive AI-powered strategic planning platform designed for C
 2. **Plugin Limitations**: Cannot deploy actual plugin instances, must use instructions
 3. **API Versioning**: Using preview API (2024-12-01-preview) which may change
 4. **Rate Limits**: Subject to OpenAI Assistants API rate limits
+5. **Connected Agents**: Pattern proved unreliable, switched to tool calling approach
 
 ## Deployment Information
 
@@ -115,9 +122,11 @@ StratOS is a comprehensive AI-powered strategic planning platform designed for C
 
 ### Agent Testing
 - ✅ All 15 agents individually tested
-- ✅ Main Orchestrator routing tested
-- ✅ Cross-system routing verified
+- ✅ Main Orchestrator routing tested with tool calling pattern
+- ✅ Cross-system routing verified through function tools
 - ✅ Error handling validated
+- ✅ End-to-end orchestration flow tested and working
+- ✅ Tool call parsing and execution verified
 
 ### Integration Testing
 - 🚧 FastAPI-Agent integration pending
@@ -140,10 +149,11 @@ StratOS is a comprehensive AI-powered strategic planning platform designed for C
 
 ## Next Priority Tasks
 
-1. **Complete FastAPI-Agent Integration** (Critical)
-   - Parse orchestrator routing decisions
-   - Implement agent invocation logic
-   - Handle response aggregation
+1. **Complete FastAPI Tool Call Handler** (Critical)
+   - Update agent_client.py to handle orchestrator's tool calls
+   - Create handlers that invoke specialist agents based on tool name
+   - Submit tool outputs back to orchestrator for final response
+   - Remove system-specific routing logic from FastAPI
 
 2. **Add Conversation Management** (High)
    - Implement thread persistence
