@@ -84,6 +84,9 @@ ipython_config.py
 # pyenv
 .python-version
 
+# Exclude semantic_kernel_multi_agent directory
+semantic_kernel_multi_agent/
+
 # pipenv
 # According to Python official guidance, Pipfile.lock should not be ignored
 # Pipfile
