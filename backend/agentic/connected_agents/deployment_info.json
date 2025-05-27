@@ -1,0 +1,8 @@
+{
+  "greeter_agent_id": "asst_n1ICXlLYRBaw1jWOyq0pmYgM",
+  "weather_agent_id": "asst_cOTxxFS7IPn0BVu4BW4YrLUT",
+  "orchestrator_agent_id": "asst_sZOmWhdVCa935fQORWgiIozj",
+  "endpoint": "https://ai.azure.com/api/eastus/agents/v1.0/subscriptions/514bd6d3-2c02-45c6-a86f-29cf262a379a/resourceGroups/semantic-kernel-multi-agent-rg/providers/Microsoft.MachineLearningServices/workspaces/sk-multi-agent-project",
+  "model": "gpt-35-turbo",
+  "instructions_version": "proven_working_v1"
+}
