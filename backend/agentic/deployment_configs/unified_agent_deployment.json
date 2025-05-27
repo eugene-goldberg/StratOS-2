@@ -1,0 +1,8 @@
+{
+  "agent_id": "asst_PM2ipgoN85xNxh5x7ECuxnzE",
+  "agent_name": "StratOSUnifiedAgent",
+  "model": "gpt-35-turbo",
+  "tool_count": 12,
+  "deployed_at": "2025-05-27T17:08:09.531025+00:00",
+  "endpoint": "https://ai.azure.com/api/eastus/agents/v1.0/subscriptions/514bd6d3-2c02-45c6-a86f-29cf262a379a/resourceGroups/semantic-kernel-multi-agent-rg/providers/Microsoft.MachineLearningServices/workspaces/sk-multi-agent-project"
+}

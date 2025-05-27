@@ -1,0 +1,95 @@
+# -----------------------------------------------------------------------------
+# AGENT DEPLOYMENT SPECIFIC CONFIGURATION (for deploy_agents_ai_project.py)
+# This section is CRITICAL for the agent deployment script.
+# -----------------------------------------------------------------------------
+
+# Endpoint for Azure AI Studio Project Agent Service (derived from UI trace)
+# IMPORTANT: For SDK discovery mode, this should be unset or blank (but SDK discovery is not working)
+AZURE_AI_AGENT_ENDPOINT="https://ai.azure.com/api/eastus/agents/v1.0/subscriptions/514bd6d3-2c02-45c6-a86f-29cf262a379a/resourceGroups/semantic-kernel-multi-agent-rg/providers/Microsoft.MachineLearningServices/workspaces/sk-multi-agent-project"
+
+# LLM deployment name accessible by the AI Project (e.g., from your linked 'sk-multi-agent-openai' resource)
+AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME="gpt-35-turbo" # VERIFY this is the correct name (e.g., "gpt-4" or "gpt-35-turbo")
+
+# API Version for the AI Studio Agent Service (from UI trace)
+AZURE_AI_AGENT_API_VERSION="2024-12-01-preview"
+
+# Azure AI Project/Hub Contextual Information (Used by SDK)
+AZURE_AI_AGENT_PROJECT_NAME="sk-multi-agent-project"
+AZURE_AI_AGENT_PROJECT_HUB_NAME="sk-multi-agent-hub"
+AZURE_AI_AGENT_PROJECT_SUBSCRIPTION_ID="514bd6d3-2c02-45c6-a86f-29cf262a379a"
+AZURE_AI_AGENT_PROJECT_RESOURCE_GROUP="semantic-kernel-multi-agent-rg"
+
+# Optional: API Key for Azure AI Agent Service (ONLY if DefaultAzureCredential with Service Principal fails)
+# AZURE_AI_AGENT_API_KEY=""
+
+
+# -----------------------------------------------------------------------------
+# Service Principal Credentials (for DefaultAzureCredential)
+# ** FILL THESE IN WITH YOUR ACTUAL VALUES **
+# -----------------------------------------------------------------------------
+AZURE_CLIENT_ID="0d41080b-9595-4f4a-b6ad-9ef01b3f5ecf"
+AZURE_CLIENT_SECRET="MSg8Q~fSqZvntpsWvETH4ZZb2uUdDfxnuu7~Jbu7" # Ensure this is correctly quoted/escaped if it contains special characters
+AZURE_TENANT_ID="5acd02e3-dfea-4b7c-aab5-1633ffe0403a"
+
+
+# -----------------------------------------------------------------------------
+# Original Azure OpenAI Service Configuration (if used by other parts of your app or for direct SK interaction)
+# Note: The agent deployment script will use AZURE_AI_AGENT_* variables above.
+# -----------------------------------------------------------------------------
+# AZURE_OPENAI_ENDPOINT="https://eastus.api.cognitive.microsoft.com/" # Or your 'sk-multi-agent-openai.openai.azure.com' endpoint
+# AZURE_OPENAI_API_KEY="b77c5b137db6465dabdbc34adb136e2c" # Key for the endpoint above
+# AZURE_OPENAI_DEPLOYMENT_NAME="gpt-4" # A model deployment in the endpoint above
+
+# -----------------------------------------------------------------------------
+# Orchestrator LLM Configuration (for Semantic Kernel AzureChatCompletion)
+# These are used by the plugin-based orchestrator for its own LLM
+# -----------------------------------------------------------------------------
+AZURE_OPENAI_ENDPOINT="https://sk-multi-agent-openai.openai.azure.com/"
+AZURE_OPENAI_API_KEY="b77c5b137db6465dabdbc34adb136e2c"
+AZURE_OPENAI_CHAT_DEPLOYMENT_NAME="gpt-35-turbo"  # For the orchestrator's own LLM
+
+
+# -----------------------------------------------------------------------------
+# Original Azure AI Foundry Context (Potentially redundant if covered by AZURE_AI_AGENT_PROJECT_*)
+# These specific names (without _AGENT_ infix) might be used by other scripts/tools.
+# The agent deployment script now primarily uses the AZURE_AI_AGENT_PROJECT_* prefixed variables.
+# -----------------------------------------------------------------------------
+# AZURE_AI_HUB_NAME="sk-multi-agent-hub" # Covered by AZURE_AI_AGENT_PROJECT_HUB_NAME
+# AZURE_AI_PROJECT_NAME="sk-multi-agent-project" # Covered by AZURE_AI_AGENT_PROJECT_NAME
+# AZURE_AI_PROJECT_HOST="eastus.api.azureml.ms" # Not used by current agent script for endpoint
+# AZURE_SUBSCRIPTION_ID="514bd6d3-2c02-45c6-a86f-29cf262a379a" # Covered by AZURE_AI_AGENT_PROJECT_SUBSCRIPTION_ID
+# AZURE_RESOURCE_GROUP="semantic-kernel-multi-agent-rg" # Covered by AZURE_AI_AGENT_PROJECT_RESOURCE_GROUP
+# AZURE_AI_PROJECT_CONNECTION_STRING="eastus.api.azureml.ms/discovery;..." # Not used by current agent script
+
+
+# -----------------------------------------------------------------------------
+# Azure AI Search Configuration (if used by other parts of your application)
+# ** FILL IN AZURE_SEARCH_ENDPOINT IF YOU USE IT **
+# -----------------------------------------------------------------------------
+AZURE_SEARCH_ENDPOINT=""
+AZURE_SEARCH_API_KEY="AOGQoi0Gx8M6GW826q2Jee7GMzjHOuc6y8vPZddYaPAzSeBxoAWF"
+AZURE_SEARCH_INDEX_NAME="stratos-index"
+APPLICATIONINSIGHTS_CONNECTION_STRING="InstrumentationKey=189923ab-6ad8-408f-b3f6-7ae4817a3988;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=dfba6d9b-7df1-4bf5-af6a-2fb21f1881b2"
+
+# -----------------------------------------------------------------------------
+# Deployed Specialist Agent IDs (for MainOrchestratorAgent tool calling)
+# These are the actual deployed agent IDs from Azure AI Agent Service
+# -----------------------------------------------------------------------------
+MAIN_ORCHESTRATOR_AGENT_ID="asst_ntM606r1K9Zci3YEz1WIQEXI"
+CEO_LOG_AGENT_ID="asst_N5azTOnrhdlm4K9wC6i9OtHA"
+NORTH_STAR_AGENT_ID="asst_9Cd1I1QCYm6TqvjVeKfdQOkf"
+SWOT_TOWS_AGENT_ID="asst_cCpLqNIt5nRrYuYHNUKs6HyM"
+MEMORY_RECALL_AGENT_ID="asst_fJ9cWW3fcCI5lrYaMPeEUlob"
+PREFERENCE_LEARNING_AGENT_ID="asst_wxMQ2W9Eo10xx8AcxxgPMBA4"
+RISK_OPPORTUNITY_AGENT_ID="asst_KE82pn2anmOhKJU7URCimdzw"
+SO_LINKAGE_AGENT_ID="asst_MsgCaStPuzCtmQQATyD8uaVW"
+INITIATIVE_GENERATION_AGENT_ID="asst_9koCMSmlAV9lmVcewE6EbgU9"
+RESOURCE_OPTIMIZATION_AGENT_ID="asst_TGCv7Y4U4M7tPd37TYeT79vh"
+ACTION_PLANNING_AGENT_ID="asst_tSH6svJedWRZhJVrgwL5lyc9"
+CANVAS_VISUALIZATION_AGENT_ID="asst_8c3Av4TaHvwlGSpOfVh8cWih"
+ALIGNMENT_SCORING_AGENT_ID="asst_wJDQNzy4HNESV0ZYnTM6CLiZ"
+
+# Router agents (not used by MainOrchestratorAgent but included for completeness)
+STRATEGIC_CONTEXT_ROUTER_ID="asst_W9JAWsfil7Vr1UsAfR9xs6LH"
+ANALYSIS_ORCHESTRATOR_ID="asst_9nmPRTXVfDt0WFLV4RgIZyb8"
+PLANNING_COORDINATOR_ID="asst_CWpjmOpBGQuTpb7DbjY9rhIH"
