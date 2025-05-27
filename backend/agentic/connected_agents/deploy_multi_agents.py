@@ -90,7 +90,7 @@ async def main():
         weather_tool = ConnectedAgentTool(
             id=weather_agent.id,
             name="weather_information_tool",
-            description="Tool that provides weather information for US cities"
+            description="Tool that provides real-time weather information for US cities from National Weather Service API"
         )
         logger.info("✅ Created weather tool")
         

@@ -1,7 +1,7 @@
 {
-  "greeter_agent_id": "asst_wF8NNQ5DIifiqEro1JsynEJd",
-  "weather_agent_id": "asst_V3YUEpG9ZGfsXUadc82QMGkF",
-  "orchestrator_agent_id": "asst_bH7nASrQXM1NvWtyurhDfsq9",
+  "greeter_agent_id": "asst_uXcVaFj4TbGTE9kIxdQAGOvB",
+  "weather_agent_id": "asst_58eUwdW7g8zKYniJwKSzHkjq",
+  "orchestrator_agent_id": "asst_TyFLuYcBUedzY25ez3fM9RVG",
   "endpoint": "https://ai.azure.com/api/eastus/agents/v1.0/subscriptions/514bd6d3-2c02-45c6-a86f-29cf262a379a/resourceGroups/semantic-kernel-multi-agent-rg/providers/Microsoft.MachineLearningServices/workspaces/sk-multi-agent-project",
   "model": "gpt-35-turbo"
 }
