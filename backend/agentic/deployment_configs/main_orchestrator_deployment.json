@@ -1,13 +1,10 @@
 {
   "agent_name": "MainOrchestrator",
-  "agent_id": "asst_DvAoA85m6eCsWdOT2bsTxE6i",
-  "deployment_time": "2025-05-26T00:16:30.094599+00:00",
-  "deployment_type": "main_orchestrator_plugin_based",
-  "phase": "phase_1_unified_mas",
-  "architecture": "plugin_based",
-  "routing_method": "instruction_based",
-  "specialist_agents": 13,
-  "notes": "Deployed with plugin-based architecture following semantic_kernel_multi_agent pattern",
-  "last_updated": "2025-05-25T20:00:56.755970",
-  "update_notes": "Updated agent names to match actual deployments"
+  "agent_id": "asst_FsaGvKkfDn4mCEqfWQW9XMHW",
+  "deployment_time": "2025-05-26T18:49:17.096243+00:00",
+  "deployment_type": "main_orchestrator_llm_based",
+  "architecture": "llm_based_routing",
+  "routing_method": "natural_language_understanding",
+  "specialist_agents": 15,
+  "notes": "Deployed with LLM-based routing - no hardcoded function tools, pure language understanding"
 }

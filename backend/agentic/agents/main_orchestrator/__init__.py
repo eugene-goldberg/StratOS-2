@@ -1,7 +1,5 @@
-"""Main Orchestrator Agent for StratOS Unified MAS."""
+"""Main Orchestrator Agent for StratOS."""
 
 from .main_orchestrator import MainOrchestratorAgent
-from .router import DeterministicRouter
-from .domain_patterns import DomainIdentifier
 
-__all__ = ["MainOrchestratorAgent", "DeterministicRouter", "DomainIdentifier"]
+__all__ = ["MainOrchestratorAgent"]

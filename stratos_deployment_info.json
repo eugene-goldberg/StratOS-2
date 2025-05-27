@@ -1,0 +1,15 @@
+{
+  "ceo_log_agent_id": "asst_7ZIF3to3KPhG48VEsn6LsdOZ",
+  "north_star_agent_id": "asst_ZNZZlVG0ECZwRl6EJCRmMNAQ",
+  "memory_recall_agent_id": "asst_aHH3es8ozA8D9Q4gmL9E7d6f",
+  "preference_learning_agent_id": "asst_SArjcAG3j2uOowTOjSyDCVtq",
+  "swot_tows_agent_id": "asst_PFuIAC8DR9tjgvsuxwMvXKjs",
+  "risk_opportunity_agent_id": "asst_jINM6NWp1lbsMahHOduGeXIG",
+  "so_linkage_agent_id": "asst_Aihrd1S646tJ0Uzq6p4PSydj",
+  "alignment_scoring_agent_id": "asst_nga1Z21CsquoNO7CWNZichll",
+  "initiative_generation_agent_id": "asst_tG6CVvjsiMaj5XnYLtA6Vy7h",
+  "resource_optimization_agent_id": "asst_K9M933Rv223U8ZqyqFd8qSuJ",
+  "action_planning_agent_id": "asst_yrRVLR4yfZbGBpnzethTFm4J",
+  "canvas_visualization_agent_id": "asst_kzaStTlJGDOfmtP10z5DrKHF",
+  "main_orchestrator_agent_id": "asst_LgNjAIwEDV5wQcogIUmGf4qq"
+}

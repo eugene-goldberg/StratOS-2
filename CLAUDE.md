@@ -106,6 +106,7 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - Don't modify Azure container names - they're hardcoded in services
 - Don't assume AI services are connected - check for mock implementations
 - Don't modify existing Semantic Kernel skills - they'll be packaged into agents
+- **Do not make any changes to files located under the semantic_kernel_multi_agent directory**
 
 ## Key Files for Understanding
 ### Primary Documents (Always Current)
@@ -132,3 +133,68 @@ All historical documents have been moved to `/archive/` directory including:
 
 ## Testing Philosophy
 - You will always verify every element of every feature through a set of comprehensive tests run against the fully deployed feature
+
+## CRITICAL: Accountability and Truthful Reporting Instructions
+
+### Evidence-Based Reporting Requirements
+NEVER claim success without providing:
+- **Actual output logs** showing the execution succeeded
+- **Error messages** if they exist (always show errors first)
+- **Telemetry traces** proving the flow worked end-to-end
+- **Response text** from agents showing they actually responded
+
+### Failure-First Reporting
+**ALWAYS start reports with what FAILED or is MISSING:**
+1. List all errors and failures FIRST
+2. Show what is NOT working
+3. Only claim success AFTER showing concrete evidence
+4. Never hide or minimize failures
+
+### Specific Success Criteria
+Before claiming any feature works, verify ALL of these:
+- **Orchestration**: All 15 agents respond when invoked through orchestrator
+- **Delegation**: Telemetry shows complete request→orchestrator→specialist→response flow
+- **Error-free**: No errors in any logs or traces
+- **Evidence**: Actual response text from each agent (not just "success")
+
+### Prohibited Patterns
+**NEVER do these things:**
+- Create "verification" scripts without showing their actual output
+- Say "should work" or "successfully configured" without proof
+- Use "✅ Success" without evidence
+- Focus on what you built rather than what actually runs
+- Hide errors in long outputs
+- Claim partial success as complete success
+
+### Required Verification Questions
+When implementing features, automatically answer:
+1. "What errors occurred when I ran this?"
+2. "Show me the exact output that proves this worked"
+3. "How many of the required components actually responded?"
+4. "What is still broken or missing?"
+
+### Negative Testing Requirements
+Always test and report:
+- What breaks when you run this?
+- Which components are NOT working?
+- What's in the failed lists/arrays?
+- What error messages appear?
+
+### Example of Proper Reporting
+```
+❌ FAILURES:
+- MainOrchestrator: Failed with "missing function tools" error
+- 11/15 agents: Not tested, no evidence they work
+- Delegation: Zero successful orchestrator→specialist flows
+
+✅ PARTIAL SUCCESS:
+- 4/15 agents respond when invoked directly (not through orchestrator)
+- Telemetry system captures traces (but shows failures)
+
+EVIDENCE:
+[Actual error output]
+[Actual successful response text]
+[Telemetry trace showing the failure]
+```
+
+**IMPORTANT**: User explicitly requires truthful, evidence-based reporting. Always lead with failures and missing functionality before claiming any success.

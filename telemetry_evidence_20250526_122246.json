@@ -1,0 +1,74 @@
+{
+  "test_start": "2025-05-26T12:22:18.758749",
+  "delegations": [
+    {
+      "test_name": "CEO_Log_Test",
+      "expected_agent": "CEOLogAgent",
+      "message": "I need to record that we just signed a $10M deal with Amazon",
+      "start_time": "2025-05-26T12:22:18.761924",
+      "orchestrator_thread": "thread_9DYwuFrUxtmSfYhpcN8TQJ4n",
+      "tool_call": {
+        "function": "invoke_ceologagent",
+        "arguments": {
+          "request": "We just signed a $10M deal with Amazon",
+          "category": "market"
+        },
+        "tool_call_id": "call_5Ka81rOO4bzYgBo1zKfjZHef"
+      },
+      "specialist_thread": "thread_ohPuadIjWZUcy0AgcA0NserV",
+      "specialist_response": {
+        "text": "That's great news! Congratulations on closing such a significant deal with Amazon. This partnership will undoubtedly bring valuable opportunities for growth and collaboration. Let's ensure that all re...",
+        "length": 415
+      },
+      "orchestrator_final_response": null,
+      "end_time": "2025-05-26T12:22:27.356875",
+      "success": false
+    },
+    {
+      "test_name": "SWOT_Analysis_Test",
+      "expected_agent": "SWOTTOWSAgent",
+      "message": "Perform a SWOT analysis for our expansion into Europe",
+      "start_time": "2025-05-26T12:22:27.357109",
+      "orchestrator_thread": "thread_6UEV3Qs2YWPwpSciPISV44ge",
+      "tool_call": {
+        "function": "invoke_swottowsagent",
+        "arguments": {
+          "request": "Perform a SWOT analysis for our expansion into Europe",
+          "analysis_type": "swot"
+        },
+        "tool_call_id": "call_lIye91i5IZCFW16z6peF9C7Y"
+      },
+      "specialist_thread": "thread_RKQwnNMGVIpTTDB6Q5j6QIRW",
+      "specialist_response": {
+        "text": "Let's start with the internal factors, which are the Strengths and Weaknesses of StratOS:\n\n**Strengths:**\n1. Established brand recognition and reputation in the tech industry\n2. Strong financial posit...",
+        "length": 1332
+      },
+      "orchestrator_final_response": null,
+      "end_time": "2025-05-26T12:22:36.799562",
+      "success": false
+    },
+    {
+      "test_name": "Risk_Assessment_Test",
+      "expected_agent": "RiskOpportunityAgent",
+      "message": "What are the main cybersecurity risks we face?",
+      "start_time": "2025-05-26T12:22:36.799906",
+      "orchestrator_thread": "thread_JvQmjcMfORiDRHKIwfOSkM93",
+      "tool_call": {
+        "function": "invoke_riskopportunityagent",
+        "arguments": {
+          "request": "Identify main cybersecurity risks"
+        },
+        "tool_call_id": "call_McfRL4kyh8F6xEZ6qXKU7q05"
+      },
+      "specialist_thread": "thread_uZDq4VnALm7evAiLw8IPmkXK",
+      "specialist_response": {
+        "text": "As the Risk/Opportunity Detection Agent for StratOS, I have identified several main cybersecurity risks that the organization may face:\n\n1. **Phishing Attacks**: Cybercriminals may use deceptive email...",
+        "length": 2220
+      },
+      "orchestrator_final_response": null,
+      "end_time": "2025-05-26T12:22:46.361642",
+      "success": false
+    }
+  ],
+  "traces_captured": []
+}

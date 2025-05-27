@@ -1,19 +1,48 @@
 # StratOS TODO List
-*Last Updated: May 25, 2025*
+*Last Updated: May 26, 2025*
 
 ## 🎯 Current Sprint (Week of May 26)
 
 ### Critical Path Items
 
-1. **Deploy Main Orchestrator with Function Tools** ✅ COMPLETED (May 26)
-   - [x] Deploy Main Orchestrator with function tool definitions for all 15 agents ✅ COMPLETED (May 26)
-   - [x] Verify orchestrator returns tool calls (requires_action) instead of text ✅ COMPLETED
-   - [x] Test tool calling with various request types ✅ COMPLETED
-   - [x] Document the tool call/response flow ✅ COMPLETED
-   - [x] Implement end-to-end flow with actual specialist agent invocation ✅ COMPLETED
-   - [x] Create test_complete_orchestration_flow.py demonstrating full working flow ✅ COMPLETED
+1. **Refactor All Agents to semantic_kernel_multi_agent Pattern** ✅ COMPLETED (May 26)
+   - [x] Remove BaseStratosAgent inheritance from all 14 agents ✅ COMPLETED
+   - [x] Standardize constructors to `__init__(self, service=None)` pattern ✅ COMPLETED
+   - [x] Add `get_agent()` method to all agents ✅ COMPLETED
+   - [x] Update Main Orchestrator to use refactored agents ✅ COMPLETED (May 26)
+   - [x] Test orchestration with refactored agents ✅ COMPLETED (May 26)
    
-2. **Implement Tool Call Handling in FastAPI**
+   **Agents to Refactor:**
+   
+   **Strategic Foundation (4 agents):**
+   - [x] CEOLogAgent - Remove BaseStratosAgent, simplify constructor ✅
+   - [x] NorthStarAgent - Remove BaseStratosAgent, simplify constructor ✅
+   - [x] MemoryRecallAgent - Remove BaseStratosAgent, add get_agent() ✅
+   - [x] PreferenceLearningAgent - Remove BaseStratosAgent, add get_agent() ✅
+   
+   **Analysis Intelligence (4 agents):**
+   - [x] SWOTTOWSAgent - Remove BaseStratosAgent, add get_agent() ✅
+   - [x] RiskOpportunityAgent - Remove BaseStratosAgent, add get_agent() ✅
+   - [x] SOLinkageAgent - Full refactor completed ✅
+   - [x] AlignmentScoringAgent - Full refactor completed ✅
+   
+   **Planning Execution (6 agents):**
+   - [x] InitiativeGenerationAgent - Remove BaseStratosAgent, simplified ✅
+   - [x] ResourceOptimizationAgent - Full refactor completed ✅
+   - [x] ActionPlanningAgent - Full refactor completed ✅
+   - [x] ProgressTrackingAgent - Does not exist (skipped) ✅
+   - [x] DependencyManagementAgent - Does not exist (skipped) ✅
+   - [x] CanvasVisualizationAgent - Full refactor completed ✅
+
+2. **Deploy Main Orchestrator with Tool Calling** ✅ COMPLETED (May 26)
+   - [x] Update main_orchestrator.py with full Semantic Kernel plugin architecture ✅ COMPLETED
+   - [x] Create DeployedAgentPlugin class for wrapping specialist agents ✅ COMPLETED
+   - [x] Update .env with all 12 specialist agent IDs ✅ COMPLETED
+   - [x] Deploy Main Orchestrator with tool definitions (ID: asst_PkBVaNwenBlxV3rfPuiunywU) ✅ COMPLETED
+   - [x] Test multi-agent orchestration flow ✅ COMPLETED
+   - [x] Verify correct routing: CEO notes → CEOLogAgent, Vision → NorthStarAgent ✅ COMPLETED
+   
+3. **Implement Tool Call Handling in FastAPI**
    - [ ] Update agent_client.py to handle orchestrator's tool calls
    - [ ] Create tool call handlers that invoke specialist agents
    - [ ] Submit tool outputs back to orchestrator
@@ -138,11 +167,12 @@
 
 ## 🐛 Known Issues
 
-1. **Main Orchestrator Integration In Progress**
-   - Main Orchestrator successfully deployed with ID: asst_IkSbH3d9TaRWfpOcCCE4QxK4
-   - Tool calling pattern implemented and verified working
-   - Need to complete FastAPI integration to handle tool calls
-   - Abandoned Connected Agents pattern in favor of simpler tool calling approach
+1. **Main Orchestrator Integration Complete** ✅ RESOLVED (May 26)
+   - Main Orchestrator deployed with full tool calling (ID: asst_PkBVaNwenBlxV3rfPuiunywU)
+   - Semantic Kernel plugin architecture implemented
+   - Multi-agent orchestration tested and working
+   - Correct routing verified for all agent types
+   - FastAPI integration remains for production use
 
 2. **Azure AI Agent Service Limitations**
    - Cannot deploy actual plugin instances

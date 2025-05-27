@@ -1,0 +1,75 @@
+{
+  "test_start": "2025-05-26T12:26:24.677200",
+  "delegations": [
+    {
+      "test_name": "CEO_Log_Test",
+      "expected_agent": "CEOLogAgent",
+      "message": "I need to record that we just signed a $10M deal with Amazon",
+      "start_time": "2025-05-26T12:26:24.680343",
+      "orchestrator_thread": "thread_yKEqSoHLFuY5jUvBsXAhxqtz",
+      "tool_call": {
+        "function": "invoke_ceologagent",
+        "arguments": {
+          "request": "We just signed a $10M deal with Amazon",
+          "category": "strategic"
+        },
+        "tool_call_id": "call_DuF9PdGMczQme5PlsGWIS6WR"
+      },
+      "specialist_thread": "thread_ZPKKe6RNHwWof5TWEbkQpOoa",
+      "specialist_response": {
+        "text": "Great news! I will log the details of the deal in our system. Can you provide me with the key information such as the terms of the deal, timeline, and any other important details that need to be docum...",
+        "length": 206
+      },
+      "orchestrator_final_response": null,
+      "end_time": "2025-05-26T12:26:34.024705",
+      "success": false
+    },
+    {
+      "test_name": "SWOT_Analysis_Test",
+      "expected_agent": "SWOTTOWSAgent",
+      "message": "Perform a SWOT analysis for our expansion into Europe",
+      "start_time": "2025-05-26T12:26:34.024841",
+      "orchestrator_thread": "thread_sMpCVZMonRB50xM00m4mSfb2",
+      "tool_call": {
+        "function": "invoke_swottowsagent",
+        "arguments": {
+          "request": "Perform a SWOT analysis for our expansion into Europe",
+          "analysis_type": "swot"
+        },
+        "tool_call_id": "call_4peQBVRIvhfIoKfbvhuyR5My"
+      },
+      "specialist_thread": "thread_EFuF1wPrA7b44KdLHb7RwK5n",
+      "specialist_response": {
+        "text": "Great! Let's start by identifying the internal factors of your business for the SWOT analysis:\n\nStrengths:\n1. Established brand recognition in current markets\n2. Robust technological infrastructure\n3....",
+        "length": 1286
+      },
+      "orchestrator_final_response": null,
+      "end_time": "2025-05-26T12:26:43.276629",
+      "success": false
+    },
+    {
+      "test_name": "Risk_Assessment_Test",
+      "expected_agent": "RiskOpportunityAgent",
+      "message": "What are the main cybersecurity risks we face?",
+      "start_time": "2025-05-26T12:26:43.276691",
+      "orchestrator_thread": "thread_nfS9K7LXmb4YgHWlUc9cnfvB",
+      "tool_call": {
+        "function": "invoke_riskopportunityagent",
+        "arguments": {
+          "request": "Main cybersecurity risks",
+          "category": "strategic"
+        },
+        "tool_call_id": "call_5YyExo5pHQzGW4l8xVen1hbh"
+      },
+      "specialist_thread": "thread_PnWvlVcXQnOs1irLeb7aeyYt",
+      "specialist_response": {
+        "text": "As the Risk/Opportunity Detection Agent for StratOS, I continuously monitor for potential cybersecurity risks within the organization's data. Some of the main cybersecurity risks that I detect and ass...",
+        "length": 1586
+      },
+      "orchestrator_final_response": null,
+      "end_time": "2025-05-26T12:26:54.194878",
+      "success": false
+    }
+  ],
+  "traces_captured": []
+}

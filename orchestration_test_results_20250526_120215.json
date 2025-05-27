@@ -1,0 +1,82 @@
+{
+  "failures": [
+    {
+      "agent": "StrategicContextRouter",
+      "error": "(None) No assistant found with id 'asst_W9JAWsfil7Vr1UsAfR9xs6LH'.\nCode: None\nMessage: No assistant found with id 'asst_W9JAWsfil7Vr1UsAfR9xs6LH'."
+    },
+    {
+      "agent": "SOLinkageAgent",
+      "error": "Orchestrator run failed: RunStatus.FAILED"
+    },
+    {
+      "agent": "PlanningCoordinator",
+      "error": "Orchestrator run failed: RunStatus.FAILED"
+    }
+  ],
+  "successes": [
+    {
+      "agent": "CEOLogAgent",
+      "message": "I need to record my thoughts about the Q4 revenue ...",
+      "response_length": 90
+    },
+    {
+      "agent": "NorthStarAgent",
+      "message": "What's our company's north star metric?...",
+      "response_length": 235
+    },
+    {
+      "agent": "MemoryRecallAgent",
+      "message": "Show me patterns from our past strategic decisions...",
+      "response_length": 2010
+    },
+    {
+      "agent": "PreferenceLearningAgent",
+      "message": "Track my preference for concise executive summarie...",
+      "response_length": 635
+    },
+    {
+      "agent": "SWOTTOWSAgent",
+      "message": "Perform a SWOT analysis for our cloud expansion...",
+      "response_length": 799
+    },
+    {
+      "agent": "RiskOpportunityAgent",
+      "message": "What are the key risks in our supply chain?...",
+      "response_length": 1313
+    },
+    {
+      "agent": "SWOTTOWSAgent",
+      "message": "Analyze the competitive landscape in the AI market...",
+      "response_length": 1998
+    },
+    {
+      "agent": "InitiativeGenerationAgent",
+      "message": "Generate initiatives for 50% revenue growth...",
+      "response_length": 2382
+    },
+    {
+      "agent": "ResourceOptimizationAgent",
+      "message": "Optimize resource allocation for Q1 projects...",
+      "response_length": 1106
+    },
+    {
+      "agent": "ActionPlanningAgent",
+      "message": "Create an action plan for improving customer satis...",
+      "response_length": 2590
+    },
+    {
+      "agent": "AlignmentScoringAgent",
+      "message": "Score the alignment of our new product launch with...",
+      "response_length": 281
+    },
+    {
+      "agent": "CanvasVisualizationAgent",
+      "message": "Update the strategic canvas with new market insigh...",
+      "response_length": 465
+    }
+  ],
+  "agents_tested": "{'PreferenceLearningAgent', 'NorthStarAgent', 'MemoryRecallAgent', 'SWOTTOWSAgent', 'CEOLogAgent', 'StrategicContextRouter', 'ResourceOptimizationAgent', 'RiskOpportunityAgent', 'ActionPlanningAgent', 'AlignmentScoringAgent', 'CanvasVisualizationAgent', 'InitiativeGenerationAgent'}",
+  "agents_not_responding": "set()",
+  "total_tests": 15,
+  "successful_delegations": 12
+}

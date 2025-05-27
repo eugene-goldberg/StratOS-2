@@ -8,7 +8,6 @@ This system handles strategic planning including:
 - Action planning and task breakdown
 """
 
-from .router import PlanningCoordinator
 from .initiative_generation_agent import InitiativeGenerationAgent
 from .resource_optimization_agent import ResourceOptimizationAgent
 from .canvas_visualization_agent import CanvasVisualizationAgent
@@ -16,7 +15,6 @@ from .alignment_scoring_agent import AlignmentScoringAgent
 from .action_planning_agent import ActionPlanningAgent
 
 __all__ = [
-    "PlanningCoordinator",
     "InitiativeGenerationAgent",
     "ResourceOptimizationAgent", 
     "CanvasVisualizationAgent",

@@ -7,14 +7,12 @@ This system handles strategic analysis including:
 - Guided analysis sessions
 """
 
-from .router import AnalysisOrchestrator
-from .swot_tows_agent import SwotTowsAgent
+from .swot_tows_agent import SWOTTOWSAgent
 from .risk_opportunity_agent import RiskOpportunityAgent
 from .so_linkage_agent import SOLinkageAgent
 
 __all__ = [
-    "AnalysisOrchestrator",
-    "SwotTowsAgent", 
+    "SWOTTOWSAgent", 
     "RiskOpportunityAgent",
     "SOLinkageAgent"
 ]
