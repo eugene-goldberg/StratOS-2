@@ -13,8 +13,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv(Path(__file__).parent / '.env')
-load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
+load_dotenv(Path(__file__).parent.parent.parent / '.env')
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))

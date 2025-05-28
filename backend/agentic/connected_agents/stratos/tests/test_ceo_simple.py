@@ -10,12 +10,11 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from connected_agents and parent directories
-load_dotenv(Path(__file__).parent / '.env')
-load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
+# Load environment variables from connected_agents directory
+load_dotenv(Path(__file__).parent.parent.parent / '.env')
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent
+project_root = Path(__file__).parent.parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from azure.ai.projects.aio import AIProjectClient

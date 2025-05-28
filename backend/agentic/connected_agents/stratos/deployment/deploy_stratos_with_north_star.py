@@ -12,19 +12,23 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from connected_agents directory
-load_dotenv(Path(__file__).parent / '.env')
+load_dotenv(Path(__file__).parent.parent.parent / '.env')
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent
+project_root = Path(__file__).parent.parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
+
+# Add stratos agents to path
+stratos_root = Path(__file__).parent.parent
+sys.path.insert(0, str(stratos_root))
 
 from azure.ai.projects.aio import AIProjectClient
 from azure.identity.aio import DefaultAzureCredential
 
 # Import agent configurations
-from backend.agentic.connected_agents import ceo_log_agent_config
-from backend.agentic.connected_agents import north_star_agent_config
-from backend.agentic.connected_agents import orchestrator_agent_config_with_north_star as orchestrator_config
+from agents import ceo_log_agent_config
+from agents import north_star_agent_config
+from agents import orchestrator_agent_config_with_north_star as orchestrator_config
 
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -162,13 +166,13 @@ async def deploy_stratos_agents():
                 }
                 
                 # 5. Save deployment info
-                deployment_file = Path(__file__).parent / "stratos_deployment_info.json"
+                deployment_file = Path(__file__).parent.parent / "archive" / "stratos_deployment_info.json"
                 with open(deployment_file, 'w') as f:
                     json.dump(deployment_info, f, indent=2)
                 logger.info(f"Deployment info saved to: {deployment_file}")
                 
                 # 6. Update .env file with new agent IDs
-                env_path = project_root / '.env'
+                env_path = Path(__file__).parent.parent.parent / '.env'
                 env_content = ""
                 if env_path.exists():
                     with open(env_path, 'r') as f:

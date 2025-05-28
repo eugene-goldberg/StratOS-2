@@ -24,10 +24,19 @@ from semantic_kernel.connectors.ai.function_choice_behavior import FunctionChoic
 from semantic_kernel import Kernel
 from semantic_kernel.functions import KernelPlugin
 from dotenv import load_dotenv
+from pathlib import Path
+import sys
+
+# Load environment variables
+load_dotenv(Path(__file__).parent.parent.parent / '.env')
+
+# Add stratos agents to path
+stratos_root = Path(__file__).parent.parent
+sys.path.insert(0, str(stratos_root))
 
 # Import our CEO Log components
-from ceo_log_plugin import CEOLogPlugin
-from ceo_log_agent_config import AGENT_NAME_PREFIX, AGENT_INSTRUCTIONS, MODEL_NAME
+from agents.ceo_log_plugin import CEOLogPlugin
+from agents.ceo_log_agent_config import AGENT_NAME_PREFIX, AGENT_INSTRUCTIONS, MODEL_NAME
 
 # Load environment variables
 load_dotenv()

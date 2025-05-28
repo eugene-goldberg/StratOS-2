@@ -29,9 +29,8 @@ All test outputs are saved to `test_outputs/ceo_agent/`:
 
 ## Utility Scripts
 
-Located in `telemetry/utils/`:
-- `query_ceo_telemetry.py` - Query Application Insights for telemetry data
-- `capture_ceo_telemetry.py` - Capture telemetry data to local files
+Located in `../telemetry/`:
+- Query and capture scripts for telemetry data
 
 ## Running Tests
 

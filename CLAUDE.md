@@ -208,3 +208,9 @@ EVIDENCE:
 ```
 
 **IMPORTANT**: User explicitly requires truthful, evidence-based reporting. Always lead with failures and missing functionality before claiming any success.
+
+## Azure API and SDK Guidance
+- None of the Azure APIs have changed
+- None of the Python SDKs have changed
+- If you experience errors or difficulties it must not be attributed to APIs or SDKs
+- Such issues must be interpreted as issues with your logic and you must address them accordingly

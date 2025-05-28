@@ -12,11 +12,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv(Path(__file__).parent / '.env')
-load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
+load_dotenv(Path(__file__).parent.parent.parent / '.env')
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent
+project_root = Path(__file__).parent.parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from azure.ai.projects.aio import AIProjectClient
@@ -50,7 +49,7 @@ class TelemetryCapture:
         
     def save_events(self):
         filename = f"north_star_telemetry_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{self.session_id[:8]}.json"
-        filepath = Path(__file__).parent / "telemetry" / "north_star_agent" / filename
+        filepath = Path(__file__).parent.parent / "telemetry" / "north_star_agent" / filename
         filepath.parent.mkdir(parents=True, exist_ok=True)
         
         with open(filepath, 'w') as f:
