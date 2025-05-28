@@ -1,0 +1,184 @@
+{
+  "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6",
+  "agent_name": "North Star Agent",
+  "capture_time": "2025-05-28T20:33:07.560860",
+  "events": [
+    {
+      "event_type": "telemetry_configured",
+      "data": {
+        "app_insights": false
+      },
+      "timestamp": "2025-05-28T20:31:47.025746",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "deployment_loaded",
+      "data": {
+        "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1",
+        "agents": [
+          "ceo_log",
+          "north_star",
+          "memory_recall",
+          "preference_learning"
+        ]
+      },
+      "timestamp": "2025-05-28T20:31:47.027676",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "orchestrator_fetch_start",
+      "data": {
+        "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1"
+      },
+      "timestamp": "2025-05-28T20:31:47.030047",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "orchestrator_fetch_complete",
+      "data": {
+        "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1",
+        "tools_count": 4,
+        "tools": [
+          {
+            "name": "ceo_log_specialist",
+            "id": "asst_BZUv6JAHU4wUzdpJXyOTZ6Q5"
+          },
+          {
+            "name": "north_star_specialist",
+            "id": "asst_9OtYgiKrsm6pkLN1gC02WqP4"
+          },
+          {
+            "name": "memory_recall_specialist",
+            "id": "asst_KqSl2nZr1nuQRXnb059gXPgU"
+          },
+          {
+            "name": "preference_learning_specialist",
+            "id": "asst_qcT41aEXbpGJTTUZipfNcpK6"
+          }
+        ]
+      },
+      "timestamp": "2025-05-28T20:31:47.746442",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Help me define our organizational purpose. We want to make AI accessible to everyone.",
+        "target": "North Star Agent",
+        "function": "purpose_definition"
+      },
+      "timestamp": "2025-05-28T20:31:47.748225",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 88,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the North Star specialist for defining our organizational purpose!",
+        "scenario": "purpose_definition"
+      },
+      "timestamp": "2025-05-28T20:31:57.090731",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "north_star",
+        "scenario": "purpose_definition"
+      },
+      "timestamp": "2025-05-28T20:31:57.090874",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Create a vision statement for becoming the global leader in AI by 2030",
+        "target": "North Star Agent",
+        "function": "vision_creation"
+      },
+      "timestamp": "2025-05-28T20:32:07.094052",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 80,
+        "delegation_detected": false,
+        "response_preview": "I'll connect you with the north_star specialist for creating a vision statement!",
+        "scenario": "vision_creation"
+      },
+      "timestamp": "2025-05-28T20:32:10.402543",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "What core values should guide our AI development efforts?",
+        "target": "North Star Agent",
+        "function": "values_management"
+      },
+      "timestamp": "2025-05-28T20:32:20.405847",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 182,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the North Star specialist for core values for AI development efforts!I'll connect you with the North Star specialist for core values for AI development efforts!",
+        "scenario": "values_management"
+      },
+      "timestamp": "2025-05-28T20:32:36.771590",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "north_star",
+        "scenario": "values_management"
+      },
+      "timestamp": "2025-05-28T20:32:36.771759",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Set strategic goals for our digital transformation initiative",
+        "target": "North Star Agent",
+        "function": "goal_setting"
+      },
+      "timestamp": "2025-05-28T20:32:46.773808",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 238,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the North Star specialist for setting strategic goals for our digital transformation initiative! I'll connect you with the North Star specialist for setting strategic goals for o...",
+        "scenario": "goal_setting"
+      },
+      "timestamp": "2025-05-28T20:32:57.559109",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "north_star",
+        "scenario": "goal_setting"
+      },
+      "timestamp": "2025-05-28T20:32:57.559290",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    },
+    {
+      "event_type": "test_complete",
+      "data": {
+        "tests_run": 4,
+        "delegations": 3
+      },
+      "timestamp": "2025-05-28T20:33:07.560195",
+      "session_id": "69528b5c-2bca-4d96-b7ba-2ddd1f771af6"
+    }
+  ]
+}

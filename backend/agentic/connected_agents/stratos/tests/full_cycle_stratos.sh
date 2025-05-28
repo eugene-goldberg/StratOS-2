@@ -77,11 +77,11 @@ fi
 sleep 2
 
 # Step 2: Deploy StratOS agents
-print_step "STEP 2: Deploying StratOS agents (CEO Log, North Star, Memory Recall)"
+print_step "STEP 2: Deploying StratOS agents (CEO Log, North Star, Memory Recall, Preference Learning)"
 cd "$DEPLOYMENT_DIR"
 
 print_info "Deploying all StratOS connected agents..."
-python deploy_all_stratos_agents.py
+python deploy_all_stratos_agents_v2.py
 
 if [ $? -eq 0 ]; then
     print_success "All StratOS agents successfully deployed"
@@ -139,8 +139,22 @@ else
     print_error "North Star comprehensive test failed"
 fi
 
-# Step 6: Check telemetry files
-print_step "STEP 6: Verifying telemetry data"
+sleep 30  # Delay between comprehensive tests
+
+# Step 6: Run comprehensive test for Preference Learning
+print_step "STEP 6: Running comprehensive Preference Learning test with telemetry"
+
+print_info "Executing comprehensive Preference Learning test..."
+python test_all_agents_unified.py --agent preference --type comprehensive
+
+if [ $? -eq 0 ]; then
+    print_success "Preference Learning comprehensive test passed"
+else
+    print_error "Preference Learning comprehensive test failed"
+fi
+
+# Step 7: Check telemetry files
+print_step "STEP 7: Verifying telemetry data"
 
 cd "$TELEMETRY_DIR"
 print_info "Checking for telemetry files..."
@@ -169,17 +183,19 @@ print_step "FULL CYCLE COMPLETED! 🎉"
 
 echo -e "${GREEN}Summary of actions performed:${NC}"
 echo "1. ✅ Undeployed all existing StratOS agents"
-echo "2. ✅ Deployed CEO Log, North Star, and Memory Recall agents"
+echo "2. ✅ Deployed CEO Log, North Star, Memory Recall, and Preference Learning agents"
 echo "3. ✅ Ran unified simple tests for all agents"
 echo "4. ✅ Ran comprehensive Memory Recall test with telemetry"
 echo "5. ✅ Ran comprehensive North Star test with telemetry"
-echo "6. ✅ Captured and verified telemetry data"
+echo "6. ✅ Ran comprehensive Preference Learning test with telemetry"
+echo "7. ✅ Captured and verified telemetry data"
 
 # Display test results summary
 echo -e "\n${YELLOW}Test Results Summary:${NC}"
 echo "• CEO Log Agent: Check logs for delegation status"
 echo "• North Star Agent: Expected to show delegation"
 echo "• Memory Recall Agent: Expected to show delegation"
+echo "• Preference Learning Agent: Expected to show delegation"
 
 print_info "Check the telemetry folder for detailed analysis results"
 

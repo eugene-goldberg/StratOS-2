@@ -1,0 +1,70 @@
+{
+  "session_id": "876e8099-e853-403a-95d9-1c68bce506f7",
+  "capture_time": "2025-05-28T15:41:57.145448",
+  "events": [
+    {
+      "timestamp": "2025-05-28T15:41:55.823656",
+      "event_type": "test_started",
+      "data": {
+        "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1",
+        "test_type": "preference_learning_detailed"
+      },
+      "session_id": "876e8099-e853-403a-95d9-1c68bce506f7"
+    },
+    {
+      "timestamp": "2025-05-28T15:41:55.825420",
+      "event_type": "fetching_orchestrator",
+      "data": {
+        "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1"
+      },
+      "session_id": "876e8099-e853-403a-95d9-1c68bce506f7"
+    },
+    {
+      "timestamp": "2025-05-28T15:41:57.143407",
+      "event_type": "orchestrator_details",
+      "data": {
+        "name": "StratOSOrchestratorAgent-5a2fcfbd",
+        "model": "gpt-35-turbo",
+        "tools_count": 4,
+        "tools": [
+          {
+            "type": "connected_agent",
+            "name": "ceo_log_specialist",
+            "id": "asst_BZUv6JAHU4wUzdpJXyOTZ6Q5"
+          },
+          {
+            "type": "connected_agent",
+            "name": "north_star_specialist",
+            "id": "asst_9OtYgiKrsm6pkLN1gC02WqP4"
+          },
+          {
+            "type": "connected_agent",
+            "name": "memory_recall_specialist",
+            "id": "asst_KqSl2nZr1nuQRXnb059gXPgU"
+          },
+          {
+            "type": "connected_agent",
+            "name": "preference_learning_specialist",
+            "id": "asst_qcT41aEXbpGJTTUZipfNcpK6"
+          }
+        ]
+      },
+      "session_id": "876e8099-e853-403a-95d9-1c68bce506f7"
+    },
+    {
+      "timestamp": "2025-05-28T15:41:57.143514",
+      "event_type": "creating_thread",
+      "data": {},
+      "session_id": "876e8099-e853-403a-95d9-1c68bce506f7"
+    },
+    {
+      "timestamp": "2025-05-28T15:41:57.144196",
+      "event_type": "error",
+      "data": {
+        "error_type": "AttributeError",
+        "error_message": "'AgentsClient' object has no attribute 'create_thread'"
+      },
+      "session_id": "876e8099-e853-403a-95d9-1c68bce506f7"
+    }
+  ]
+}

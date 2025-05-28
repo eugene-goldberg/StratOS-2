@@ -1,0 +1,175 @@
+{
+  "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7",
+  "agent_name": "Memory Recall Agent",
+  "capture_time": "2025-05-28T20:27:45.097963",
+  "events": [
+    {
+      "event_type": "telemetry_configured",
+      "data": {
+        "app_insights": false
+      },
+      "timestamp": "2025-05-28T20:26:31.205342",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "deployment_loaded",
+      "data": {
+        "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1",
+        "agents": [
+          "ceo_log",
+          "north_star",
+          "memory_recall",
+          "preference_learning"
+        ]
+      },
+      "timestamp": "2025-05-28T20:26:31.205773",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "orchestrator_fetch_start",
+      "data": {
+        "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1"
+      },
+      "timestamp": "2025-05-28T20:26:31.207874",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "orchestrator_fetch_complete",
+      "data": {
+        "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1",
+        "tools_count": 4,
+        "tools": [
+          {
+            "name": "ceo_log_specialist",
+            "id": "asst_BZUv6JAHU4wUzdpJXyOTZ6Q5"
+          },
+          {
+            "name": "north_star_specialist",
+            "id": "asst_9OtYgiKrsm6pkLN1gC02WqP4"
+          },
+          {
+            "name": "memory_recall_specialist",
+            "id": "asst_KqSl2nZr1nuQRXnb059gXPgU"
+          },
+          {
+            "name": "preference_learning_specialist",
+            "id": "asst_qcT41aEXbpGJTTUZipfNcpK6"
+          }
+        ]
+      },
+      "timestamp": "2025-05-28T20:26:32.109266",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Identify patterns in our strategic decision-making over the past quarter",
+        "target": "Memory Recall Agent",
+        "function": "pattern_recognition"
+      },
+      "timestamp": "2025-05-28T20:26:32.110460",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 119,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the Memory Recall specialist for patterns in our strategic decision-making over the past quarter!",
+        "scenario": "pattern_recognition"
+      },
+      "timestamp": "2025-05-28T20:26:35.598752",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "memory_recall",
+        "scenario": "pattern_recognition"
+      },
+      "timestamp": "2025-05-28T20:26:35.598952",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Search for any previous initiatives related to customer experience improvements",
+        "target": "Memory Recall Agent",
+        "function": "context_retrieval"
+      },
+      "timestamp": "2025-05-28T20:26:45.601427",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 270,
+        "delegation_detected": false,
+        "response_preview": "I'll connect you with the memory_recall_specialist for information on previous initiatives related to customer experience improvements!I'll connect you with the memory_recall_specialist for informatio...",
+        "scenario": "context_retrieval"
+      },
+      "timestamp": "2025-05-28T20:26:55.921134",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Analyze how our strategic priorities have evolved over the last 90 days",
+        "target": "Memory Recall Agent",
+        "function": "historical_analysis"
+      },
+      "timestamp": "2025-05-28T20:27:05.923617",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 268,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the memory_recall_specialist for an analysis of how our strategic priorities have evolved over the last 90 days!I'll connect you with the Memory Recall specialist for an analysis...",
+        "scenario": "historical_analysis"
+      },
+      "timestamp": "2025-05-28T20:27:21.624065",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "memory_recall",
+        "scenario": "historical_analysis"
+      },
+      "timestamp": "2025-05-28T20:27:21.624205",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Find similar situations where we successfully pivoted our product strategy",
+        "target": "Memory Recall Agent",
+        "function": "similarity_search"
+      },
+      "timestamp": "2025-05-28T20:27:31.626136",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 132,
+        "delegation_detected": false,
+        "response_preview": "I'll connect you with the memory_recall_specialist for finding similar situations where successful product strategy pivots occurred!",
+        "scenario": "similarity_search"
+      },
+      "timestamp": "2025-05-28T20:27:35.094753",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    },
+    {
+      "event_type": "test_complete",
+      "data": {
+        "tests_run": 4,
+        "delegations": 2
+      },
+      "timestamp": "2025-05-28T20:27:45.096701",
+      "session_id": "ff8cbc17-0c72-4db4-8da6-384d2b99d9f7"
+    }
+  ]
+}

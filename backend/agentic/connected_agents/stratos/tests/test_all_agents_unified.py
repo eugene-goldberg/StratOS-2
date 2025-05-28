@@ -7,6 +7,7 @@ import asyncio
 import logging
 from typing import List, Dict
 from base_agent_test import BaseAgentTest
+from test_preference_learning_unified import PreferenceLearningAgentTest
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -127,7 +128,8 @@ async def test_all_agents(test_type: str = "simple") -> Dict[str, bool]:
     agent_tests = [
         CEOLogAgentTest,
         NorthStarAgentTest,
-        MemoryRecallAgentTest
+        MemoryRecallAgentTest,
+        PreferenceLearningAgentTest
     ]
     
     results = {}
@@ -173,7 +175,7 @@ async def main():
     parser = argparse.ArgumentParser(description="Test StratOS Connected Agents")
     parser.add_argument(
         "--agent",
-        choices=["ceo", "northstar", "memory", "all"],
+        choices=["ceo", "northstar", "memory", "preference", "all"],
         default="all",
         help="Which agent to test (default: all)"
     )
@@ -190,7 +192,8 @@ async def main():
     agent_map = {
         "ceo": CEOLogAgentTest,
         "northstar": NorthStarAgentTest,
-        "memory": MemoryRecallAgentTest
+        "memory": MemoryRecallAgentTest,
+        "preference": PreferenceLearningAgentTest
     }
     
     if args.agent == "all":

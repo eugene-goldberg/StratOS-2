@@ -1,0 +1,193 @@
+{
+  "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db",
+  "agent_name": "Preference Learning Agent",
+  "capture_time": "2025-05-28T20:15:10.617346",
+  "events": [
+    {
+      "event_type": "telemetry_configured",
+      "data": {
+        "app_insights": false
+      },
+      "timestamp": "2025-05-28T20:13:59.068105",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "deployment_loaded",
+      "data": {
+        "orchestrator_id": "asst_3MaKHqIofLTCKMlFwckiUAjm",
+        "agents": [
+          "ceo_log",
+          "north_star",
+          "memory_recall",
+          "preference_learning"
+        ]
+      },
+      "timestamp": "2025-05-28T20:13:59.068419",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "orchestrator_fetch_start",
+      "data": {
+        "orchestrator_id": "asst_3MaKHqIofLTCKMlFwckiUAjm"
+      },
+      "timestamp": "2025-05-28T20:13:59.070528",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "orchestrator_fetch_complete",
+      "data": {
+        "orchestrator_id": "asst_3MaKHqIofLTCKMlFwckiUAjm",
+        "tools_count": 4,
+        "tools": [
+          {
+            "name": "ceo_log_specialist",
+            "id": "asst_xJxZU7UqlQHq1Nc1jJ8b8kxw"
+          },
+          {
+            "name": "north_star_specialist",
+            "id": "asst_R5rFSewNDjDaJBBV7b4FZSWu"
+          },
+          {
+            "name": "memory_recall_specialist",
+            "id": "asst_RD8jAtPez27WhBUKK5M4FH5K"
+          },
+          {
+            "name": "preference_learning_specialist",
+            "id": "asst_NeUY9c6vRQquQOfoI6BiHuxK"
+          }
+        ]
+      },
+      "timestamp": "2025-05-28T20:14:00.038829",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Learn from this: User reviewed 3 conservative options before selecting moderate risk strategy with 85% confidence",
+        "target": "Preference Learning Agent",
+        "function": "learn_interaction"
+      },
+      "timestamp": "2025-05-28T20:14:00.040019",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 98,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the Preference Learning specialist for learning from user behavior patterns!",
+        "scenario": "learn_interaction"
+      },
+      "timestamp": "2025-05-28T20:14:03.777523",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "preference_learning",
+        "scenario": "learn_interaction"
+      },
+      "timestamp": "2025-05-28T20:14:03.777702",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "What are my learned preferences for strategic planning decisions?",
+        "target": "Preference Learning Agent",
+        "function": "retrieve_preferences"
+      },
+      "timestamp": "2025-05-28T20:14:13.780963",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 262,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the Preference Learning specialist for insights on your learned preferences for strategic planning decisions!I'll connect you with the Preference Learning specialist for insights...",
+        "scenario": "retrieve_preferences"
+      },
+      "timestamp": "2025-05-28T20:14:25.759720",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "preference_learning",
+        "scenario": "retrieve_preferences"
+      },
+      "timestamp": "2025-05-28T20:14:25.759940",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Based on my preferences, how would I likely approach a new market entry decision?",
+        "target": "Preference Learning Agent",
+        "function": "predict_preference"
+      },
+      "timestamp": "2025-05-28T20:14:35.763019",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 131,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the Preference Learning specialist for insights on how you would likely approach a new market entry decision!",
+        "scenario": "predict_preference"
+      },
+      "timestamp": "2025-05-28T20:14:39.420837",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "preference_learning",
+        "scenario": "predict_preference"
+      },
+      "timestamp": "2025-05-28T20:14:39.421030",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Generate personalized recommendations for resource allocation based on my past decisions",
+        "target": "Preference Learning Agent",
+        "function": "generate_recommendations"
+      },
+      "timestamp": "2025-05-28T20:14:49.424048",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 238,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the Preference Learning specialist for personalized recommendations based on your past decisions!I'll connect you with the Preference Learning specialist for personalized recomme...",
+        "scenario": "generate_recommendations"
+      },
+      "timestamp": "2025-05-28T20:15:00.612748",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "preference_learning",
+        "scenario": "generate_recommendations"
+      },
+      "timestamp": "2025-05-28T20:15:00.612922",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    },
+    {
+      "event_type": "test_complete",
+      "data": {
+        "tests_run": 4,
+        "delegations": 4
+      },
+      "timestamp": "2025-05-28T20:15:10.613787",
+      "session_id": "10eed291-78d5-4f28-b0b2-44ec600983db"
+    }
+  ]
+}

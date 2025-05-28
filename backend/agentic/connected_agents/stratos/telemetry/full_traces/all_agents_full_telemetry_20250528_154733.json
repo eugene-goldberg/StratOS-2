@@ -1,0 +1,190 @@
+{
+  "session_start": "2025-05-28T15:46:48.979328",
+  "agents": {
+    "CEO Log": {
+      "name": "CEO Log",
+      "query": "Generate insights from this CEO observation: Team morale is high after successful product launch",
+      "start_time": "2025-05-28T15:46:48.980087",
+      "events": [
+        {
+          "type": "orchestrator_tools",
+          "time": "2025-05-28T15:46:49.889118",
+          "data": {
+            "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1",
+            "orchestrator_name": "StratOSOrchestratorAgent-5a2fcfbd",
+            "tools": [
+              {
+                "type": "connected_agent",
+                "name": "ceo_log_specialist",
+                "id": "asst_BZUv6JAHU4wUzdpJXyOTZ6Q5"
+              },
+              {
+                "type": "connected_agent",
+                "name": "north_star_specialist",
+                "id": "asst_9OtYgiKrsm6pkLN1gC02WqP4"
+              },
+              {
+                "type": "connected_agent",
+                "name": "memory_recall_specialist",
+                "id": "asst_KqSl2nZr1nuQRXnb059gXPgU"
+              },
+              {
+                "type": "connected_agent",
+                "name": "preference_learning_specialist",
+                "id": "asst_qcT41aEXbpGJTTUZipfNcpK6"
+              }
+            ]
+          }
+        },
+        {
+          "type": "error",
+          "time": "2025-05-28T15:46:49.890607",
+          "data": {
+            "error_type": "AttributeError",
+            "error_message": "'AgentsClient' object has no attribute 'create_thread'"
+          }
+        }
+      ],
+      "success": false
+    },
+    "North Star": {
+      "name": "North Star",
+      "query": "What should be our company vision for AI-driven healthcare?",
+      "start_time": "2025-05-28T15:46:59.894103",
+      "events": [
+        {
+          "type": "orchestrator_tools",
+          "time": "2025-05-28T15:47:01.338102",
+          "data": {
+            "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1",
+            "orchestrator_name": "StratOSOrchestratorAgent-5a2fcfbd",
+            "tools": [
+              {
+                "type": "connected_agent",
+                "name": "ceo_log_specialist",
+                "id": "asst_BZUv6JAHU4wUzdpJXyOTZ6Q5"
+              },
+              {
+                "type": "connected_agent",
+                "name": "north_star_specialist",
+                "id": "asst_9OtYgiKrsm6pkLN1gC02WqP4"
+              },
+              {
+                "type": "connected_agent",
+                "name": "memory_recall_specialist",
+                "id": "asst_KqSl2nZr1nuQRXnb059gXPgU"
+              },
+              {
+                "type": "connected_agent",
+                "name": "preference_learning_specialist",
+                "id": "asst_qcT41aEXbpGJTTUZipfNcpK6"
+              }
+            ]
+          }
+        },
+        {
+          "type": "error",
+          "time": "2025-05-28T15:47:01.340063",
+          "data": {
+            "error_type": "AttributeError",
+            "error_message": "'AgentsClient' object has no attribute 'create_thread'"
+          }
+        }
+      ],
+      "success": false
+    },
+    "Memory Recall": {
+      "name": "Memory Recall",
+      "query": "What patterns have we seen in past strategic pivots?",
+      "start_time": "2025-05-28T15:47:11.342247",
+      "events": [
+        {
+          "type": "orchestrator_tools",
+          "time": "2025-05-28T15:47:12.448683",
+          "data": {
+            "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1",
+            "orchestrator_name": "StratOSOrchestratorAgent-5a2fcfbd",
+            "tools": [
+              {
+                "type": "connected_agent",
+                "name": "ceo_log_specialist",
+                "id": "asst_BZUv6JAHU4wUzdpJXyOTZ6Q5"
+              },
+              {
+                "type": "connected_agent",
+                "name": "north_star_specialist",
+                "id": "asst_9OtYgiKrsm6pkLN1gC02WqP4"
+              },
+              {
+                "type": "connected_agent",
+                "name": "memory_recall_specialist",
+                "id": "asst_KqSl2nZr1nuQRXnb059gXPgU"
+              },
+              {
+                "type": "connected_agent",
+                "name": "preference_learning_specialist",
+                "id": "asst_qcT41aEXbpGJTTUZipfNcpK6"
+              }
+            ]
+          }
+        },
+        {
+          "type": "error",
+          "time": "2025-05-28T15:47:12.450017",
+          "data": {
+            "error_type": "AttributeError",
+            "error_message": "'AgentsClient' object has no attribute 'create_thread'"
+          }
+        }
+      ],
+      "success": false
+    },
+    "Preference Learning": {
+      "name": "Preference Learning",
+      "query": "Learn this: User prefers visual dashboards over text reports",
+      "start_time": "2025-05-28T15:47:22.451978",
+      "events": [
+        {
+          "type": "orchestrator_tools",
+          "time": "2025-05-28T15:47:23.427957",
+          "data": {
+            "orchestrator_id": "asst_3qqbta7VL487UqbddPCsAmr1",
+            "orchestrator_name": "StratOSOrchestratorAgent-5a2fcfbd",
+            "tools": [
+              {
+                "type": "connected_agent",
+                "name": "ceo_log_specialist",
+                "id": "asst_BZUv6JAHU4wUzdpJXyOTZ6Q5"
+              },
+              {
+                "type": "connected_agent",
+                "name": "north_star_specialist",
+                "id": "asst_9OtYgiKrsm6pkLN1gC02WqP4"
+              },
+              {
+                "type": "connected_agent",
+                "name": "memory_recall_specialist",
+                "id": "asst_KqSl2nZr1nuQRXnb059gXPgU"
+              },
+              {
+                "type": "connected_agent",
+                "name": "preference_learning_specialist",
+                "id": "asst_qcT41aEXbpGJTTUZipfNcpK6"
+              }
+            ]
+          }
+        },
+        {
+          "type": "error",
+          "time": "2025-05-28T15:47:23.429045",
+          "data": {
+            "error_type": "AttributeError",
+            "error_message": "'AgentsClient' object has no attribute 'create_thread'"
+          }
+        }
+      ],
+      "success": false
+    }
+  },
+  "session_end": "2025-05-28T15:47:33.430488"
+}
