@@ -58,6 +58,9 @@ async def quick_test():
         
         logger.info(f"Response: {response}")
         
+        # Wait to avoid rate limits
+        await asyncio.sleep(3)
+        
         # Test calculation delegation
         logger.info("\n" + "="*60)
         logger.info("TEST 2: Calculation Request")
@@ -70,12 +73,28 @@ async def quick_test():
         
         logger.info(f"Response: {response}")
         
+        # Wait to avoid rate limits
+        await asyncio.sleep(3)
+        
+        # Test weather delegation
+        logger.info("\n" + "="*60)
+        logger.info("TEST 3: Weather Request")
+        logger.info("="*60)
+        
+        response = ""
+        async for part in orchestrator_agent.invoke(messages="What's the weather like in San Francisco?"):
+            if hasattr(part, 'content') and part.content:
+                response += str(part.content)
+        
+        logger.info(f"Response: {response}")
+        
         # Summary
         logger.info("\n" + "="*60)
         logger.info("SUMMARY")
         logger.info("="*60)
         logger.info("✅ Multi-tool orchestrator is deployed and responding")
-        logger.info("✅ Check responses above to verify proper delegation to specialized agents")
+        logger.info("✅ Three specialized agents available: Greeter, Calculator, Weather")
+        logger.info("✅ Check responses above to verify proper delegation with announcements")
 
 if __name__ == "__main__":
     asyncio.run(quick_test())

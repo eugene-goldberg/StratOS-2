@@ -34,11 +34,15 @@ async def test_multi_tool_orchestrator():
     test_queries = [
         "Hello! Please greet me warmly.",
         "What is 25 times 4?",
+        "What's the weather like in New York?",
         "Can you calculate 15% of 200?",
         "Good morning!",
+        "Tell me about the weather in London",
         "What's the result of 10 + 5 and then multiply by 2?",
         "Hi there, I need a greeting!",
-        "Calculate: (50 + 30) / 4"
+        "What's the temperature in Paris?",
+        "Calculate: (50 + 30) / 4",
+        "Is it raining in Seattle?"
     ]
     
     endpoint = os.getenv("AZURE_AI_PROJECT_CONNECTION_STRING")
@@ -88,6 +92,12 @@ async def test_multi_tool_orchestrator():
                     logger.info("✅ Calculation delegation successful!")
                 else:
                     logger.warning("❌ Calculation delegation may have failed")
+                    
+            elif any(word in query.lower() for word in ['weather', 'temperature', 'rain', 'forecast']):
+                if "weather information specialist" in response.lower() or "°c" in response.lower() or "°f" in response.lower():
+                    logger.info("✅ Weather delegation successful!")
+                else:
+                    logger.warning("❌ Weather delegation may have failed")
             
             await asyncio.sleep(1)  # Small delay between queries
 
