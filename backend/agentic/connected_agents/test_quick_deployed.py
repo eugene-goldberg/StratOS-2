@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Quick test of deployed multi-tool orchestrator to verify delegation works.
+Quick test of deployed StratOS orchestrator to verify delegation works.
 Now includes telemetry tracking for better observability.
 """
 
@@ -8,6 +8,8 @@ import asyncio
 import os
 import logging
 import sys
+import json
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -29,19 +31,27 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 async def quick_test():
-    """Quick test of orchestrator delegation with telemetry."""
+    """Quick test of StratOS orchestrator delegation with telemetry."""
     
-    orchestrator_id = os.getenv("MAIN_ORCHESTRATOR_AGENT_ID")
-    if not orchestrator_id:
-        logger.error("MAIN_ORCHESTRATOR_AGENT_ID not found in environment")
-        return
-        
-    logger.info(f"Testing orchestrator: {orchestrator_id}")
+    # Check for deployment info first
+    deployment_file = Path(__file__).parent / "stratos_deployment_info.json"
+    if deployment_file.exists():
+        with open(deployment_file, 'r') as f:
+            deployment_info = json.load(f)
+        orchestrator_id = deployment_info['orchestrator']['id']
+        logger.info(f"Using orchestrator from deployment info: {orchestrator_id}")
+    else:
+        orchestrator_id = os.getenv("STRATOS_ORCHESTRATOR_ID")
+        if not orchestrator_id:
+            logger.error("STRATOS_ORCHESTRATOR_ID not found in environment and no deployment info available")
+            return
+            
+    logger.info(f"Testing StratOS orchestrator: {orchestrator_id}")
     
     endpoint = os.getenv("AZURE_AI_PROJECT_CONNECTION_STRING")
     
     # Main test span for telemetry
-    with create_span_context("connected_agents.quick_test", {
+    with create_span_context("stratos.quick_test", {
         "test.type": "quick_delegation",
         "orchestrator.id": orchestrator_id
     }) as main_span:
@@ -63,80 +73,82 @@ async def quick_test():
                 definition=orchestrator_def
             )
             
-            # Test greeting delegation
+            # Test CEO Log delegation
             logger.info("\n" + "="*60)
-            logger.info("TEST 1: Greeting Request")
+            logger.info("TEST 1: CEO Log Tag Generation")
             logger.info("="*60)
             
-            with create_span_context("test.greeting_delegation", {
-                "delegation.type": "greeting",
-                "target.agent": "GreetingAgent"
+            with create_span_context("test.ceo_log_delegation", {
+                "delegation.type": "ceo_log",
+                "target.agent": "CEOLogAgent",
+                "function": "GenerateTags"
             }) as span:
                 response = ""
-                async for part in orchestrator_agent.invoke(messages="Hello! Please give me a warm greeting."):
+                async for part in orchestrator_agent.invoke(messages="Generate tags for this CEO log entry: 'Had a productive meeting with the sales team. Q1 revenue exceeded targets by 20%. Team morale is high.'"):
                     if hasattr(part, 'content') and part.content:
                         response += str(part.content)
                 
                 logger.info(f"Response: {response}")
                 add_span_attributes(span, {
                     "response.length": len(response),
-                    "delegation.success": "greeting specialist" in response.lower()
+                    "delegation.success": "ceo log specialist" in response.lower()
                 })
         
             # Wait to avoid rate limits
             await asyncio.sleep(3)
             
-            # Test calculation delegation
+            # Test CEO Log save entry
             logger.info("\n" + "="*60)
-            logger.info("TEST 2: Calculation Request")
+            logger.info("TEST 2: CEO Log Save Entry")
             logger.info("="*60)
             
-            with create_span_context("test.calculation_delegation", {
-                "delegation.type": "calculation",
-                "target.agent": "CalculatorAgent"
+            with create_span_context("test.ceo_log_save", {
+                "delegation.type": "ceo_log",
+                "target.agent": "CEOLogAgent",
+                "function": "SaveEntry"
             }) as span:
                 response = ""
-                async for part in orchestrator_agent.invoke(messages="What is 25 times 4?"):
+                async for part in orchestrator_agent.invoke(messages="Save this CEO log entry: 'Meeting with the board went well. We discussed the new AI strategy and got approval for increased R&D budget.'"):
                     if hasattr(part, 'content') and part.content:
                         response += str(part.content)
                 
                 logger.info(f"Response: {response}")
                 add_span_attributes(span, {
                     "response.length": len(response),
-                    "delegation.success": "calculation expert" in response.lower()
+                    "delegation.success": "ceo log specialist" in response.lower()
                 })
         
             # Wait to avoid rate limits
             await asyncio.sleep(3)
             
-            # Test weather delegation
+            # Test CEO Log insights
             logger.info("\n" + "="*60)
-            logger.info("TEST 3: Weather Request")
+            logger.info("TEST 3: CEO Log Extract Insights")
             logger.info("="*60)
             
-            with create_span_context("test.weather_delegation", {
-                "delegation.type": "weather",
-                "target.agent": "WeatherAgent",
-                "location": "San Francisco"
+            with create_span_context("test.ceo_log_insights", {
+                "delegation.type": "ceo_log",
+                "target.agent": "CEOLogAgent",
+                "function": "ExtractInsights"
             }) as span:
                 response = ""
-                async for part in orchestrator_agent.invoke(messages="What's the weather like in San Francisco?"):
+                async for part in orchestrator_agent.invoke(messages="Extract insights from recent CEO log entries about team and culture"):
                     if hasattr(part, 'content') and part.content:
                         response += str(part.content)
                 
                 logger.info(f"Response: {response}")
                 add_span_attributes(span, {
                     "response.length": len(response),
-                    "delegation.success": "weather information specialist" in response.lower(),
-                    "weather.data_present": any(word in response.lower() for word in ["temperature", "conditions", "weather"])
+                    "delegation.success": "ceo log specialist" in response.lower(),
+                    "insights.present": any(word in response.lower() for word in ["insight", "theme", "recommendation"])
                 })
         
             # Summary
             logger.info("\n" + "="*60)
             logger.info("SUMMARY")
             logger.info("="*60)
-            logger.info("✅ Multi-tool orchestrator is deployed and responding")
-            logger.info("✅ Three specialized agents available: Greeter, Calculator, Weather")
+            logger.info("✅ StratOS orchestrator is deployed and responding")
+            logger.info("✅ CEO Log Agent available with multiple functions")
             logger.info("✅ Check responses above to verify proper delegation with announcements")
             logger.info("✅ Telemetry tracking enabled - check Application Insights for traces")
             
