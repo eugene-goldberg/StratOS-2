@@ -5,7 +5,7 @@ This folder contains intermediate scripts used during the development and debugg
 ## Scripts Overview
 
 ### Initial Deployment and Testing
-- `main_deployment_script.py` - Original deployment script for greeter agent
+- `main_deployment_script.py` - Original deployment script for single greeter agent (superseded by deploy_connected_agents.py)
 - `main_deployment_script_updated.py` - Updated version with improvements
 - `simple_test_invoke.py` - Simple test for orchestrator delegation
 - `verify_working_system.py` - System verification script
