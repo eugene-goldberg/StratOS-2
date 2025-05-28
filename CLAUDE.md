@@ -1,5 +1,10 @@
 Always use python3 instead of python
 Always use python3 virtual environment for running tests
+**IMPORTANT: Virtual Environment Location**
+- you must use the .venv located under the connected_agents folder
+
+Always use python3 instead of python
+Always use python3 virtual environment for running tests
 
 ## IMPORTANT: Primary Documentation
 **ALWAYS READ THESE FOUR MAIN DOCUMENTS:**
@@ -47,6 +52,11 @@ ALL backend development work takes place exclusively under `/backend/agentic/`
 - The `/backend/legacy/` folder contains the old implementation for reference only
 - Do NOT modify or create files in `/backend/legacy/`
 - All new backend code, APIs, and agent implementations go in `/backend/agentic/`
+- **YOU MUST REMAIN WITHIN THE connected_agents FOLDER FOR ALL OF YOUR SEARCHES**
+
+## IMPORTANT: Reference Folder Restrictions
+- you must not obtain any references from the archive folder
+- you must retain the use of ConnectedAhentTool
 
 ## Testing
 - Run backend tests: `cd /path/to/project && source venv/bin/activate && python -m pytest tests/`
