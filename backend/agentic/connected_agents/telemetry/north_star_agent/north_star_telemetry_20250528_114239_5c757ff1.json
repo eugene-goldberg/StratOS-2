@@ -1,0 +1,121 @@
+{
+  "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+  "capture_time": "2025-05-28T11:42:39.526101",
+  "events": [
+    {
+      "timestamp": "2025-05-28T11:42:09.607454",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "telemetry_configured",
+      "data": {
+        "app_insights": true
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:09.609580",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "orchestrator_fetch_start",
+      "data": {
+        "orchestrator_id": "asst_wrL2PzRNRNrRwFzMlUYihMsH"
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:10.714752",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "orchestrator_fetch_complete",
+      "data": {
+        "name": "StratOSOrchestratorAgent-16a39733",
+        "tools_count": 2,
+        "tools": [
+          {
+            "name": "ceo_log_specialist",
+            "id": "asst_JxCvzH1POsFWBjRJaKfAL8YZ"
+          },
+          {
+            "name": "north_star_specialist",
+            "id": "asst_H48Gnzi8c5ihPFNqmT2MDGhB"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:10.715848",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "query_sent",
+      "data": {
+        "query": "Help me define our organizational purpose. We want to make AI accessible to everyone.",
+        "target": "north_star",
+        "function": "purpose_definition"
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:23.486995",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "response_received",
+      "data": {
+        "response_length": 526,
+        "parts_count": 2,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the North Star specialist for strategic foundation guidance!To define your organizational purpose as \"Making AI accessible to everyone,\" consider the following questions to refine the statement:\n- Why is making AI accessible important?\n- How does this purpose differentiate your organization?\n- What impact do you aim to create by making AI accessible to everyone?\nOnce you have clarity, we can solidify this purpose statement and connect it to your vision and values for a holi"
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:23.487431",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "north_star",
+        "announcement": "I'll connect you with the North Star specialist"
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:23.487549",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "query_sent",
+      "data": {
+        "query": "Create a vision statement for becoming the global leader in AI by 2030",
+        "target": "north_star",
+        "function": "vision_creation"
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:35.832279",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "response_received",
+      "data": {
+        "response_length": 601,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the North Star specialist for strategic foundation guidance!Here is the vision statement for becoming the global leader in AI by 2030:\n\n\"Our vision is to revolutionize the future through AI innovation, becoming the unrivaled global leader by 2030. We envision a world where every interaction is empowered by cutting-edge AI solutions, driving profound advancements in technology and human potential. Through relentless creativity and unwavering dedication, we pave the way for a"
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:35.832561",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "query_sent",
+      "data": {
+        "query": "Save this CEO log: Great progress on North Star implementation today",
+        "target": "ceo_log",
+        "function": "save_entry"
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:39.524456",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "response_received",
+      "data": {
+        "response_length": 118,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the CEO Log specialist for strategic insights! \n\n[The CEO log entry has been saved successfully]"
+      }
+    },
+    {
+      "timestamp": "2025-05-28T11:42:39.524579",
+      "session_id": "5c757ff1-c9b7-4ef2-ae9d-10253fcc875a",
+      "event_type": "test_complete",
+      "data": {
+        "tests_run": 3,
+        "north_star_delegations": 2,
+        "ceo_log_delegations": 1
+      }
+    }
+  ]
+}
