@@ -18,7 +18,7 @@ async def create_specialized_agent(client, model_deployment_name):
     """
     agent_name = f"{specialized_agent_config.AGENT_NAME_PREFIX}-{uuid.uuid4()}"
     logger.info(f"Creating Specialized Agent: {agent_name}...")
-    
+
     agent_definition = await client.agents.create_agent(
         model=model_deployment_name,
         name=agent_name,
@@ -47,11 +47,36 @@ async def create_orchestrator_agent(client, model_deployment_name, connected_too
     agent_name = f"{orchestrator_agent_config.AGENT_NAME_PREFIX}-{uuid.uuid4()}"
     logger.info(f"Creating Main Orchestrator Agent: {agent_name}...")
 
+    # Convert ConnectedAgentTool objects to the format expected by the API
+    tools = []
+    for tool in connected_tools_definitions:
+        if hasattr(tool, 'definitions'):
+            # tool is a ConnectedAgentTool object with definitions property
+            logger.info(f"Using ConnectedAgentTool definitions for: {tool.name if hasattr(tool, 'name') else 'unknown'}")
+            tools.extend(tool.definitions)
+        elif hasattr(tool, 'id') and hasattr(tool, 'name') and hasattr(tool, 'description'):
+            # Manual format for connected agent tool
+            logger.info(f"Creating manual ConnectedAgentTool format: id={tool.id}, name={tool.name}")
+            tools.append({
+                "type": "connected_agent",
+                "connected_agent": {
+                    "id": tool.id,
+                    "name": tool.name,
+                    "description": tool.description
+                }
+            })
+        else:
+            # tool is already in the right format
+            logger.info(f"Tool already in correct format: {tool}")
+            tools.append(tool)
+    
+    logger.info(f"Tools to be attached to orchestrator: {tools}")
+
     agent_definition = await client.agents.create_agent(
         model=model_deployment_name,
         name=agent_name,
         instructions=orchestrator_agent_config.AGENT_INSTRUCTIONS,
-        tools=connected_tools_definitions # Expects a list of tool definitions
+        tools=tools
     )
     logger.info(f"Main Orchestrator Agent '{agent_name}' created with ID: {agent_definition.id}")
     return agent_definition
