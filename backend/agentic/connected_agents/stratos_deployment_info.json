@@ -1,17 +1,23 @@
 {
-  "deployment_time": "2025-05-28T10:50:54.942533",
+  "deployment_time": "2025-05-28T11:32:24.167882",
   "agents": {
     "ceo_log": {
-      "name": "CEOLogAgent-94f57a35",
-      "id": "asst_T3KtZ9Qfg7Z78PRmL9wuJPlX",
+      "name": "CEOLogAgent-9ec6e04e",
+      "id": "asst_JxCvzH1POsFWBjRJaKfAL8YZ",
+      "type": "connected_agent"
+    },
+    "north_star": {
+      "name": "NorthStarAgent-9b3e522d",
+      "id": "asst_H48Gnzi8c5ihPFNqmT2MDGhB",
       "type": "connected_agent"
     }
   },
   "orchestrator": {
-    "name": "StratOSOrchestratorAgent-a28aaaf5",
-    "id": "asst_ChNCt7uB1rt88oWfS9YPdAQh",
+    "name": "StratOSOrchestratorAgent-16a39733",
+    "id": "asst_wrL2PzRNRNrRwFzMlUYihMsH",
     "connected_agents": [
-      "ceo_log"
+      "ceo_log",
+      "north_star"
     ]
   }
 }
