@@ -1,0 +1,6 @@
+{
+  "query": "\n    AppTraces\n    | where TimeGenerated >= datetime(2025-05-28T13:48:00.117353)\n    | where TimeGenerated <= datetime(2025-05-28T14:03:00.117353)\n    | where OperationId == '99b23ab32f026d74e71e9eab2a44c5ae'\n    | order by TimeGenerated asc\n    ",
+  "operation_id": "99b23ab32f026d74e71e9eab2a44c5ae",
+  "trace_count": 0,
+  "traces": []
+}

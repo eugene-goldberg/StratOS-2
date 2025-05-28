@@ -1,0 +1,238 @@
+{
+  "query_time": "2025-05-28T09:22:53.778174",
+  "trace_count": 29,
+  "traces": [
+    {
+      "TimeGenerated": "2025-05-28 14:09:27.481832+00:00",
+      "Message": "gen_ai.run_step.tool_calls",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_3lAvWcAQF6MK0GotB88qE8Lo\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_C4OQKB7TcrapJNP3GrdzDU3c\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:09:19.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:09:25.0000000Z\",\"gen_ai.usage.input_tokens\":\"987\",\"gen_ai.usage.output_tokens\":\"27\",\"gen_ai.event.content\":\"{\\\"tool_calls\\\": [{\\\"id\\\": \\\"call_8c8sCxYSXlmTJqALIJ0OBK8N\\\", \\\"type\\\": \\\"connected_agent\\\"}]}\",\"_MS.ResourceAttributeId\":\"72e3e877-a800-4912-807d-24f1415c781a\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:09:27.481629+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_3lAvWcAQF6MK0GotB88qE8Lo\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_C4OQKB7TcrapJNP3GrdzDU3c\",\"gen_ai.message.id\":\"msg_ptXF7Nz6YdjN6fbUfgTgQbfD\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:09:25.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:09:25.0000000Z\",\"gen_ai.usage.input_tokens\":\"1062\",\"gen_ai.usage.output_tokens\":\"63\",\"_MS.ResourceAttributeId\":\"72e3e877-a800-4912-807d-24f1415c781a\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:09:17.174834+00:00",
+      "Message": "gen_ai.user.message",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_3lAvWcAQF6MK0GotB88qE8Lo\",\"gen_ai.event.content\":\"{\\\"role\\\": \\\"user\\\"}\",\"_MS.ResourceAttributeId\":\"7192e257-c3ab-473b-9656-dac5098024af\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:09:15.769238+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_ycJzvpRCkBG89Ku6mYgJKhYd\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_kxNacoW5Iu8IEo6POIZllbp6\",\"gen_ai.message.id\":\"msg_UcPH3NlKNyUramDjuT1TapcT\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:09:08.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:09:09.0000000Z\",\"gen_ai.usage.input_tokens\":\"989\",\"gen_ai.usage.output_tokens\":\"21\",\"_MS.ResourceAttributeId\":\"7192e257-c3ab-473b-9656-dac5098024af\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:09:15.768859+00:00",
+      "Message": "gen_ai.run_step.tool_calls",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_ycJzvpRCkBG89Ku6mYgJKhYd\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_kxNacoW5Iu8IEo6POIZllbp6\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:09:09.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:09:15.0000000Z\",\"gen_ai.usage.input_tokens\":\"1012\",\"gen_ai.usage.output_tokens\":\"23\",\"gen_ai.event.content\":\"{\\\"tool_calls\\\": [{\\\"id\\\": \\\"call_bG82V7IHnkG5c39alvXivyxv\\\", \\\"type\\\": \\\"connected_agent\\\"}]}\",\"_MS.ResourceAttributeId\":\"7192e257-c3ab-473b-9656-dac5098024af\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:09:15.768616+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_ycJzvpRCkBG89Ku6mYgJKhYd\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_kxNacoW5Iu8IEo6POIZllbp6\",\"gen_ai.message.id\":\"msg_P2K0qmTEgZQkBfa2Y3kSQlhZ\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:09:15.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:09:15.0000000Z\",\"gen_ai.usage.input_tokens\":\"1080\",\"gen_ai.usage.output_tokens\":\"16\",\"_MS.ResourceAttributeId\":\"7192e257-c3ab-473b-9656-dac5098024af\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:09:07.298318+00:00",
+      "Message": "gen_ai.user.message",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_ycJzvpRCkBG89Ku6mYgJKhYd\",\"gen_ai.event.content\":\"{\\\"role\\\": \\\"user\\\"}\",\"_MS.ResourceAttributeId\":\"7a84ad15-646a-457a-b2bd-d85319b108de\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:09:06.128457+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_zhQiIPbPv2m76GzwKdY7GtCN\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_tcadjAgCIFDxETozdlmQC1Rr\",\"gen_ai.message.id\":\"msg_Iayd8qXQDKMFABdmpUrKGtF5\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:08:57.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:08:58.0000000Z\",\"gen_ai.usage.input_tokens\":\"988\",\"gen_ai.usage.output_tokens\":\"11\",\"_MS.ResourceAttributeId\":\"7a84ad15-646a-457a-b2bd-d85319b108de\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:09:06.128326+00:00",
+      "Message": "gen_ai.run_step.tool_calls",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_zhQiIPbPv2m76GzwKdY7GtCN\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_tcadjAgCIFDxETozdlmQC1Rr\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:08:58.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:09:03.0000000Z\",\"gen_ai.usage.input_tokens\":\"1001\",\"gen_ai.usage.output_tokens\":\"17\",\"gen_ai.event.content\":\"{\\\"tool_calls\\\": [{\\\"id\\\": \\\"call_IRVqt0Ne5KcAZoSMaPFHBs4L\\\", \\\"type\\\": \\\"connected_agent\\\"}]}\",\"_MS.ResourceAttributeId\":\"7a84ad15-646a-457a-b2bd-d85319b108de\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:09:06.128069+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_zhQiIPbPv2m76GzwKdY7GtCN\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_tcadjAgCIFDxETozdlmQC1Rr\",\"gen_ai.message.id\":\"msg_lVDAEb18IF8ApCfO61hXkPqM\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:09:03.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:09:04.0000000Z\",\"gen_ai.usage.input_tokens\":\"1097\",\"gen_ai.usage.output_tokens\":\"79\",\"_MS.ResourceAttributeId\":\"7a84ad15-646a-457a-b2bd-d85319b108de\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:08:55.938107+00:00",
+      "Message": "gen_ai.user.message",
+      "SeverityLevel": "0",
+      "Properties": "{\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_zhQiIPbPv2m76GzwKdY7GtCN\",\"gen_ai.event.content\":\"{\\\"role\\\": \\\"user\\\"}\",\"_MS.ResourceAttributeId\":\"8c39b3b6-68d5-400d-8748-867eddd20c9c\"}",
+      "OperationId": "47660d5cf8e9ff10cdfdaf2310314677",
+      "AppRoleName": "connected-agents-telemetry-capture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:06:38.594880+00:00",
+      "Message": "gen_ai.user.message",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"035cafc2-d6e4-49a3-a751-02037b64909a\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_NUnzsjVnqwjImPD4psReBwWD\",\"gen_ai.event.content\":\"{\\\"role\\\": \\\"user\\\"}\"}",
+      "OperationId": "40056ffe2f3083eb0f6c8ba99cb57e64",
+      "AppRoleName": "RawTelemetryCapture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:00:53.918200+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"21aa5926-730d-40e8-98fb-3f04073c81ec\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_ONGoGWqHZFtKzvWlkDpvs08Z\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_HlXyN9z0uohDlAEEDExRBz12\",\"gen_ai.message.id\":\"msg_P7OOeqTBgaLHGlTq3FL1vEwA\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:00:45.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:00:45.0000000Z\",\"gen_ai.usage.input_tokens\":\"989\",\"gen_ai.usage.output_tokens\":\"29\"}",
+      "OperationId": "be9bd450b602fe457f1a8971367fdc71",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:00:53.917893+00:00",
+      "Message": "gen_ai.run_step.tool_calls",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"21aa5926-730d-40e8-98fb-3f04073c81ec\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_ONGoGWqHZFtKzvWlkDpvs08Z\",\"gen_ai.event.content\":\"{\\\"tool_calls\\\": [{\\\"id\\\": \\\"call_OwlMYtmbAhV7Memd8Bnlnvqw\\\", \\\"type\\\": \\\"connected_agent\\\"}]}\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_HlXyN9z0uohDlAEEDExRBz12\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:00:45.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:00:52.0000000Z\",\"gen_ai.usage.input_tokens\":\"1020\",\"gen_ai.usage.output_tokens\":\"23\"}",
+      "OperationId": "be9bd450b602fe457f1a8971367fdc71",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:00:53.917470+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"21aa5926-730d-40e8-98fb-3f04073c81ec\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_ONGoGWqHZFtKzvWlkDpvs08Z\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_HlXyN9z0uohDlAEEDExRBz12\",\"gen_ai.message.id\":\"msg_QbgU6lNAlyV9vRJiNJychuWy\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:00:52.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:00:52.0000000Z\",\"gen_ai.usage.input_tokens\":\"1058\",\"gen_ai.usage.output_tokens\":\"11\"}",
+      "OperationId": "be9bd450b602fe457f1a8971367fdc71",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:00:43.804589+00:00",
+      "Message": "gen_ai.user.message",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"b17cdc28-6f99-468c-a251-be4bbfea2d45\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_ONGoGWqHZFtKzvWlkDpvs08Z\",\"gen_ai.event.content\":\"{\\\"role\\\": \\\"user\\\"}\"}",
+      "OperationId": "be9bd450b602fe457f1a8971367fdc71",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:00:42.554507+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"b17cdc28-6f99-468c-a251-be4bbfea2d45\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_HaunPR5iqx2nN8xyAworij5c\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_H0Y4wVb4djz9r1BzbqzY2nag\",\"gen_ai.message.id\":\"msg_9Hs7rlT9uTgr9Tzrkv8bJHBY\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:00:35.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:00:35.0000000Z\",\"gen_ai.usage.input_tokens\":\"989\",\"gen_ai.usage.output_tokens\":\"11\"}",
+      "OperationId": "be9bd450b602fe457f1a8971367fdc71",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:00:42.554392+00:00",
+      "Message": "gen_ai.run_step.tool_calls",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"b17cdc28-6f99-468c-a251-be4bbfea2d45\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_HaunPR5iqx2nN8xyAworij5c\",\"gen_ai.event.content\":\"{\\\"tool_calls\\\": [{\\\"id\\\": \\\"call_ZR74zYxew78ZKAymfdfpiFpf\\\", \\\"type\\\": \\\"connected_agent\\\"}]}\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_H0Y4wVb4djz9r1BzbqzY2nag\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:00:35.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:00:41.0000000Z\",\"gen_ai.usage.input_tokens\":\"1002\",\"gen_ai.usage.output_tokens\":\"17\"}",
+      "OperationId": "be9bd450b602fe457f1a8971367fdc71",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:00:42.554124+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"b17cdc28-6f99-468c-a251-be4bbfea2d45\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_HaunPR5iqx2nN8xyAworij5c\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_H0Y4wVb4djz9r1BzbqzY2nag\",\"gen_ai.message.id\":\"msg_4FwYo0g5B34WDqRLurtkFq2B\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T14:00:41.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T14:00:41.0000000Z\",\"gen_ai.usage.input_tokens\":\"1098\",\"gen_ai.usage.output_tokens\":\"50\"}",
+      "OperationId": "be9bd450b602fe457f1a8971367fdc71",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 14:00:33.665730+00:00",
+      "Message": "gen_ai.user.message",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"49c47123-582c-4f54-9d1f-b7fcf1a6e362\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_HaunPR5iqx2nN8xyAworij5c\",\"gen_ai.event.content\":\"{\\\"role\\\": \\\"user\\\"}\"}",
+      "OperationId": "be9bd450b602fe457f1a8971367fdc71",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 13:59:58.827167+00:00",
+      "Message": "gen_ai.user.message",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"1efb8193-59e0-43b4-88d8-566ce52418db\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_xP6CD4kkSLQ7g8MUiuWDN3KM\",\"gen_ai.event.content\":\"{\\\"role\\\": \\\"user\\\"}\"}",
+      "OperationId": "15510512958af5e54048ea69b90a3d8e",
+      "AppRoleName": "RawTelemetryCapture"
+    },
+    {
+      "TimeGenerated": "2025-05-28 13:56:16.256384+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"f1df52f1-84c7-4b80-a4ef-a3e5105b0c56\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_etJf4Uw44S0Utqipg5c9Rp2v\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_qDIGk1Y0HvSQbcXZyxKwHN5o\",\"gen_ai.message.id\":\"msg_j0iq2z2k7H1PxHIaPDDdzZGo\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T13:56:08.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T13:56:08.0000000Z\",\"gen_ai.usage.input_tokens\":\"989\",\"gen_ai.usage.output_tokens\":\"12\"}",
+      "OperationId": "d3e277eb3038e9efaabf71803119b0a7",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 13:56:16.256301+00:00",
+      "Message": "gen_ai.run_step.tool_calls",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"f1df52f1-84c7-4b80-a4ef-a3e5105b0c56\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_etJf4Uw44S0Utqipg5c9Rp2v\",\"gen_ai.event.content\":\"{\\\"tool_calls\\\": [{\\\"id\\\": \\\"call_AjL9ur3RtUK3vIK00AOgwwXG\\\", \\\"type\\\": \\\"connected_agent\\\"}]}\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_qDIGk1Y0HvSQbcXZyxKwHN5o\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T13:56:08.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T13:56:14.0000000Z\",\"gen_ai.usage.input_tokens\":\"1003\",\"gen_ai.usage.output_tokens\":\"23\"}",
+      "OperationId": "d3e277eb3038e9efaabf71803119b0a7",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 13:56:16.256158+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"f1df52f1-84c7-4b80-a4ef-a3e5105b0c56\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_etJf4Uw44S0Utqipg5c9Rp2v\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_qDIGk1Y0HvSQbcXZyxKwHN5o\",\"gen_ai.message.id\":\"msg_tgDDuiTQ1X7Vm4p7kGQwqgDG\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T13:56:14.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T13:56:14.0000000Z\",\"gen_ai.usage.input_tokens\":\"1073\",\"gen_ai.usage.output_tokens\":\"15\"}",
+      "OperationId": "d3e277eb3038e9efaabf71803119b0a7",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 13:56:06.667748+00:00",
+      "Message": "gen_ai.user.message",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"64cda0c7-be92-49b4-ab8f-2fd66b9c0add\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_etJf4Uw44S0Utqipg5c9Rp2v\",\"gen_ai.event.content\":\"{\\\"role\\\": \\\"user\\\"}\"}",
+      "OperationId": "d3e277eb3038e9efaabf71803119b0a7",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 13:56:05.368628+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"64cda0c7-be92-49b4-ab8f-2fd66b9c0add\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_NLYmPq36mdkxXHjBpgmLS3VH\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_FKJfUOKAnTDtJGoWmif7nS1k\",\"gen_ai.message.id\":\"msg_e3WM32idjbGawNJSLTcVeI7j\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T13:55:56.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T13:55:57.0000000Z\",\"gen_ai.usage.input_tokens\":\"989\",\"gen_ai.usage.output_tokens\":\"11\"}",
+      "OperationId": "d3e277eb3038e9efaabf71803119b0a7",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 13:56:05.368408+00:00",
+      "Message": "gen_ai.run_step.tool_calls",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"64cda0c7-be92-49b4-ab8f-2fd66b9c0add\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_NLYmPq36mdkxXHjBpgmLS3VH\",\"gen_ai.event.content\":\"{\\\"tool_calls\\\": [{\\\"id\\\": \\\"call_pNUfBKQukGmAf4dRy5jFNmOp\\\", \\\"type\\\": \\\"connected_agent\\\"}]}\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_FKJfUOKAnTDtJGoWmif7nS1k\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T13:55:57.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T13:56:03.0000000Z\",\"gen_ai.usage.input_tokens\":\"1002\",\"gen_ai.usage.output_tokens\":\"17\"}",
+      "OperationId": "d3e277eb3038e9efaabf71803119b0a7",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 13:56:05.368022+00:00",
+      "Message": "gen_ai.run_step.message_creation",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"64cda0c7-be92-49b4-ab8f-2fd66b9c0add\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_NLYmPq36mdkxXHjBpgmLS3VH\",\"gen_ai.agent.id\":\"asst_HdROC9uZMh9VZcTrBV5VdssW\",\"gen_ai.thread.run.id\":\"run_FKJfUOKAnTDtJGoWmif7nS1k\",\"gen_ai.message.id\":\"msg_fN5HeomwTuuOPofgEd6ge5b1\",\"gen_ai.run_step.status\":\"completed\",\"gen_ai.run_step.start.timestamp\":\"2025-05-28T13:56:03.0000000Z\",\"gen_ai.run_step.end.timestamp\":\"2025-05-28T13:56:03.0000000Z\",\"gen_ai.usage.input_tokens\":\"1098\",\"gen_ai.usage.output_tokens\":\"42\"}",
+      "OperationId": "d3e277eb3038e9efaabf71803119b0a7",
+      "AppRoleName": "connected-agents-test"
+    },
+    {
+      "TimeGenerated": "2025-05-28 13:55:55.188793+00:00",
+      "Message": "gen_ai.user.message",
+      "SeverityLevel": "0",
+      "Properties": "{\"_MS.ResourceAttributeId\":\"8e74ff85-1aaf-4284-abcd-5bd4b3115d1f\",\"gen_ai.system\":\"az.ai.agents\",\"gen_ai.thread.id\":\"thread_NLYmPq36mdkxXHjBpgmLS3VH\",\"gen_ai.event.content\":\"{\\\"role\\\": \\\"user\\\"}\"}",
+      "OperationId": "d3e277eb3038e9efaabf71803119b0a7",
+      "AppRoleName": "connected-agents-test"
+    }
+  ]
+}

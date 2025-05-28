@@ -1,0 +1,33 @@
+{
+  "test_id": "test_1748441334",
+  "start_time": "2025-05-28T09:08:54.623990",
+  "operations": [
+    {
+      "type": "weather_delegation",
+      "request": "What's the weather in Seattle?",
+      "response_preview": "I'll check with my weather information specialist!The current weather in Seattle is 55\u00b0F (13\u00b0C) with light rain and a wind speed of 10 mph from the West. The forecast predicts light rain with cloudy s...",
+      "duration_seconds": 11.45,
+      "delegation_found": true,
+      "timestamp": "2025-05-28T09:09:07.003256"
+    },
+    {
+      "type": "calculator_delegation",
+      "request": "What is 789 times 456?",
+      "response_preview": "I'll engage my mathematical calculation expert for this! \n\nLet me fetch the result for you.The result of 789 times 456 is 359,784.",
+      "duration_seconds": 9.71,
+      "delegation_found": true,
+      "result_found": false,
+      "timestamp": "2025-05-28T09:09:16.710054"
+    },
+    {
+      "type": "greeting_delegation",
+      "request": "Give me an enthusiastic greeting!",
+      "response_preview": "I'll connect you with my enthusiastic greeting specialist! Here's the energetic greeting for you: \"WOOHOO! A THOUSAND WELCOMES, MAGNIFICENT HUMAN! IT IS AN ABSOLUTE JOY TO GREET YOU TODAY! \u2728\ud83c\udf89\u2728\"",
+      "duration_seconds": 11.32,
+      "delegation_found": true,
+      "timestamp": "2025-05-28T09:09:28.034217"
+    }
+  ],
+  "end_time": "2025-05-28T09:09:28.036258",
+  "total_duration": 32.480000000000004
+}

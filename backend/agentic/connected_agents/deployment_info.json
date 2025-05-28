@@ -1,0 +1,21 @@
+{
+  "deployment_time": "2025-05-28T09:34:47",
+  "agents": {
+    "greeter": {
+      "id": "asst_xJuz0RR2Zy4EkfFaCtNdcnms",
+      "name": "SpecializedEnthusiasticGreeterAgent-fe6cc277-e9c3-484c-8b5b-d60cdc55b57d"
+    },
+    "calculator": {
+      "id": "asst_a4hGLSyQUdwSOKjfYbwKPnq2",
+      "name": "CalculatorAgent-6f7ebe56"
+    },
+    "weather": {
+      "id": "asst_Xy7XJVhjgDofZN16auLwLXcg",
+      "name": "WeatherAgent-96d16cb3"
+    },
+    "orchestrator": {
+      "id": "asst_P5dKkKv2U5GvUxb8DGZcC1z1",
+      "name": "MultiToolOrchestratorAgent-88078135"
+    }
+  }
+}
