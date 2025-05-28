@@ -5,7 +5,6 @@ import logging
 
 # Import configurations
 import specialized_agent_config
-import orchestrator_agent_config
 
 # Import necessary SDK components
 from azure.ai.agents.models import ConnectedAgentTool
@@ -40,43 +39,5 @@ def define_connected_tool(specialized_agent_id, tool_name, tool_description):
     logger.info(f"ConnectedAgentTool '{tool_name}' defined.")
     return connected_tool
 
-async def create_orchestrator_agent(client, model_deployment_name, connected_tools_definitions):
-    """
-    Creates the main orchestrator agent in Azure AI Agent Service.
-    """
-    agent_name = f"{orchestrator_agent_config.AGENT_NAME_PREFIX}-{uuid.uuid4()}"
-    logger.info(f"Creating Main Orchestrator Agent: {agent_name}...")
-
-    # Convert ConnectedAgentTool objects to the format expected by the API
-    tools = []
-    for tool in connected_tools_definitions:
-        if hasattr(tool, 'definitions'):
-            # tool is a ConnectedAgentTool object with definitions property
-            logger.info(f"Using ConnectedAgentTool definitions for: {tool.name if hasattr(tool, 'name') else 'unknown'}")
-            tools.extend(tool.definitions)
-        elif hasattr(tool, 'id') and hasattr(tool, 'name') and hasattr(tool, 'description'):
-            # Manual format for connected agent tool
-            logger.info(f"Creating manual ConnectedAgentTool format: id={tool.id}, name={tool.name}")
-            tools.append({
-                "type": "connected_agent",
-                "connected_agent": {
-                    "id": tool.id,
-                    "name": tool.name,
-                    "description": tool.description
-                }
-            })
-        else:
-            # tool is already in the right format
-            logger.info(f"Tool already in correct format: {tool}")
-            tools.append(tool)
-    
-    logger.info(f"Tools to be attached to orchestrator: {tools}")
-
-    agent_definition = await client.agents.create_agent(
-        model=model_deployment_name,
-        name=agent_name,
-        instructions=orchestrator_agent_config.AGENT_INSTRUCTIONS,
-        tools=tools
-    )
-    logger.info(f"Main Orchestrator Agent '{agent_name}' created with ID: {agent_definition.id}")
-    return agent_definition
+# Note: create_orchestrator_agent function removed - orchestrator creation is now handled
+# directly in deploy_connected_agents.py using multi_tool_orchestrator_config
