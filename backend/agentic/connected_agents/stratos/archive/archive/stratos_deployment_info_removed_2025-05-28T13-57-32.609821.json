@@ -1,0 +1,17 @@
+{
+  "deployment_time": "2025-05-28T13:57:32.609821",
+  "agents": {
+    "ceo_log": {
+      "name": "CEOLogAgent-fec00865",
+      "id": "asst_RuL0Bc2qmSstARWomZ4APCB4",
+      "type": "connected_agent"
+    }
+  },
+  "orchestrator": {
+    "name": "StratOSOrchestratorAgent-cebc85cd",
+    "id": "asst_NZawy66wG1fuXYXSZGb5OslP",
+    "connected_agents": [
+      "ceo_log"
+    ]
+  }
+}

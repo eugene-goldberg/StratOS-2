@@ -1,0 +1,29 @@
+{
+  "deployment_time": "2025-05-28T14:13:50.531350",
+  "agents": {
+    "ceo_log": {
+      "name": "CEOLogAgent-9d8e6bf2",
+      "id": "asst_LPgHgYCq8Ifs1lxxFioW2uxD",
+      "type": "connected_agent"
+    },
+    "north_star": {
+      "name": "NorthStarAgent-9d8e6bf2",
+      "id": "asst_tXCwnDqeWhkPfPJswwLW2zjs",
+      "type": "connected_agent"
+    },
+    "memory_recall": {
+      "name": "MemoryRecallAgent-9d8e6bf2",
+      "id": "asst_RiwXN2Gk4zBugT8d7olhBfGs",
+      "type": "connected_agent"
+    }
+  },
+  "orchestrator": {
+    "name": "StratOSOrchestratorAgent-9d8e6bf2",
+    "id": "asst_xH5DZM74LvXojKS6XbIxMEo0",
+    "connected_agents": [
+      "ceo_log",
+      "north_star",
+      "memory_recall"
+    ]
+  }
+}

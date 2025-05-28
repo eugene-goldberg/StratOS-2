@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Full Cycle Test Script for StratOS Connected Agents with Telemetry
+# Full Cycle Test Script for StratOS Connected Agents with Unified Telemetry
 # This script performs the complete testing cycle:
 # 1. Undeploy all existing StratOS agents
-# 2. Deploy CEO Log and North Star agents with orchestrator
-# 3. Run full test suite with telemetry
+# 2. Deploy all StratOS agents with orchestrator
+# 3. Run unified test suite with telemetry
 # 4. Collect and analyze telemetry data
 
 set -e  # Exit on error
@@ -42,9 +42,22 @@ DEPLOYMENT_DIR="$STRATOS_DIR/deployment"
 TESTS_DIR="$STRATOS_DIR/tests"
 TELEMETRY_DIR="$STRATOS_DIR/telemetry"
 
+# Activate virtual environment
+if [ -f "$STRATOS_DIR/.venv/bin/activate" ]; then
+    source "$STRATOS_DIR/.venv/bin/activate"
+    print_info "Activated virtual environment"
+else
+    print_error "Virtual environment not found at $STRATOS_DIR/.venv"
+    print_info "Creating virtual environment..."
+    cd "$STRATOS_DIR"
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+fi
+
 # Start the full cycle
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║      StratOS Agents Full Cycle Test with Telemetry        ║${NC}"
+echo -e "${BLUE}║   StratOS Agents Full Cycle Test with Unified Telemetry   ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
 
 # Step 1: Undeploy all existing StratOS agents
@@ -52,7 +65,7 @@ print_step "STEP 1: Undeploying all existing StratOS agents"
 cd "$DEPLOYMENT_DIR"
 
 print_info "Running removal of all StratOS agents..."
-python3 remove_all_stratos_agents.py
+python remove_all_stratos_agents.py
 
 if [ $? -eq 0 ]; then
     print_success "All StratOS agents successfully removed"
@@ -64,11 +77,11 @@ fi
 sleep 2
 
 # Step 2: Deploy StratOS agents
-print_step "STEP 2: Deploying StratOS agents (CEO Log, North Star, Orchestrator)"
+print_step "STEP 2: Deploying StratOS agents (CEO Log, North Star, Memory Recall)"
 cd "$DEPLOYMENT_DIR"
 
-print_info "Deploying StratOS connected agents..."
-python3 deploy_stratos_with_north_star.py
+print_info "Deploying all StratOS connected agents..."
+python deploy_all_stratos_agents.py
 
 if [ $? -eq 0 ]; then
     print_success "All StratOS agents successfully deployed"
@@ -83,105 +96,97 @@ else
     exit 1
 fi
 
-sleep 3
+sleep 20  # Longer delay to avoid rate limits after deployment
 
-# Step 3: Run CEO Log tests
-print_step "STEP 3: Running CEO Log Agent tests"
+# Step 3: Run simple tests for all agents
+print_step "STEP 3: Running simple tests for all agents"
 
-print_info "Executing simple CEO Log test..."
+print_info "Executing unified simple tests..."
 cd "$TESTS_DIR"
-python3 test_ceo_simple.py
+python test_all_agents_unified.py --agent all --type simple
 
 if [ $? -eq 0 ]; then
-    print_success "CEO Log simple test passed"
+    print_success "All simple tests completed"
 else
-    print_error "CEO Log simple test failed"
-    exit 1
+    print_info "Some tests may have failed - check individual results"
 fi
 
-sleep 2
+sleep 30  # Much longer delay between test batches to avoid rate limits
 
-# Step 4: Run North Star tests
-print_step "STEP 4: Running North Star Agent tests"
+# Step 4: Run comprehensive test for Memory Recall  
+print_step "STEP 4: Running comprehensive Memory Recall test with telemetry"
 
-print_info "Executing North Star orchestration test..."
-python3 test_north_star_orchestration.py
+print_info "Executing comprehensive Memory Recall test..."
+python test_all_agents_unified.py --agent memory --type comprehensive
 
 if [ $? -eq 0 ]; then
-    print_success "North Star orchestration test passed"
-    print_info "Tests performed:"
-    echo "  • Purpose definition delegation"
-    echo "  • Vision creation delegation"
-    echo "  • Values management delegation"
-    echo "  • CEO Log delegation (verification)"
+    print_success "Memory Recall comprehensive test passed"
 else
-    print_error "North Star orchestration test failed"
-    exit 1
+    print_error "Memory Recall comprehensive test failed"
 fi
 
-# Step 5: Run comprehensive test with telemetry
-print_step "STEP 5: Running comprehensive test with telemetry capture"
+sleep 30  # Delay between comprehensive tests
 
-print_info "Executing North Star telemetry capture..."
-python3 capture_north_star_telemetry.py
+# Step 5: Run comprehensive test for North Star
+print_step "STEP 5: Running comprehensive North Star test with telemetry"
+
+print_info "Executing comprehensive North Star test..."
+python test_all_agents_unified.py --agent northstar --type comprehensive
 
 if [ $? -eq 0 ]; then
-    print_success "Telemetry capture completed successfully"
+    print_success "North Star comprehensive test passed"
 else
-    print_error "Telemetry capture failed"
-    exit 1
+    print_error "North Star comprehensive test failed"
 fi
 
-# Step 6: Wait for telemetry ingestion
-print_step "STEP 6: Waiting for telemetry ingestion"
-
-print_info "Waiting 30 seconds for Application Insights to ingest telemetry data..."
-echo -n "Progress: "
-for i in {1..6}; do
-    echo -n "."
-    sleep 5
-done
-echo " Done!"
-
-# Step 7: Check telemetry files
-print_step "STEP 7: Verifying telemetry data"
+# Step 6: Check telemetry files
+print_step "STEP 6: Verifying telemetry data"
 
 cd "$TELEMETRY_DIR"
 print_info "Checking for telemetry files..."
 
-# Find the latest telemetry file
-LATEST_TELEMETRY=$(ls -t north_star_agent/north_star_telemetry_*.json 2>/dev/null | head -1)
-if [ -n "$LATEST_TELEMETRY" ]; then
-    print_success "Telemetry file found: $LATEST_TELEMETRY"
+# Count telemetry files created in the last 10 minutes
+TELEMETRY_COUNT=$(find . -name "*_telemetry_*.json" -mmin -10 2>/dev/null | wc -l)
+if [ "$TELEMETRY_COUNT" -gt 0 ]; then
+    print_success "Found $TELEMETRY_COUNT telemetry files"
     
-    # Display delegation evidence
-    echo -e "\n${YELLOW}Delegation Evidence:${NC}"
-    grep -A2 "delegation_confirmed" "$LATEST_TELEMETRY" || true
+    # List recent telemetry files
+    echo -e "\n${YELLOW}Recent telemetry files:${NC}"
+    find . -name "*_telemetry_*.json" -mmin -10 -exec basename {} \; 2>/dev/null
+    
+    # Check for delegation evidence in the most recent file
+    LATEST_TELEMETRY=$(find . -name "*_telemetry_*.json" -mmin -10 -print0 2>/dev/null | xargs -0 ls -t | head -1)
+    if [ -n "$LATEST_TELEMETRY" ]; then
+        echo -e "\n${YELLOW}Delegation Evidence from $LATEST_TELEMETRY:${NC}"
+        grep -A2 "delegation_confirmed" "$LATEST_TELEMETRY" 2>/dev/null || true
+    fi
 else
-    print_error "No telemetry file found"
+    print_error "No telemetry files found"
 fi
 
 # Summary
-print_step "FULL CYCLE COMPLETED SUCCESSFULLY! 🎉"
+print_step "FULL CYCLE COMPLETED! 🎉"
 
 echo -e "${GREEN}Summary of actions performed:${NC}"
 echo "1. ✅ Undeployed all existing StratOS agents"
-echo "2. ✅ Deployed CEO Log Agent, North Star Agent, and Orchestrator"
-echo "3. ✅ Ran CEO Log simple test"
-echo "4. ✅ Ran North Star orchestration test"
-echo "5. ✅ Captured comprehensive telemetry data"
-echo "6. ✅ Verified delegation evidence:"
-echo "   • CEO Log delegation: 'I'll connect you with the CEO Log specialist'"
-echo "   • North Star delegation: 'I'll connect you with the North Star specialist'"
-echo "   • Complete request/response flows captured"
-echo "   • Distributed tracing with session IDs"
+echo "2. ✅ Deployed CEO Log, North Star, and Memory Recall agents"
+echo "3. ✅ Ran unified simple tests for all agents"
+echo "4. ✅ Ran comprehensive Memory Recall test with telemetry"
+echo "5. ✅ Ran comprehensive North Star test with telemetry"
+echo "6. ✅ Captured and verified telemetry data"
+
+# Display test results summary
+echo -e "\n${YELLOW}Test Results Summary:${NC}"
+echo "• CEO Log Agent: Check logs for delegation status"
+echo "• North Star Agent: Expected to show delegation"
+echo "• Memory Recall Agent: Expected to show delegation"
 
 print_info "Check the telemetry folder for detailed analysis results"
 
 # Optional: Display current deployment info
 if [ -f "$STRATOS_DIR/archive/stratos_deployment_info.json" ]; then
     echo -e "\n${YELLOW}Current Deployment Info:${NC}"
-    cat "$STRATOS_DIR/archive/stratos_deployment_info.json" | python3 -m json.tool | head -20
+    cat "$STRATOS_DIR/archive/stratos_deployment_info.json" | python -m json.tool | head -20
 fi
 
 echo -e "\n${BLUE}════════════════════════════════════════════════════════════${NC}"

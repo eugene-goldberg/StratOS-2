@@ -1,0 +1,158 @@
+{
+  "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d",
+  "agent_name": "CEO Log Agent",
+  "capture_time": "2025-05-28T19:48:33.143931",
+  "events": [
+    {
+      "event_type": "telemetry_configured",
+      "data": {
+        "app_insights": false
+      },
+      "timestamp": "2025-05-28T19:47:31.695417",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "deployment_loaded",
+      "data": {
+        "orchestrator_id": "asst_JbK3F5c2pByVzCMA6UPalqvz",
+        "agents": [
+          "ceo_log",
+          "north_star",
+          "memory_recall"
+        ]
+      },
+      "timestamp": "2025-05-28T19:47:31.695511",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "orchestrator_fetch_start",
+      "data": {
+        "orchestrator_id": "asst_JbK3F5c2pByVzCMA6UPalqvz"
+      },
+      "timestamp": "2025-05-28T19:47:31.697572",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "orchestrator_fetch_complete",
+      "data": {
+        "orchestrator_id": "asst_JbK3F5c2pByVzCMA6UPalqvz",
+        "tools_count": 3,
+        "tools": [
+          {
+            "name": "ceo_log_specialist",
+            "id": "asst_9GbqbvEp2JgqlIVfPGdNxPAp"
+          },
+          {
+            "name": "north_star_specialist",
+            "id": "asst_N55FU1r2kdYvbeWTRpipbCPW"
+          },
+          {
+            "name": "memory_recall_specialist",
+            "id": "asst_P02rvCBN8wYmRQABNT141meb"
+          }
+        ]
+      },
+      "timestamp": "2025-05-28T19:47:33.023127",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Generate tags for this CEO log entry: 'Team meeting went well. Discussed Q2 roadmap and AI strategy.'",
+        "target": "CEO Log Agent",
+        "function": "tag_generation"
+      },
+      "timestamp": "2025-05-28T19:47:33.023910",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 156,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the CEO Log specialist for generating tags for the log entry! They have suggested tags like team_meeting, Q2_roadmap, and AI_strategy.",
+        "scenario": "tag_generation"
+      },
+      "timestamp": "2025-05-28T19:47:42.593257",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "ceo_log",
+        "scenario": "tag_generation"
+      },
+      "timestamp": "2025-05-28T19:47:42.593362",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Summarize this strategic log: 'Met with board to discuss expansion plans. Key focus on Asian markets.'",
+        "target": "CEO Log Agent",
+        "function": "summarize_entry"
+      },
+      "timestamp": "2025-05-28T19:47:52.595667",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 176,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the CEO Log specialist for a summary of the strategic log entry about discussing expansion plans with a key focus on Asian markets during a board meeting.",
+        "scenario": "summarize_entry"
+      },
+      "timestamp": "2025-05-28T19:48:02.800469",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "ceo_log",
+        "scenario": "summarize_entry"
+      },
+      "timestamp": "2025-05-28T19:48:02.800573",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "What strategic insights can you extract from recent CEO communications about digital transformation?",
+        "target": "CEO Log Agent",
+        "function": "extract_insights"
+      },
+      "timestamp": "2025-05-28T19:48:12.802440",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 128,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the CEO Log specialist for strategic insights from recent CEO communications about digital transformation!",
+        "scenario": "extract_insights"
+      },
+      "timestamp": "2025-05-28T19:48:23.141985",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "ceo_log",
+        "scenario": "extract_insights"
+      },
+      "timestamp": "2025-05-28T19:48:23.142115",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    },
+    {
+      "event_type": "test_complete",
+      "data": {
+        "tests_run": 3,
+        "delegations": 3
+      },
+      "timestamp": "2025-05-28T19:48:33.143535",
+      "session_id": "fc189d63-1dbe-40b3-8c7d-8bd7e87f557d"
+    }
+  ]
+}

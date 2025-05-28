@@ -1,23 +1,29 @@
 {
-  "deployment_time": "2025-05-28T12:46:40.967610",
+  "deployment_time": "2025-05-28T14:21:19.295325",
   "agents": {
     "ceo_log": {
-      "name": "CEOLogAgent-21e94fc5",
-      "id": "asst_A3nRcrLB0Rz4KFDBWh3lhjqb",
+      "name": "CEOLogAgent-16cceaa3",
+      "id": "asst_9GbqbvEp2JgqlIVfPGdNxPAp",
       "type": "connected_agent"
     },
     "north_star": {
-      "name": "NorthStarAgent-f1a9e0fa",
-      "id": "asst_Y3dtLUavZGE6s52gUvccPP4u",
+      "name": "NorthStarAgent-16cceaa3",
+      "id": "asst_N55FU1r2kdYvbeWTRpipbCPW",
+      "type": "connected_agent"
+    },
+    "memory_recall": {
+      "name": "MemoryRecallAgent-16cceaa3",
+      "id": "asst_P02rvCBN8wYmRQABNT141meb",
       "type": "connected_agent"
     }
   },
   "orchestrator": {
-    "name": "StratOSOrchestratorAgent-20cb9b0b",
-    "id": "asst_T68BO0n3GhnV5Lhh7PttLlxp",
+    "name": "StratOSOrchestratorAgent-16cceaa3",
+    "id": "asst_JbK3F5c2pByVzCMA6UPalqvz",
     "connected_agents": [
       "ceo_log",
-      "north_star"
+      "north_star",
+      "memory_recall"
     ]
   }
 }

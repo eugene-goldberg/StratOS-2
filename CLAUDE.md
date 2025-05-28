@@ -214,3 +214,6 @@ EVIDENCE:
 - None of the Python SDKs have changed
 - If you experience errors or difficulties it must not be attributed to APIs or SDKs
 - Such issues must be interpreted as issues with your logic and you must address them accordingly
+
+## Test Reporting
+- never report on any test as being successful unless you are able to show the detailed telemetry for that test

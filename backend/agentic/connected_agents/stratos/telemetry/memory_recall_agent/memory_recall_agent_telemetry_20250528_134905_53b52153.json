@@ -1,0 +1,179 @@
+{
+  "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea",
+  "agent_name": "Memory Recall Agent",
+  "capture_time": "2025-05-28T18:49:05.139463",
+  "events": [
+    {
+      "event_type": "telemetry_configured",
+      "data": {
+        "app_insights": false
+      },
+      "timestamp": "2025-05-28T18:48:05.877615",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "deployment_loaded",
+      "data": {
+        "orchestrator_id": "asst_PiDg9liSQ6iQV1DjHTitmAfW",
+        "agents": [
+          "ceo_log",
+          "north_star",
+          "memory_recall"
+        ]
+      },
+      "timestamp": "2025-05-28T18:48:05.878239",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "orchestrator_fetch_start",
+      "data": {
+        "orchestrator_id": "asst_PiDg9liSQ6iQV1DjHTitmAfW"
+      },
+      "timestamp": "2025-05-28T18:48:05.879722",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "orchestrator_fetch_complete",
+      "data": {
+        "orchestrator_id": "asst_PiDg9liSQ6iQV1DjHTitmAfW",
+        "tools_count": 3,
+        "tools": [
+          {
+            "name": "ceo_log_specialist",
+            "id": "asst_eA25vKOpKCABKu67vRoZysuP"
+          },
+          {
+            "name": "north_star_specialist",
+            "id": "asst_rI3rI5mUx5DpemA14PAk86dn"
+          },
+          {
+            "name": "memory_recall_specialist",
+            "id": "asst_vA3BCNZF7XOBcRggf448V33m"
+          }
+        ]
+      },
+      "timestamp": "2025-05-28T18:48:06.785765",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Identify patterns in our strategic decision-making over the past quarter",
+        "target": "Memory Recall Agent",
+        "function": "pattern_recognition"
+      },
+      "timestamp": "2025-05-28T18:48:06.787406",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 439,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the Memory Recall specialist for historical insights!\n\nAnalyzing the strategic decision-making patterns over the past quarter, key trends include a focus on market expansion, inn...",
+        "scenario": "pattern_recognition"
+      },
+      "timestamp": "2025-05-28T18:48:24.293319",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "memory_recall",
+        "scenario": "pattern_recognition"
+      },
+      "timestamp": "2025-05-28T18:48:24.293578",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Search for any previous initiatives related to customer experience improvements",
+        "target": "Memory Recall Agent",
+        "function": "context_retrieval"
+      },
+      "timestamp": "2025-05-28T18:48:26.295694",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 270,
+        "delegation_detected": false,
+        "response_preview": "I have retrieved information on previous initiatives related to customer experience improvements within the organization. The insights highlight specific initiatives implemented, lessons learned, and ...",
+        "scenario": "context_retrieval"
+      },
+      "timestamp": "2025-05-28T18:48:37.383366",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Analyze how our strategic priorities have evolved over the last 90 days",
+        "target": "Memory Recall Agent",
+        "function": "historical_analysis"
+      },
+      "timestamp": "2025-05-28T18:48:39.385373",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 150,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the Memory Recall specialist for historical insights!I'll connect you with the Memory Recall specialist for historical insights!",
+        "scenario": "historical_analysis"
+      },
+      "timestamp": "2025-05-28T18:48:57.736058",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "memory_recall",
+        "scenario": "historical_analysis"
+      },
+      "timestamp": "2025-05-28T18:48:57.736376",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "query_sent",
+      "data": {
+        "query": "Find similar situations where we successfully pivoted our product strategy",
+        "target": "Memory Recall Agent",
+        "function": "similarity_search"
+      },
+      "timestamp": "2025-05-28T18:48:59.739696",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "response_received",
+      "data": {
+        "response_length": 119,
+        "delegation_detected": true,
+        "response_preview": "I'll connect you with the Memory Recall specialist for historical insights!\n\n[Memory Recall specialist's response here]",
+        "scenario": "similarity_search"
+      },
+      "timestamp": "2025-05-28T18:49:03.136941",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "delegation_confirmed",
+      "data": {
+        "type": "memory_recall",
+        "scenario": "similarity_search"
+      },
+      "timestamp": "2025-05-28T18:49:03.137160",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    },
+    {
+      "event_type": "test_complete",
+      "data": {
+        "tests_run": 4,
+        "delegations": 3
+      },
+      "timestamp": "2025-05-28T18:49:05.138153",
+      "session_id": "53b52153-2042-4cc2-b514-40c608a5ccea"
+    }
+  ]
+}
