@@ -1,0 +1,85 @@
+Querying telemetry from 2025-05-28 13:07:34.546038+00:00 to 2025-05-28 15:07:34.546038+00:00
+
+Querying AppTraces for agent activity...
+
+Found 29 agent-related traces
+
+--- Trace 1 ---
+Time: 2025-05-28 14:09:27.481832+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.run_step.tool_calls...
+Properties: {"_MS.ResourceAttributeId":"72e3e877-a800-4912-807d-24f1415c781a","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_3lAvWcAQF6MK0GotB88qE8Lo","gen_ai.event.content":"{\"tool_calls\": [{\"id\":...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+--- Trace 2 ---
+Time: 2025-05-28 14:09:27.481629+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.run_step.message_creation...
+Properties: {"_MS.ResourceAttributeId":"72e3e877-a800-4912-807d-24f1415c781a","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_3lAvWcAQF6MK0GotB88qE8Lo","gen_ai.agent.id":"asst_HdROC9uZMh9VZcTrBV5VdssW",...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+--- Trace 3 ---
+Time: 2025-05-28 14:09:17.174834+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.user.message...
+Properties: {"_MS.ResourceAttributeId":"7192e257-c3ab-473b-9656-dac5098024af","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_3lAvWcAQF6MK0GotB88qE8Lo","gen_ai.event.content":"{\"role\": \"user\"}"}...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+--- Trace 4 ---
+Time: 2025-05-28 14:09:15.769238+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.run_step.message_creation...
+Properties: {"_MS.ResourceAttributeId":"7192e257-c3ab-473b-9656-dac5098024af","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_ycJzvpRCkBG89Ku6mYgJKhYd","gen_ai.agent.id":"asst_HdROC9uZMh9VZcTrBV5VdssW",...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+--- Trace 5 ---
+Time: 2025-05-28 14:09:15.768859+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.run_step.tool_calls...
+Properties: {"_MS.ResourceAttributeId":"7192e257-c3ab-473b-9656-dac5098024af","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_ycJzvpRCkBG89Ku6mYgJKhYd","gen_ai.event.content":"{\"tool_calls\": [{\"id\":...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+--- Trace 6 ---
+Time: 2025-05-28 14:09:15.768616+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.run_step.message_creation...
+Properties: {"_MS.ResourceAttributeId":"7192e257-c3ab-473b-9656-dac5098024af","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_ycJzvpRCkBG89Ku6mYgJKhYd","gen_ai.agent.id":"asst_HdROC9uZMh9VZcTrBV5VdssW",...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+--- Trace 7 ---
+Time: 2025-05-28 14:09:07.298318+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.user.message...
+Properties: {"_MS.ResourceAttributeId":"7a84ad15-646a-457a-b2bd-d85319b108de","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_ycJzvpRCkBG89Ku6mYgJKhYd","gen_ai.event.content":"{\"role\": \"user\"}"}...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+--- Trace 8 ---
+Time: 2025-05-28 14:09:06.128457+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.run_step.message_creation...
+Properties: {"_MS.ResourceAttributeId":"7a84ad15-646a-457a-b2bd-d85319b108de","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_zhQiIPbPv2m76GzwKdY7GtCN","gen_ai.agent.id":"asst_HdROC9uZMh9VZcTrBV5VdssW",...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+--- Trace 9 ---
+Time: 2025-05-28 14:09:06.128326+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.run_step.tool_calls...
+Properties: {"_MS.ResourceAttributeId":"7a84ad15-646a-457a-b2bd-d85319b108de","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_zhQiIPbPv2m76GzwKdY7GtCN","gen_ai.event.content":"{\"tool_calls\": [{\"id\":...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+--- Trace 10 ---
+Time: 2025-05-28 14:09:06.128069+00:00
+Service: connected-agents-telemetry-capture
+Message: gen_ai.run_step.message_creation...
+Properties: {"_MS.ResourceAttributeId":"7a84ad15-646a-457a-b2bd-d85319b108de","gen_ai.system":"az.ai.agents","gen_ai.thread.id":"thread_zhQiIPbPv2m76GzwKdY7GtCN","gen_ai.agent.id":"asst_HdROC9uZMh9VZcTrBV5VdssW",...
+OperationId: 47660d5cf8e9ff10cdfdaf2310314677
+
+
+Checking recent traces (last 30 minutes)...
+Found 0 traces in the last 30 minutes
+
+✅ Saved 29 agent traces to agent_telemetry_20250528_100738.json
+
+
+Checking for telemetry transmission logs...
+No telemetry transmission logs found

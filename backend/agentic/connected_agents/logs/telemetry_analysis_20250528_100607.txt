@@ -1,0 +1,185 @@
+Loading telemetry from: agent_telemetry_20250528_100738.json
+Analyzing 29 traces from 2025-05-28T10:07:38.414232
+
+
+============================================================
+Thread: thread_3lAvWcAQF6MK0GotB88qE8Lo
+Agent: asst_HdROC9uZMh9VZcTrBV5VdssW
+Start: 2025-05-28 14:09:27.481832+00:00
+Traces: 3
+
+📥 USER MESSAGE
+   Content: {"role": "user"}
+
+💬 MESSAGE CREATION
+   Message ID: msg_ptXF7Nz6YdjN6fbUfgTgQbfD
+   Duration: 0.00 seconds
+
+🔧 TOOL CALLS
+   Tool: connected_agent
+   ID: call_8c8sCxYSXlmTJqALIJ0OBK8N
+   ✅ DELEGATION TO CONNECTED AGENT!
+   Tokens: 987 in / 27 out
+
+============================================================
+Thread: thread_ycJzvpRCkBG89Ku6mYgJKhYd
+Agent: asst_HdROC9uZMh9VZcTrBV5VdssW
+Start: 2025-05-28 14:09:15.769238+00:00
+Traces: 4
+
+📥 USER MESSAGE
+   Content: {"role": "user"}
+
+💬 MESSAGE CREATION
+   Message ID: msg_P2K0qmTEgZQkBfa2Y3kSQlhZ
+   Duration: 0.00 seconds
+
+🔧 TOOL CALLS
+   Tool: connected_agent
+   ID: call_bG82V7IHnkG5c39alvXivyxv
+   ✅ DELEGATION TO CONNECTED AGENT!
+   Tokens: 1012 in / 23 out
+
+💬 MESSAGE CREATION
+   Message ID: msg_UcPH3NlKNyUramDjuT1TapcT
+   Duration: 1.00 seconds
+
+============================================================
+Thread: thread_zhQiIPbPv2m76GzwKdY7GtCN
+Agent: asst_HdROC9uZMh9VZcTrBV5VdssW
+Start: 2025-05-28 14:09:06.128457+00:00
+Traces: 4
+
+📥 USER MESSAGE
+   Content: {"role": "user"}
+
+💬 MESSAGE CREATION
+   Message ID: msg_lVDAEb18IF8ApCfO61hXkPqM
+   Duration: 1.00 seconds
+
+🔧 TOOL CALLS
+   Tool: connected_agent
+   ID: call_IRVqt0Ne5KcAZoSMaPFHBs4L
+   ✅ DELEGATION TO CONNECTED AGENT!
+   Tokens: 1001 in / 17 out
+
+💬 MESSAGE CREATION
+   Message ID: msg_Iayd8qXQDKMFABdmpUrKGtF5
+   Duration: 1.00 seconds
+
+============================================================
+Thread: thread_NUnzsjVnqwjImPD4psReBwWD
+Agent: unknown
+Start: 2025-05-28 14:06:38.594880+00:00
+Traces: 1
+
+📥 USER MESSAGE
+   Content: {"role": "user"}
+
+============================================================
+Thread: thread_ONGoGWqHZFtKzvWlkDpvs08Z
+Agent: asst_HdROC9uZMh9VZcTrBV5VdssW
+Start: 2025-05-28 14:00:53.918200+00:00
+Traces: 4
+
+📥 USER MESSAGE
+   Content: {"role": "user"}
+
+💬 MESSAGE CREATION
+   Message ID: msg_QbgU6lNAlyV9vRJiNJychuWy
+   Duration: 0.00 seconds
+
+🔧 TOOL CALLS
+   Tool: connected_agent
+   ID: call_OwlMYtmbAhV7Memd8Bnlnvqw
+   ✅ DELEGATION TO CONNECTED AGENT!
+   Tokens: 1020 in / 23 out
+
+💬 MESSAGE CREATION
+   Message ID: msg_P7OOeqTBgaLHGlTq3FL1vEwA
+   Duration: 0.00 seconds
+
+============================================================
+Thread: thread_HaunPR5iqx2nN8xyAworij5c
+Agent: asst_HdROC9uZMh9VZcTrBV5VdssW
+Start: 2025-05-28 14:00:42.554507+00:00
+Traces: 4
+
+📥 USER MESSAGE
+   Content: {"role": "user"}
+
+💬 MESSAGE CREATION
+   Message ID: msg_4FwYo0g5B34WDqRLurtkFq2B
+   Duration: 0.00 seconds
+
+🔧 TOOL CALLS
+   Tool: connected_agent
+   ID: call_ZR74zYxew78ZKAymfdfpiFpf
+   ✅ DELEGATION TO CONNECTED AGENT!
+   Tokens: 1002 in / 17 out
+
+💬 MESSAGE CREATION
+   Message ID: msg_9Hs7rlT9uTgr9Tzrkv8bJHBY
+   Duration: 0.00 seconds
+
+============================================================
+Thread: thread_xP6CD4kkSLQ7g8MUiuWDN3KM
+Agent: unknown
+Start: 2025-05-28 13:59:58.827167+00:00
+Traces: 1
+
+📥 USER MESSAGE
+   Content: {"role": "user"}
+
+============================================================
+Thread: thread_etJf4Uw44S0Utqipg5c9Rp2v
+Agent: asst_HdROC9uZMh9VZcTrBV5VdssW
+Start: 2025-05-28 13:56:16.256384+00:00
+Traces: 4
+
+📥 USER MESSAGE
+   Content: {"role": "user"}
+
+💬 MESSAGE CREATION
+   Message ID: msg_tgDDuiTQ1X7Vm4p7kGQwqgDG
+   Duration: 0.00 seconds
+
+🔧 TOOL CALLS
+   Tool: connected_agent
+   ID: call_AjL9ur3RtUK3vIK00AOgwwXG
+   ✅ DELEGATION TO CONNECTED AGENT!
+   Tokens: 1003 in / 23 out
+
+💬 MESSAGE CREATION
+   Message ID: msg_j0iq2z2k7H1PxHIaPDDdzZGo
+   Duration: 0.00 seconds
+
+============================================================
+Thread: thread_NLYmPq36mdkxXHjBpgmLS3VH
+Agent: asst_HdROC9uZMh9VZcTrBV5VdssW
+Start: 2025-05-28 13:56:05.368628+00:00
+Traces: 4
+
+📥 USER MESSAGE
+   Content: {"role": "user"}
+
+💬 MESSAGE CREATION
+   Message ID: msg_fN5HeomwTuuOPofgEd6ge5b1
+   Duration: 0.00 seconds
+
+🔧 TOOL CALLS
+   Tool: connected_agent
+   ID: call_pNUfBKQukGmAf4dRy5jFNmOp
+   ✅ DELEGATION TO CONNECTED AGENT!
+   Tokens: 1002 in / 17 out
+
+💬 MESSAGE CREATION
+   Message ID: msg_e3WM32idjbGawNJSLTcVeI7j
+   Duration: 1.00 seconds
+
+============================================================
+SUMMARY
+- Total threads: 9
+- Connected agent delegations: 7
+- Unique agents: 1
+  • asst_HdROC9uZMh9VZcTrBV5VdssW

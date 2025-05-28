@@ -1,0 +1,137 @@
+2025-05-28 10:06:07,734 - INFO - [<module>] Loading .env from: /Users/eugene/dev/ai/stratos-2/StratOS-2/backend/agentic/.env
+2025-05-28 10:06:08,857 - INFO - [display_agents] Fetching list of all deployed agents...
+2025-05-28 10:06:08,857 - INFO - [__init__] Environment is configured for ClientSecretCredential
+2025-05-28 10:06:08,859 - INFO - [__init__] ManagedIdentityCredential will use IMDS with client_id: 0d41080b-9595-4f4a-b6ad-9ef01b3f5ecf
+2025-05-28 10:06:08,859 - INFO - [list_all_agents] Connecting to: https://ai.azure.com/api/eastus/agents/v1.0/subscriptions/514bd6d3-2c02-45c6-a86f-29cf262a379a/resourceGroups/semantic-kernel-multi-agent-rg/providers/Microsoft.MachineLearningServices/workspaces/sk-multi-agent-project
+2025-05-28 10:06:08,860 - INFO - [on_request] Request URL: 'https://login.microsoftonline.com/5acd02e3-dfea-4b7c-aab5-1633ffe0403a/oauth2/v2.0/token'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/x-www-form-urlencoded'
+    'User-Agent': 'azsdk-python-identity/1.23.0 Python/3.13.3 (macOS-13.1-arm64-arm-64bit-Mach-O)'
+A body is sent with the request
+2025-05-28 10:06:09,223 - INFO - [on_response] Response status: 200
+Response headers:
+    'Cache-Control': 'no-store, no-cache'
+    'Pragma': 'no-cache'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Expires': '-1'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'P3P': 'REDACTED'
+    'x-ms-request-id': '36f795bf-b79d-45d0-9288-6309c75ced00'
+    'x-ms-ests-server': 'REDACTED'
+    'x-ms-srs': 'REDACTED'
+    'Content-Security-Policy-Report-Only': 'REDACTED'
+    'X-XSS-Protection': 'REDACTED'
+    'Set-Cookie': 'REDACTED'
+    'Set-Cookie': 'REDACTED'
+    'Set-Cookie': 'REDACTED'
+    'Date': 'Wed, 28 May 2025 15:06:08 GMT'
+    'Content-Length': '1604'
+2025-05-28 10:06:09,224 - INFO - [get_token_info] DefaultAzureCredential acquired a token from EnvironmentCredential
+2025-05-28 10:06:09,225 - INFO - [on_request] Request URL: 'https://ai.azure.com/api/eastus/agents/v1.0/subscriptions/514bd6d3-2c02-45c6-a86f-29cf262a379a/resourceGroups/semantic-kernel-multi-agent-rg/providers/Microsoft.MachineLearningServices/workspaces/sk-multi-agent-project/assistants?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '4913f0f0-3bd5-11f0-ae9e-caa77f602aca'
+    'User-Agent': 'semantic-kernel-python/1.31.0-AIProjectClient azsdk-python-ai-agents/1.0.0 Python/3.13.3 (macOS-13.1-arm64-arm-64bit-Mach-O)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-05-28 10:06:10,653 - INFO - [on_response] Response status: 200
+Response headers:
+    'Date': 'Wed, 28 May 2025 15:06:10 GMT'
+    'Content-Type': 'application/json'
+    'Transfer-Encoding': 'chunked'
+    'Connection': 'keep-alive'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Content-Encoding': 'REDACTED'
+    'Set-Cookie': 'REDACTED'
+    'x-azure-ref': 'REDACTED'
+    'X-Cache': 'REDACTED'
+2025-05-28 10:06:10,658 - INFO - [on_request] Request URL: 'https://ai.azure.com/api/eastus/agents/v1.0/subscriptions/514bd6d3-2c02-45c6-a86f-29cf262a379a/resourceGroups/semantic-kernel-multi-agent-rg/providers/Microsoft.MachineLearningServices/workspaces/sk-multi-agent-project/assistants?api-version=REDACTED&after=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '4a263f0c-3bd5-11f0-ae9e-caa77f602aca'
+    'User-Agent': 'semantic-kernel-python/1.31.0-AIProjectClient azsdk-python-ai-agents/1.0.0 Python/3.13.3 (macOS-13.1-arm64-arm-64bit-Mach-O)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-05-28 10:06:11,136 - INFO - [on_response] Response status: 200
+Response headers:
+    'Date': 'Wed, 28 May 2025 15:06:11 GMT'
+    'Content-Type': 'application/json'
+    'Content-Length': '96'
+    'Connection': 'keep-alive'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Set-Cookie': 'REDACTED'
+    'x-azure-ref': 'REDACTED'
+    'X-Cache': 'REDACTED'
+    'Accept-Ranges': 'REDACTED'
+
+====================================================================================================
+DEPLOYED AGENTS IN AZURE AI AGENT SERVICE
+====================================================================================================
+Total agents: 4
+====================================================================================================
+
+1. MultiToolOrchestratorAgent-88078135 (ID: asst_P5dKkKv2U5GvUxb8DGZcC1z1)
+   Model: gpt-35-turbo
+   Created: 2025-05-28 14:34:47+00:00
+   Tools: 3
+   Instructions Preview: You are an orchestrator agent with MANDATORY delegation rules for specific types of requests. You MUST follow these directives exactly for proper tool delegation. CRITICAL PROTOCOL FOR ALL DELEGATIONS...
+
+2. WeatherAgent-96d16cb3 (ID: asst_Xy7XJVhjgDofZN16auLwLXcg)
+   Model: gpt-35-turbo
+   Created: 2025-05-28 14:34:47+00:00
+   Instructions Preview: You are a helpful weather information agent that provides accurate, real-time weather data.
+
+You have access to weather tools that connect to the weather.gov API to get live weather data for US cities...
+
+3. CalculatorAgent-6f7ebe56 (ID: asst_a4hGLSyQUdwSOKjfYbwKPnq2)
+   Model: gpt-35-turbo
+   Created: 2025-05-28 14:34:46+00:00
+   Instructions Preview: You are a precise mathematical calculator agent. Your role is to:
+
+1. Perform accurate mathematical calculations
+2. Show your work step-by-step when solving complex problems
+3. Provide clear, precise ...
+
+4. SpecializedEnthusiasticGreeterAgent-fe6cc277-e9c3-484c-8b5b-d60cdc55b57d (ID: asst_xJuz0RR2Zy4EkfFaCtNdcnms)
+   Model: gpt-35-turbo
+   Created: 2025-05-28 14:34:46+00:00
+   Instructions Preview: You are the 'Ultra Exuberant Greeter Bot'! Your ONLY function is to provide an extremely enthusiastic, over-the-top, and uniquely friendly greeting. For example, if activated, you should respond with ...
+
+====================================================================================================
+SUMMARY BY CREATION DATE
+====================================================================================================
+
+2025-05-28: 4 agents
+  - MultiToolOrchestratorAgent-88078135
+  - WeatherAgent-96d16cb3
+  - CalculatorAgent-6f7ebe56
+  - SpecializedEnthusiasticGreeterAgent-fe6cc277-e9c3-484c-8b5b-d60cdc55b57d
