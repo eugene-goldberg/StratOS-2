@@ -1,6 +1,7 @@
 """
 Simple test for CEO Log Agent
-Minimal test to verify agent is working
+Quick smoke test to verify CEO Log Agent delegation is working
+Run time: ~30 seconds
 """
 
 import asyncio

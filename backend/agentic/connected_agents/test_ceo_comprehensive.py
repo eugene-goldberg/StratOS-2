@@ -1,6 +1,7 @@
 """
-Test CEO Log Agent with Telemetry
-Captures telemetry traces to verify delegation flow
+Comprehensive test for CEO Log Agent with Telemetry
+Tests all CEO Log functions and captures telemetry for verification
+Run time: ~2-3 minutes
 """
 
 import asyncio
