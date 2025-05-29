@@ -1,0 +1,16 @@
+{
+  "agent_type": "ceo_log",
+  "agent_id": "asst_k51LfWISn4jf0CKwy5qJ3lQQ",
+  "agent_name": "CEOLogAgent-29df5e4f-82a6-43e3-a699-9cbb204894a9",
+  "model": "gpt-35-turbo",
+  "tools": [
+    "GenerateTags",
+    "GetDelegationMetrics",
+    "GetLogSummary",
+    "SaveEntry",
+    "SearchEntries"
+  ],
+  "deployed_at": "2025-05-28T21:33:15.792530",
+  "description": "CEO Log Agent - Manages executive thoughts, observations, and strategic insights",
+  "tracking_enabled": true
+}

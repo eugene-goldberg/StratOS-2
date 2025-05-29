@@ -183,3 +183,6 @@ build/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Telemetry log files
+backend/agentic/connected_agents/stratos_telemetry_*.log

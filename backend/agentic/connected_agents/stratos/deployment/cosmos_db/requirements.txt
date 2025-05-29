@@ -1,0 +1,14 @@
+# Cosmos DB Setup Script Dependencies
+
+# Azure SDK
+azure-cosmos>=4.5.1
+azure-identity>=1.15.0
+azure-keyvault-secrets>=4.7.0
+azure-monitor-query>=1.2.0
+azure-mgmt-cosmosdb>=9.3.0
+azure-mgmt-authorization>=4.0.0
+azure-mgmt-monitor>=6.0.1
+azure-mgmt-keyvault>=10.2.3
+
+# Utilities
+python-dotenv>=1.0.0

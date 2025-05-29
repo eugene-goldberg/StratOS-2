@@ -1,0 +1,189 @@
+{
+  "schemaVersion": "1.0",
+  "lastUpdated": "2025-05-28T22:11:05.842657",
+  "container": {
+    "name": "CEOLogs",
+    "partitionKey": "/userId",
+    "uniqueKeys": [],
+    "defaultTTL": -1
+  },
+  "documentSchema": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the log entry",
+      "required": true
+    },
+    "userId": {
+      "type": "string",
+      "description": "User identifier (partition key)",
+      "required": true
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "ISO 8601",
+      "description": "When the log entry was created",
+      "required": true
+    },
+    "logEntry": {
+      "type": "object",
+      "required": true,
+      "properties": {
+        "content": {
+          "type": "string",
+          "maxLength": 5000,
+          "description": "The actual log content",
+          "required": true
+        },
+        "sentiment": {
+          "type": "string",
+          "enum": [
+            "positive",
+            "negative",
+            "neutral"
+          ],
+          "default": "neutral"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confidence score for sentiment analysis"
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User-defined tags for categorization"
+    },
+    "strategicThemes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "AI-identified strategic themes"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata about the log entry"
+    },
+    "analysis": {
+      "type": "object",
+      "properties": {
+        "keyInsights": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "actionItems": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "riskFactors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "createdBy": {
+      "type": "string",
+      "default": "CEOLogAgent"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "ISO 8601",
+      "description": "Server timestamp when created"
+    },
+    "modifiedAt": {
+      "type": "string",
+      "format": "ISO 8601",
+      "description": "Server timestamp when last modified"
+    },
+    "version": {
+      "type": "integer",
+      "description": "Document version number"
+    }
+  },
+  "storedProcedures": [
+    {
+      "name": "bulkCreateLogs",
+      "description": "Bulk create multiple log entries",
+      "parameters": [
+        "logs: Array<LogEntry>"
+      ],
+      "returns": "{ created: number, errors: Array }"
+    },
+    {
+      "name": "getLogsSummary",
+      "description": "Get summary statistics for user's logs",
+      "parameters": [
+        "userId: string",
+        "days: number"
+      ],
+      "returns": "{ totalLogs, sentimentCounts, topTags, topThemes, dailyCounts }"
+    },
+    {
+      "name": "searchLogsWithHighlights",
+      "description": "Search logs with highlighted results",
+      "parameters": [
+        "userId: string",
+        "searchTerm: string",
+        "limit: number"
+      ],
+      "returns": "{ searchTerm, resultCount, results: Array }"
+    },
+    {
+      "name": "aggregateStrategicInsights",
+      "description": "Aggregate strategic insights over time period",
+      "parameters": [
+        "userId: string",
+        "startDate: string",
+        "endDate: string"
+      ],
+      "returns": "{ keyInsights, actionItems, riskFactors, sentimentTrend, themeEvolution }"
+    }
+  ],
+  "triggers": [
+    {
+      "name": "validateLogEntry",
+      "type": "Pre",
+      "operation": "Create",
+      "description": "Validates and normalizes log entries before creation"
+    },
+    {
+      "name": "updateModifiedTime",
+      "type": "Pre",
+      "operation": "Replace",
+      "description": "Updates modification timestamp and version"
+    }
+  ],
+  "indexes": [
+    {
+      "kind": "Range",
+      "paths": [
+        "/timestamp/?",
+        "/userId/?"
+      ]
+    },
+    {
+      "kind": "Composite",
+      "paths": [
+        {
+          "path": "/timestamp",
+          "order": "descending"
+        },
+        {
+          "path": "/userId",
+          "order": "ascending"
+        }
+      ]
+    }
+  ]
+}

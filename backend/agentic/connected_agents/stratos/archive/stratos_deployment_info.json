@@ -1,35 +1,29 @@
 {
-  "deployment_time": "2025-05-28T15:23:40.395784",
+  "deployment_time": "2025-05-28T21:51:57.311010",
   "agents": {
     "ceo_log": {
-      "name": "CEOLogAgent-5a2fcfbd",
-      "id": "asst_BZUv6JAHU4wUzdpJXyOTZ6Q5",
+      "name": "CEOLogAgent-5f3382e4",
+      "id": "asst_nbyTtjWspeOEUH5RurvFPNOF",
       "type": "connected_agent"
     },
     "north_star": {
-      "name": "NorthStarAgent-5a2fcfbd",
-      "id": "asst_9OtYgiKrsm6pkLN1gC02WqP4",
+      "name": "NorthStarAgent-5f3382e4",
+      "id": "asst_kYWqsCwR0JwbovT4zLbRAhNy",
       "type": "connected_agent"
     },
     "memory_recall": {
-      "name": "MemoryRecallAgent-5a2fcfbd",
-      "id": "asst_KqSl2nZr1nuQRXnb059gXPgU",
-      "type": "connected_agent"
-    },
-    "preference_learning": {
-      "name": "PreferenceLearningAgent-5a2fcfbd",
-      "id": "asst_qcT41aEXbpGJTTUZipfNcpK6",
+      "name": "MemoryRecallAgent-5f3382e4",
+      "id": "asst_SkvhW3DZTtnufdTbmSqkFcpa",
       "type": "connected_agent"
     }
   },
   "orchestrator": {
-    "name": "StratOSOrchestratorAgent-5a2fcfbd",
-    "id": "asst_3qqbta7VL487UqbddPCsAmr1",
+    "name": "StratOSOrchestratorAgent-5f3382e4",
+    "id": "asst_LVZnISMFNOuGcqlr4js5IDvb",
     "connected_agents": [
       "ceo_log",
       "north_star",
-      "memory_recall",
-      "preference_learning"
+      "memory_recall"
     ]
   }
 }
