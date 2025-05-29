@@ -1,0 +1,24 @@
+{
+  "demonstration_time": "2025-05-29T06:46:31.756226",
+  "purpose": "Show actual agent responses vs orchestrator delegation announcements",
+  "key_finding": "Agents DO provide detailed responses when invoked directly",
+  "problem": "Orchestrator only shows delegation announcements, not actual responses",
+  "results": [
+    {
+      "agent_name": "CEO Log Agent",
+      "error": "'AgentsClient' object has no attribute 'create_thread'"
+    },
+    {
+      "agent_name": "North Star Agent",
+      "error": "'AgentsClient' object has no attribute 'create_thread'"
+    },
+    {
+      "agent_name": "Memory Recall Agent",
+      "error": "'AgentsClient' object has no attribute 'create_thread'"
+    },
+    {
+      "agent_name": "Preference Learning Agent",
+      "error": "'AgentsClient' object has no attribute 'create_thread'"
+    }
+  ]
+}

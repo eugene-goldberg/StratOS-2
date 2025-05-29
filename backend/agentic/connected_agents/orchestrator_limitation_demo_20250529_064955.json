@@ -1,0 +1,23 @@
+{
+  "demonstration_time": "2025-05-29T06:49:55.877800",
+  "limitation": "Orchestrator returns only delegation announcements, not agent responses",
+  "test_results": [
+    {
+      "test": "CEO Log Request",
+      "error": "'coroutine' object has no attribute 'invoke'"
+    },
+    {
+      "test": "North Star Query",
+      "error": "'coroutine' object has no attribute 'invoke'"
+    },
+    {
+      "test": "Memory Recall",
+      "error": "'coroutine' object has no attribute 'invoke'"
+    }
+  ],
+  "statistics": {
+    "total_tests": 3,
+    "delegation_only": 0,
+    "percentage": "N/A"
+  }
+}

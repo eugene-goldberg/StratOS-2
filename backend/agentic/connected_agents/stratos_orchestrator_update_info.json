@@ -1,0 +1,12 @@
+{
+  "orchestrator_id": "asst_LVZnISMFNOuGcqlr4js5IDvb",
+  "update_time": "2025-05-29T07:38:09.502270",
+  "instructions_based_on": "CEO_TELEMETRY_EVIDENCE.json",
+  "key_features": [
+    "DIRECTIVE structure from working example",
+    "Explicit STEP X.3: Present the tool's output as provided",
+    "Clear delegation protocols for each agent",
+    "Example output format showing tool inclusion",
+    "Emphasis on including tool outputs in response"
+  ]
+}
