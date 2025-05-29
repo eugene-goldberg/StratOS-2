@@ -1,0 +1,22 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "COSMOS_DB_ENDPOINT": "https://stratos-ceo-logs.documents.azure.com:443/",
+    "COSMOS_DB_KEY": "",
+    "COSMOS_DB_DATABASE": "StratOSDatabase",
+    "COSMOS_DB_CONTAINER_LOGS": "ceoLogEntries",
+    "COSMOS_DB_CONTAINER_ANALYTICS": "logAnalytics",
+    "AZURE_OPENAI_ENDPOINT": "",
+    "AZURE_OPENAI_KEY": "",
+    "AZURE_OPENAI_DEPLOYMENT": "gpt-35-turbo",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "",
+    "CACHE_TTL_SECONDS": "300",
+    "MAX_SEARCH_RESULTS": "100"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*"
+  }
+}

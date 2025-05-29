@@ -1,0 +1,16 @@
+{
+  "agent_id": "asst_85MtpKLDOQA9ttsUckByGTKD",
+  "agent_name": "CEOLogAgent-7d6032fd",
+  "deployment_time": "2025-05-29T13:35:02.652098",
+  "model": "gpt-35-turbo",
+  "has_azure_function_integration": true,
+  "azure_functions": {
+    "base_url": "https://stratos-ceo-log-functions.azurewebsites.net/api",
+    "endpoints": [
+      "SaveCEOLog",
+      "SearchCEOLogs",
+      "AnalyzeLogs",
+      "GetInsights"
+    ]
+  }
+}

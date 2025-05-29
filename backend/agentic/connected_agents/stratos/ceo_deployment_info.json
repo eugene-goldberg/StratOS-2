@@ -1,0 +1,14 @@
+{
+  "ceo_log_agent_cosmos_id": "asst_qOFhcSTQ8RmUmUSP7vR1frIG",
+  "ceo_log_agent_cosmos_name": "CEOLogAgentCosmos-20250529-115802",
+  "azure_openai_endpoint": "https://sk-multi-agent-openai.openai.azure.com/",
+  "model": "gpt-35-turbo",
+  "function_endpoints": {
+    "save": "https://stratos-ceo-log-functions.azurewebsites.net/api/saveceolog",
+    "search": "https://stratos-ceo-log-functions.azurewebsites.net/api/searchceologs",
+    "analyze": "https://stratos-ceo-log-functions.azurewebsites.net/api/analyzelogs",
+    "insights": "https://stratos-ceo-log-functions.azurewebsites.net/api/getinsights"
+  },
+  "deployed_at": "2025-05-29T11:58:03.132499",
+  "has_cosmos_integration": true
+}

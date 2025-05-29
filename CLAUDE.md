@@ -217,3 +217,5 @@ EVIDENCE:
 
 ## Test Reporting
 - never report on any test as being successful unless you are able to show the detailed telemetry for that test
+
+do not stop , do not provide any progress reports, do not claim any tasks as being completed, do not claim any API     and environment changes as the reason for failure until you have a fully functional end to end flow confirmed which   involved azure function, cosmos db and the ceo log agent 

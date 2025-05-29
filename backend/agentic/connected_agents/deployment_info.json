@@ -17,5 +17,10 @@
       "id": "asst_P5dKkKv2U5GvUxb8DGZcC1z1",
       "name": "MultiToolOrchestratorAgent-88078135"
     }
-  }
+  },
+  "ceo_log_agent_id": "asst_wyLHPFlQUA3MB69xjMuopI0U",
+  "ceo_log_agent_name": "CEOLogAgentFinal-20250529-161148",
+  "ceo_function_endpoint": "https://stratos-ceo-log-functions.azurewebsites.net/api",
+  "deployed_at": "2025-05-29T16:11:49.690443",
+  "has_azure_function_integration": true
 }

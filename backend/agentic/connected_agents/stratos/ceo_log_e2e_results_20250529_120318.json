@@ -1,0 +1,59 @@
+{
+  "test_run": "2025-05-29T12:03:18.671204",
+  "user_id": "e2e_test_user_1748538187",
+  "summary": {
+    "total": 7,
+    "passed": 0,
+    "failed": 6,
+    "skipped": 1
+  },
+  "component_status": {
+    "ceo_log_agent": false,
+    "azure_functions": false,
+    "cosmos_db": false
+  },
+  "results": [
+    {
+      "test": "Azure Function Health Check",
+      "passed": false,
+      "duration_ms": 30.725955963134766,
+      "error": "HTTPSConnectionPool(host='ceo-log-functions.azurewebsites.net', port=443): Max retries exceeded with url: /api/CheckEnv (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x1083eb4d0>: Failed to resolve 'ceo-log-functions.azurewebsites.net' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "test": "Save Entry via Agent",
+      "passed": false,
+      "duration_ms": 1309.3230724334717,
+      "error": "(None) No assistant found with id 'asst_qOFhcSTQ8RmUmUSP7vR1frIG'.\nCode: None\nMessage: No assistant found with id 'asst_qOFhcSTQ8RmUmUSP7vR1frIG'."
+    },
+    {
+      "test": "Azure Function Direct Save",
+      "passed": false,
+      "duration_ms": 6.03795051574707,
+      "error": "HTTPSConnectionPool(host='ceo-log-functions.azurewebsites.net', port=443): Max retries exceeded with url: /api/SaveCEOLog (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x108476c10>: Failed to resolve 'ceo-log-functions.azurewebsites.net' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "test": "Cosmos DB Verification",
+      "passed": false,
+      "skipped": true,
+      "reason": "Cosmos DB client not initialized"
+    },
+    {
+      "test": "Search Entries via Agent",
+      "passed": false,
+      "duration_ms": 848.7298488616943,
+      "error": "(None) No assistant found with id 'asst_qOFhcSTQ8RmUmUSP7vR1frIG'.\nCode: None\nMessage: No assistant found with id 'asst_qOFhcSTQ8RmUmUSP7vR1frIG'."
+    },
+    {
+      "test": "Azure Function Search",
+      "passed": false,
+      "duration_ms": 2.7098655700683594,
+      "error": "HTTPSConnectionPool(host='ceo-log-functions.azurewebsites.net', port=443): Max retries exceeded with url: /api/SearchCEOLogs (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x108393890>: Failed to resolve 'ceo-log-functions.azurewebsites.net' ([Errno 8] nodename nor servname provided, or not known)\"))"
+    },
+    {
+      "test": "Analysis & Insights",
+      "passed": false,
+      "duration_ms": 1084.646224975586,
+      "error": "(None) No assistant found with id 'asst_qOFhcSTQ8RmUmUSP7vR1frIG'.\nCode: None\nMessage: No assistant found with id 'asst_qOFhcSTQ8RmUmUSP7vR1frIG'."
+    }
+  ]
+}

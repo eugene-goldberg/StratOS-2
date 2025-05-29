@@ -1,0 +1,16 @@
+{
+  "ceo_log_agent": {
+    "id": "asst_9UphrHMFGC2QihVXrtOHDcND",
+    "name": "CEOLogAgent-20250529-121024",
+    "type": "azure_ai_agent_service",
+    "has_function_tools": true,
+    "has_code_interpreter": true,
+    "function_endpoints": {
+      "save": "https://stratos-ceo-log-functions.azurewebsites.net/api/saveceolog",
+      "search": "https://stratos-ceo-log-functions.azurewebsites.net/api/searchceologs",
+      "analyze": "https://stratos-ceo-log-functions.azurewebsites.net/api/analyzelogs",
+      "insights": "https://stratos-ceo-log-functions.azurewebsites.net/api/getinsights"
+    },
+    "deployed_at": "2025-05-29T12:10:27.157707"
+  }
+}
