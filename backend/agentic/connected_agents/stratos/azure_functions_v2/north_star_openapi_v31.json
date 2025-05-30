@@ -1,0 +1,115 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "North Star Operations API",
+    "description": "API for managing North Star strategic foundation elements",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://stratos-north-star-v2.azurewebsites.net"
+    }
+  ],
+  "paths": {
+    "/api/north-star-operations": {
+      "post": {
+        "description": "Execute North Star operations for managing strategic foundation",
+        "operationId": "ExecuteNorthStarOperation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "enum": ["managePurpose", "manageVision", "manageValues", "manageStrategicGoals", "validateAlignment", "getNorthStarSummary"],
+                    "description": "The operation to perform"
+                  },
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization identifier"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": ["get", "set", "add", "remove", "list", "create", "update", "delete"],
+                    "description": "The action to perform"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "Purpose statement"
+                  },
+                  "vision": {
+                    "type": "string",
+                    "description": "Vision statement"
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "Value name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description text"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Goal title"
+                  },
+                  "goalId": {
+                    "type": "string",
+                    "description": "Goal identifier"
+                  },
+                  "parentId": {
+                    "type": "string",
+                    "description": "Parent goal ID"
+                  },
+                  "timeframe": {
+                    "type": "string",
+                    "description": "Goal timeframe"
+                  },
+                  "elementType": {
+                    "type": "string",
+                    "enum": ["initiative", "decision", "action", "metric"],
+                    "description": "Element type for validation"
+                  },
+                  "elementContent": {
+                    "type": "string",
+                    "description": "Content to validate"
+                  }
+                },
+                "required": ["operation", "organizationId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyHeader": {
+        "type": "apiKey",
+        "name": "x-functions-key",
+        "in": "header"
+      }
+    }
+  }
+}

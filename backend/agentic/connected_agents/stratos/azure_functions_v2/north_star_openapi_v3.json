@@ -1,0 +1,142 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "North Star Operations API",
+    "description": "API for managing North Star strategic foundation elements",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://stratos-north-star-v2.azurewebsites.net"
+    }
+  ],
+  "paths": {
+    "/api/north-star-operations": {
+      "post": {
+        "operationId": "ExecuteNorthStarOperation",
+        "summary": "Execute North Star operations",
+        "description": "Execute operations for managing strategic foundation elements",
+        "parameters": [
+          {
+            "name": "x-functions-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "fRvKUW-I0NseHY8728jcJtx6E7rxdvKUrK2pBiLNFEGBAzFuVfQ7jw=="
+            },
+            "description": "Azure Function API Key"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "enum": ["managePurpose", "manageVision", "manageValues", "manageStrategicGoals", "validateAlignment", "getNorthStarSummary"],
+                    "description": "The operation to perform"
+                  },
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization ID"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": ["get", "set", "list", "add", "remove", "create", "update", "delete"],
+                    "description": "The action to perform"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "Organization purpose"
+                  },
+                  "vision": {
+                    "type": "string",
+                    "description": "Organization vision"
+                  },
+                  "values": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Core values"
+                  },
+                  "goalId": {
+                    "type": "string",
+                    "description": "Goal ID"
+                  },
+                  "goalName": {
+                    "type": "string",
+                    "description": "Goal name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Goal description"
+                  },
+                  "targetDate": {
+                    "type": "string",
+                    "description": "Target date"
+                  },
+                  "parentGoalId": {
+                    "type": "string",
+                    "description": "Parent goal ID"
+                  },
+                  "elementType": {
+                    "type": "string",
+                    "description": "Element type for validation"
+                  },
+                  "elementContent": {
+                    "type": "string",
+                    "description": "Element content for validation"
+                  }
+                },
+                "required": ["operation", "organizationId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

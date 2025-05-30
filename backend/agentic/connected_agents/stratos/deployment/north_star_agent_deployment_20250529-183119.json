@@ -1,0 +1,23 @@
+{
+  "agent_id": "asst_7fvXVaebkd4fvb15ySIspxXm",
+  "agent_name": "NorthStarAgent-20250529-183119",
+  "deployment_time": "2025-05-29T18:31:20.751391",
+  "model": "gpt-35-turbo",
+  "has_function_tools": true,
+  "azure_functions": {
+    "base_url": "https://stratos-north-star-functions.azurewebsites.net/api",
+    "endpoints": [
+      "ManagePurpose",
+      "ManageVision",
+      "ManageValues",
+      "ManageStrategicGoals",
+      "ValidateAlignment",
+      "GetNorthStarSummary"
+    ]
+  },
+  "cosmos_db": {
+    "account": "stratos-ceo-logs-db",
+    "database": "StratOSData",
+    "container": "NorthStar"
+  }
+}

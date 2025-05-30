@@ -1,0 +1,9 @@
+$schema: https://azuremlschemas.azureedge.net/latest/workspaceConnection.schema.json
+name: NorthStarFunctionConnection
+type: custom
+target: https://stratos-north-star-v2.azurewebsites.net
+credentials:
+  type: api_key
+  key: fRvKUW-I0NseHY8728jcJtx6E7rxdvKUrK2pBiLNFEGBAzFuVfQ7jw==
+metadata:
+  x-functions-key: fRvKUW-I0NseHY8728jcJtx6E7rxdvKUrK2pBiLNFEGBAzFuVfQ7jw==

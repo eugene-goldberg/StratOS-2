@@ -21,6 +21,9 @@
   "ceo_log_agent_id": "asst_wyLHPFlQUA3MB69xjMuopI0U",
   "ceo_log_agent_name": "CEOLogAgentFinal-20250529-161148",
   "ceo_function_endpoint": "https://stratos-ceo-log-functions.azurewebsites.net/api",
-  "deployed_at": "2025-05-29T16:11:49.690443",
-  "has_azure_function_integration": true
+  "deployed_at": "2025-05-29T18:31:20.753106",
+  "has_azure_function_integration": true,
+  "north_star_agent_id": "asst_7fvXVaebkd4fvb15ySIspxXm",
+  "north_star_agent_name": "NorthStarAgent-20250529-183119",
+  "north_star_function_endpoint": "https://stratos-north-star-functions.azurewebsites.net/api"
 }

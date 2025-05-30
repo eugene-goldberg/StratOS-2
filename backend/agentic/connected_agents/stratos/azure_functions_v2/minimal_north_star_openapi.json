@@ -1,0 +1,67 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "North Star API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://stratos-north-star-v2.azurewebsites.net"
+    }
+  ],
+  "paths": {
+    "/api/north-star-operations": {
+      "post": {
+        "operationId": "executeNorthStarOperation",
+        "summary": "Execute North Star operation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "description": "The operation to perform"
+                  },
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization identifier"
+                  }
+                },
+                "required": ["operation", "organizationId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "name": "x-functions-key",
+        "in": "header"
+      }
+    }
+  }
+}

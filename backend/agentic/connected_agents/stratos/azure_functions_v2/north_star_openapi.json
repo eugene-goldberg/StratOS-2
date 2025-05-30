@@ -1,0 +1,265 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "North Star Operations API",
+    "version": "1.0.0",
+    "description": "Azure Function API for managing North Star strategic foundation elements"
+  },
+  "servers": [
+    {
+      "url": "https://stratos-north-star-v2.azurewebsites.net"
+    }
+  ],
+  "paths": {
+    "/api/north-star-operations": {
+      "post": {
+        "operationId": "executeNorthStarOperation",
+        "summary": "Execute North Star operation",
+        "description": "Perform operations on North Star elements including purpose, vision, values, goals, and alignment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "enum": ["managePurpose", "manageVision", "manageValues", "manageStrategicGoals", "validateAlignment", "getNorthStarSummary"],
+                    "description": "The operation to perform"
+                  },
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization identifier"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": ["get", "set", "add", "remove", "list", "create", "update", "delete"],
+                    "description": "The action to perform (varies by operation)"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "Purpose statement (for managePurpose set action)"
+                  },
+                  "vision": {
+                    "type": "string",
+                    "description": "Vision statement (for manageVision set action)"
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "Value name (for manageValues add/remove)"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description for values or goals"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Goal title (for strategic goals)"
+                  },
+                  "goalId": {
+                    "type": "string",
+                    "description": "Goal identifier (for update/delete/get)"
+                  },
+                  "parentId": {
+                    "type": "string",
+                    "description": "Parent goal ID for hierarchy"
+                  },
+                  "timeframe": {
+                    "type": "string",
+                    "description": "Goal timeframe"
+                  },
+                  "metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Success metrics for goals"
+                  },
+                  "elementType": {
+                    "type": "string",
+                    "enum": ["initiative", "decision", "action", "metric"],
+                    "description": "Type of element for alignment validation"
+                  },
+                  "elementContent": {
+                    "type": "string",
+                    "description": "Content to validate for alignment"
+                  }
+                },
+                "required": ["operation", "organizationId"]
+              },
+              "examples": {
+                "setPurpose": {
+                  "value": {
+                    "operation": "managePurpose",
+                    "organizationId": "org-123",
+                    "action": "set",
+                    "purpose": "To accelerate human potential through innovative technology"
+                  }
+                },
+                "addValue": {
+                  "value": {
+                    "operation": "manageValues",
+                    "organizationId": "org-123",
+                    "action": "add",
+                    "value": "Innovation",
+                    "description": "Constantly pushing boundaries"
+                  }
+                },
+                "createGoal": {
+                  "value": {
+                    "operation": "manageStrategicGoals",
+                    "organizationId": "org-123",
+                    "action": "create",
+                    "title": "Expand Market Reach",
+                    "description": "Enter new geographic markets",
+                    "timeframe": "2025-2027"
+                  }
+                },
+                "validateAlignment": {
+                  "value": {
+                    "operation": "validateAlignment",
+                    "organizationId": "org-123",
+                    "elementType": "initiative",
+                    "elementContent": "Launch AI-powered customer service platform"
+                  }
+                },
+                "getSummary": {
+                  "value": {
+                    "operation": "getNorthStarSummary",
+                    "organizationId": "org-123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "organizationId": {
+                      "type": "string"
+                    },
+                    "purpose": {
+                      "type": "object",
+                      "properties": {
+                        "statement": {
+                          "type": "string"
+                        },
+                        "lastUpdated": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "vision": {
+                      "type": "object",
+                      "properties": {
+                        "statement": {
+                          "type": "string"
+                        },
+                        "lastUpdated": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "values": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "goal": {
+                      "type": "object"
+                    },
+                    "goals": {
+                      "type": "array"
+                    },
+                    "alignmentScore": {
+                      "type": "number"
+                    },
+                    "alignmentLevel": {
+                      "type": "string"
+                    },
+                    "recommendations": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "northStar": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "function_key": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "function_key": {
+        "type": "apiKey",
+        "name": "x-functions-key",
+        "in": "header",
+        "description": "API key for accessing the Azure Function"
+      }
+    }
+  }
+}

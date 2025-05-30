@@ -1,0 +1,360 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "North Star Functions API",
+    "version": "1.0.0",
+    "description": "Azure Functions for managing organizational North Star elements"
+  },
+  "servers": [
+    {
+      "url": "https://stratos-north-star-functions.azurewebsites.net",
+      "description": "Production Azure Function App"
+    }
+  ],
+  "paths": {
+    "/api/ManagePurpose": {
+      "post": {
+        "operationId": "ManagePurpose",
+        "summary": "Manage organizational purpose",
+        "description": "Get or set the organizational purpose statement",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization ID"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": ["get", "set"],
+                    "description": "Action to perform"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Purpose statement (required for set action)"
+                  }
+                },
+                "required": ["organizationId", "action"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "action": {"type": "string"},
+                    "purpose": {"type": "object"},
+                    "message": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{"function_key": []}]
+      }
+    },
+    "/api/ManageVision": {
+      "post": {
+        "operationId": "ManageVision",
+        "summary": "Manage organizational vision",
+        "description": "Get or set the organizational vision statement",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization ID"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": ["get", "set"],
+                    "description": "Action to perform"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Vision statement (required for set action)"
+                  }
+                },
+                "required": ["organizationId", "action"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "action": {"type": "string"},
+                    "vision": {"type": "object"},
+                    "message": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{"function_key": []}]
+      }
+    },
+    "/api/ManageValues": {
+      "post": {
+        "operationId": "ManageValues",
+        "summary": "Manage organizational values",
+        "description": "Add, remove, or list organizational values",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization ID"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": ["add", "remove", "list"],
+                    "description": "Action to perform"
+                  },
+                  "valueName": {
+                    "type": "string",
+                    "description": "Name of the value"
+                  },
+                  "valueDescription": {
+                    "type": "string",
+                    "description": "Description of the value"
+                  }
+                },
+                "required": ["organizationId", "action"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "action": {"type": "string"},
+                    "value": {"type": "object"},
+                    "values": {"type": "array"},
+                    "total_values": {"type": "integer"},
+                    "count": {"type": "integer"},
+                    "message": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{"function_key": []}]
+      }
+    },
+    "/api/ManageStrategicGoals": {
+      "post": {
+        "operationId": "ManageStrategicGoals",
+        "summary": "Manage strategic goals",
+        "description": "Create, update, delete, get, or list strategic goals with hierarchy",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization ID"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": ["create", "update", "delete", "get", "list"],
+                    "description": "Action to perform"
+                  },
+                  "goalId": {
+                    "type": "string",
+                    "description": "Goal identifier"
+                  },
+                  "goalName": {
+                    "type": "string",
+                    "description": "Name of the goal"
+                  },
+                  "goalDescription": {
+                    "type": "string",
+                    "description": "Description of the goal"
+                  },
+                  "parentId": {
+                    "type": "string",
+                    "description": "Parent goal ID for hierarchy"
+                  },
+                  "targetDate": {
+                    "type": "string",
+                    "description": "Target completion date"
+                  }
+                },
+                "required": ["organizationId", "action"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "action": {"type": "string"},
+                    "goal": {"type": "object"},
+                    "goals": {"type": "array"},
+                    "total_count": {"type": "integer"},
+                    "message": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{"function_key": []}]
+      }
+    },
+    "/api/ValidateAlignment": {
+      "post": {
+        "operationId": "ValidateAlignment",
+        "summary": "Validate alignment with North Star",
+        "description": "Check if an element aligns with the organizational North Star",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization ID"
+                  },
+                  "elementType": {
+                    "type": "string",
+                    "description": "Type of element to validate"
+                  },
+                  "elementContent": {
+                    "type": "string",
+                    "description": "Content to validate alignment"
+                  }
+                },
+                "required": ["organizationId", "elementType", "elementContent"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "element_type": {"type": "string"},
+                    "alignment_score": {"type": "number"},
+                    "alignment_factors": {"type": "array"},
+                    "recommendations": {"type": "array"},
+                    "is_aligned": {"type": "boolean"},
+                    "north_star_completeness": {"type": "object"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{"function_key": []}]
+      }
+    },
+    "/api/GetNorthStarSummary": {
+      "post": {
+        "operationId": "GetNorthStarSummary",
+        "summary": "Get North Star summary",
+        "description": "Get a complete summary of all North Star elements",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "organizationId": {
+                    "type": "string",
+                    "description": "The organization ID"
+                  }
+                },
+                "required": ["organizationId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful summary retrieval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "organizationId": {"type": "string"},
+                    "purpose": {"type": "string"},
+                    "vision": {"type": "string"},
+                    "values": {"type": "array"},
+                    "strategic_goals_count": {"type": "integer"},
+                    "top_level_goals": {"type": "array"},
+                    "last_updated": {"type": "string"},
+                    "completeness": {"type": "object"},
+                    "insights": {"type": "array"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{"function_key": []}]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "function_key": {
+        "type": "apiKey",
+        "name": "x-functions-key",
+        "in": "header",
+        "description": "API key for accessing the Azure Function"
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+azure-functions
+azure-cosmos
+python-dateutil
+pydantic
+typing-extensions

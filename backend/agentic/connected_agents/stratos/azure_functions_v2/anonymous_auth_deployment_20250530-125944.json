@@ -1,0 +1,10 @@
+{
+  "agent_id": "asst_VNHU36RhozDb0XoMJ9phxOMB",
+  "agent_name": "NorthStarAnonymousAuth-20250530-125942",
+  "deployed_at": "2025-05-30T12:59:44.762021",
+  "model": "gpt-35-turbo",
+  "auth_type": "anonymous",
+  "api_key_location": "header_default",
+  "openapi_version": "3.0.0",
+  "server_side_execution": true
+}

@@ -1,0 +1,3 @@
+FUNCTION_APP_NAME=stratos-north-star-v2
+FUNCTION_ENDPOINT=https://stratos-north-star-v2.azurewebsites.net/api/north-star-operations
+FUNCTION_KEY=fRvKUW-I0NseHY8728jcJtx6E7rxdvKUrK2pBiLNFEGBAzFuVfQ7jw==

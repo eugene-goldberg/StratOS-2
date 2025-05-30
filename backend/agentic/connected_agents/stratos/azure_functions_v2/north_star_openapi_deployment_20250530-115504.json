@@ -1,0 +1,12 @@
+{
+  "agent_id": "asst_QE7ixESfb0WvA6xkWUm6ycn4",
+  "agent_name": "NorthStarAgentOpenAPI-20250530-115502",
+  "deployed_at": "2025-05-30T11:55:04.906169",
+  "model": "gpt-35-turbo",
+  "server_side_execution": true,
+  "tool_type": "openapi",
+  "auth_type": "connection",
+  "connection": "NorthStarFunctionConnection",
+  "function_app": "stratos-north-star-v2",
+  "function_endpoint": "https://stratos-north-star-v2.azurewebsites.net/api/north-star-operations"
+}
